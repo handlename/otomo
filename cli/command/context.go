@@ -3,10 +3,10 @@ package command
 import (
 	"context"
 
-	myapp "github.com/handlename/my-golang-template"
+	otomo "github.com/handlename/otomo"
 )
 
 type Context struct {
 	Ctx context.Context
-	App *myapp.App
+	App *otomo.App
 }

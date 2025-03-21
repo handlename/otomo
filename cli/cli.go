@@ -8,8 +8,8 @@ import (
 	"os/signal"
 
 	"github.com/alecthomas/kong"
-	myapp "github.com/handlename/my-golang-template"
-	"github.com/handlename/my-golang-template/cli/command"
+	otomo "github.com/handlename/otomo"
+	"github.com/handlename/otomo/cli/command"
 	"github.com/morikuni/failure/v2"
 	"github.com/rs/zerolog/log"
 )
@@ -23,9 +23,9 @@ const (
 
 func Run() ExitCode {
 	var root command.Root
-	ktx := kong.Parse(&root, kong.Vars{"version": fmt.Sprintf("myapp v%s", myapp.Version)})
+	ktx := kong.Parse(&root, kong.Vars{"version": fmt.Sprintf("otomo v%s", otomo.Version)})
 
-	myapp.InitLogger(root.LogLevel)
+	otomo.InitLogger(root.LogLevel)
 
 	// TODO: build options for new App
 
