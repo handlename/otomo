@@ -1,6 +1,6 @@
 module github.com/handlename/otomo
 
-go 1.22
+go 1.24
 
 require (
 	github.com/alecthomas/kong v1.9.0
