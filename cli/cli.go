@@ -8,7 +8,7 @@ import (
 	"os/signal"
 
 	"github.com/alecthomas/kong"
-	otomo "github.com/handlename/otomo"
+	"github.com/handlename/otomo"
 	"github.com/handlename/otomo/cli/command"
 	"github.com/morikuni/failure/v2"
 	"github.com/rs/zerolog/log"
@@ -27,11 +27,11 @@ func Run() ExitCode {
 
 	otomo.InitLogger(root.LogLevel)
 
-	// TODO: build options for new App
-
-	app := myapp.New()
-
-	// TODO: build options to run App
+	app := &otomo.App{
+		Port:     root.Port,
+		AppToken: os.Getenv("OTOMO_SLACK_APP_TOKEN"),
+		BotToken: os.Getenv("OTOMO_SLACK_BOT_TOKEN"),
+	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
