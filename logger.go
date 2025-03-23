@@ -22,8 +22,10 @@ func InitLogger(level string) {
 	switch strings.ToLower(level) {
 	case "trace":
 		zerolog.SetGlobalLevel(zerolog.TraceLevel)
+		log.Logger = log.With().Caller().Logger()
 	case "debug":
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+		log.Logger = log.With().Caller().Logger()
 	case "info":
 		zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	case "warn":
