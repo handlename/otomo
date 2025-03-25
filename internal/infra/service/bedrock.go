@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -13,17 +12,57 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// https://github.com/awsdocs/aws-doc-sdk-examples/blob/main/gov2/bedrock-runtime/actions/invoke_model.go
+const (
+	BEDROCK_MODEL_ID    = "arn:aws:bedrock:us-east-1:014347307013:inference-profile/us.anthropic.claude-3-5-haiku-20241022-v1:0"
+	BEDROCK_MAX_TOKENS  = 200
+	BEDROCK_TEMPERATURE = 0.5
+	ANTHROPIC_VERSION   = "bedrock-2023-05-31"
+)
+
+// https://docs.anthropic.com/en/api/messages
+// https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-anthropic-claude-messages.html#model-parameters-anthropic-claude-messages-request-response
 
 type ClaudeRequest struct {
-	Prompt            string   `json:"prompt"`
-	MaxTokensToSample int      `json:"max_tokens_to_sample"`
-	Temperature       float64  `json:"temperature,omitempty"`
-	StopSequences     []string `json:"stop_sequences,omitempty"`
+	AnthropicVersion string                 `json:"anthropic_version"`
+	MaxTokens        int                    `json:"max_tokens"`
+	Temperature      float64                `json:"temperature"`
+	StopSequences    []string               `json:"stop_sequences"`
+	Messages         []ClaudeRequestMessage `json:"messages"`
+}
+
+type ClaudeRequestMessage struct {
+	Role    string                        `json:"role"`
+	Content []ClaudeRequestMessageContent `json:"content"`
+}
+
+type ClaudeRequestMessageContent struct {
+	Type string `json:"type"`
+	Text string `json:"text"`
 }
 
 type ClaudeResponse struct {
-	Completion string `json:"completion"`
+	ID           string                  `json:"id"`
+	Model        string                  `json:"model"`
+	Type         string                  `json:"type"`
+	Role         string                  `json:"role"`
+	Content      []ClaudeResponseContent `json:"content"`
+	StopReason   string                  `json:"stop_reason"`
+	StopSequence string                  `json:"stop_sequence"`
+	Usage        ClaudeResponseUsage     `json:"usage"`
+}
+
+type ClaudeResponseContent struct {
+	Type  string          `json:"type"`
+	Text  string          `json:"text,omitempty"`
+	Image json.RawMessage `json:"image,omitempty"`
+	ID    string          `json:"id,omitempty"`
+	Name  string          `json:"name,omitempty"`
+	Input json.RawMessage `json:"input,omitempty"`
+}
+
+type ClaudeResponseUsage struct {
+	InputTokens  int `json:"input_tokens"`
+	OutputTokens int `json:"output_tokens"`
 }
 
 type Bedrock struct {
@@ -44,13 +83,24 @@ func NewBedrock(ctx context.Context) (*Bedrock, error) {
 }
 
 func (b *Bedrock) Invoke(ctx context.Context, prompt string) (string, error) {
-	modelID := "anthropic.claude-3-5-haiku-20241022-v1:0"
+	modelID := BEDROCK_MODEL_ID
 
 	body, err := json.Marshal(ClaudeRequest{
-		Prompt:            fmt.Sprintf("Human: %s\n\nAssistant:", prompt),
-		MaxTokensToSample: 200,
-		Temperature:       0.5,
-		StopSequences:     []string{"\n\nHuman:"},
+		AnthropicVersion: ANTHROPIC_VERSION,
+		MaxTokens:        BEDROCK_MAX_TOKENS,
+		Temperature:      BEDROCK_TEMPERATURE,
+		Messages: []ClaudeRequestMessage{
+			{
+				Role: "user",
+				Content: []ClaudeRequestMessageContent{
+					{
+						Type: "text",
+						Text: prompt,
+					},
+				},
+			},
+		},
+		StopSequences: []string{},
 	})
 	if err != nil {
 		return "", failure.Wrap(err, failure.Message("failed to marshal request for claude"))
@@ -71,7 +121,7 @@ func (b *Bedrock) Invoke(ctx context.Context, prompt string) (string, error) {
 		return "", failure.Wrap(err, failure.Message("failed to unmarshal response from claude"))
 	}
 
-	return res.Completion, nil
+	return res.Content[0].Text, nil
 }
 
 func wrapBedrockError(err error, modelID string) error {
