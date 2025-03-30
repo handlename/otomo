@@ -8,6 +8,12 @@ import (
 var Config Root
 
 type Root struct {
+	Bedrock Bedrock `toml:"bedrock"`
+}
+
+type Bedrock struct {
+	ModelType string `toml:"model_type"`
+	ModelID   string `toml:"model_id"`
 }
 
 // Load load config data to otomo.Config from TOML file specified by path.

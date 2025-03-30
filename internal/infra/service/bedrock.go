@@ -13,7 +13,6 @@ import (
 )
 
 const (
-	BEDROCK_MODEL_ID    = "arn:aws:bedrock:us-east-1:014347307013:inference-profile/us.anthropic.claude-3-5-haiku-20241022-v1:0"
 	BEDROCK_MAX_TOKENS  = 200
 	BEDROCK_TEMPERATURE = 0.5
 	ANTHROPIC_VERSION   = "bedrock-2023-05-31"
@@ -66,10 +65,11 @@ type ClaudeResponseUsage struct {
 }
 
 type Bedrock struct {
-	client *bedrockruntime.Client
+	modelID string
+	client  *bedrockruntime.Client
 }
 
-func NewBedrock(ctx context.Context) (*Bedrock, error) {
+func NewBedrock(ctx context.Context, modelID string) (*Bedrock, error) {
 	awsConf, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
 		return nil, failure.Wrap(err, failure.Message("failed to load aws config"))
@@ -78,13 +78,12 @@ func NewBedrock(ctx context.Context) (*Bedrock, error) {
 	client := bedrockruntime.NewFromConfig(awsConf)
 
 	return &Bedrock{
-		client: client,
+		modelID: modelID,
+		client:  client,
 	}, nil
 }
 
 func (b *Bedrock) Invoke(ctx context.Context, prompt string) (string, error) {
-	modelID := BEDROCK_MODEL_ID
-
 	body, err := json.Marshal(ClaudeRequest{
 		AnthropicVersion: ANTHROPIC_VERSION,
 		MaxTokens:        BEDROCK_MAX_TOKENS,
@@ -107,12 +106,12 @@ func (b *Bedrock) Invoke(ctx context.Context, prompt string) (string, error) {
 	}
 
 	out, err := b.client.InvokeModel(ctx, &bedrockruntime.InvokeModelInput{
-		ModelId:     aws.String(modelID),
+		ModelId:     aws.String(b.modelID),
 		ContentType: aws.String("application/json"),
 		Body:        body,
 	})
 	if err != nil {
-		return "", wrapBedrockError(err, modelID)
+		return "", b.wrapBedrockError(err)
 	}
 
 	var res ClaudeResponse
@@ -124,7 +123,7 @@ func (b *Bedrock) Invoke(ctx context.Context, prompt string) (string, error) {
 	return res.Content[0].Text, nil
 }
 
-func wrapBedrockError(err error, modelID string) error {
+func (b *Bedrock) wrapBedrockError(err error) error {
 	msg := err.Error()
 
 	switch {
@@ -136,8 +135,8 @@ func wrapBedrockError(err error, modelID string) error {
 		return failure.Wrap(err, failure.Messagef(`Could not resolve the foundation model from model identifier: "%s".
                     Please verify that the requested model exists and is accessible
                     within the specified region.\n
-                    `, modelID))
+                    `, b.modelID))
 	default:
-		return failure.Wrap(err, failure.Messagef("Couldn't invoke model: %s", modelID))
+		return failure.Wrap(err, failure.Messagef("Couldn't invoke model: %s", b.modelID))
 	}
 }

@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 
+	"github.com/handlename/otomo/config"
 	"github.com/handlename/otomo/internal/domain/entity"
 	drepo "github.com/handlename/otomo/internal/domain/repository"
 	"github.com/handlename/otomo/internal/infra/service"
@@ -16,7 +17,7 @@ type GeneralBrain struct {
 
 // New implements repository.Brain.
 func (g *GeneralBrain) New(ctx context.Context) (entity.Brain, error) {
-	client, err := service.NewBedrock(ctx)
+	client, err := service.NewBedrock(ctx, config.Config.Bedrock.ModelID)
 	if err != nil {
 		return nil, failure.Wrap(err, failure.Message("failed to create bedrock client"))
 	}
