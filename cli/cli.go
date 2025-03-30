@@ -10,6 +10,7 @@ import (
 	"github.com/alecthomas/kong"
 	"github.com/handlename/otomo"
 	"github.com/handlename/otomo/cli/command"
+	"github.com/handlename/otomo/config"
 	"github.com/morikuni/failure/v2"
 	"github.com/rs/zerolog/log"
 )
@@ -24,6 +25,11 @@ const (
 func Run() ExitCode {
 	var root command.Root
 	ktx := kong.Parse(&root, kong.Vars{"version": fmt.Sprintf("otomo v%s", otomo.Version)})
+
+	if err := config.Load(root.ConfigPath); err != nil {
+		handleError(err)
+		return ExitCodeError
+	}
 
 	otomo.InitLogger(root.LogLevel)
 
