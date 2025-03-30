@@ -3,13 +3,11 @@ package otomo
 import (
 	"context"
 	"fmt"
-	"io"
-	"net/http"
 
 	"github.com/fujiwara/ridge"
 	"github.com/handlename/otomo/internal/errorcode"
+	ihttp "github.com/handlename/otomo/internal/infra/ui/http"
 	"github.com/morikuni/failure/v2"
-	"github.com/rs/zerolog/log"
 )
 
 type App struct {
@@ -38,22 +36,8 @@ func (a *App) Run(ctx context.Context) error {
 		return failure.Wrap(err, failure.Message("failed to init app"))
 	}
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", a.Handler)
+	mux := ihttp.NewMux(ctx, a.BotToken, a.AppToken)
 	ridge.RunWithContext(ctx, fmt.Sprintf(":%d", a.Port), "/", mux)
 
 	return nil
-}
-
-func (a *App) Handler(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		log.Error().Err(err).Msg("failed to read request body")
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "echo %s", body)
 }
