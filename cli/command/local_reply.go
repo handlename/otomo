@@ -16,7 +16,7 @@ type LocalReply struct {
 
 func (o *LocalReply) Run(c *Context) error {
 	repoS := &repository.VolatileSession{}
-	repoB := repository.NewGeneralBrain(c.Ctx, c.App.BotToken, c.App.AppToken)
+	repoB := repository.NewGeneralBrain(c.Ctx)
 	msgr := &service.NopSlack{}
 
 	brain, err := repoB.New(c.Ctx)

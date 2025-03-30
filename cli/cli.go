@@ -33,16 +33,10 @@ func Run() ExitCode {
 
 	otomo.InitLogger(root.LogLevel)
 
-	app := &otomo.App{
-		Port:     root.Port,
-		AppToken: os.Getenv("OTOMO_SLACK_APP_TOKEN"),
-		BotToken: os.Getenv("OTOMO_SLACK_BOT_TOKEN"),
-	}
-
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 
-	if err := ktx.Run(&command.Context{Ctx: ctx, App: app}); err != nil {
+	if err := ktx.Run(&command.Context{Ctx: ctx, App: &otomo.App{}}); err != nil {
 		if errors.Is(err, context.Canceled) {
 			log.Error().Msg("canceled")
 		} else {

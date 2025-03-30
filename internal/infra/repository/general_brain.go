@@ -10,10 +10,7 @@ import (
 	"github.com/morikuni/failure/v2"
 )
 
-type GeneralBrain struct {
-	botToken string
-	appToken string
-}
+type GeneralBrain struct{}
 
 // New implements repository.Brain.
 func (g *GeneralBrain) New(ctx context.Context) (entity.Brain, error) {
@@ -29,13 +26,8 @@ func (g *GeneralBrain) New(ctx context.Context) (entity.Brain, error) {
 	return brain, nil
 }
 
-func NewGeneralBrain(ctx context.Context, botToken, appToken string) drepo.Brain {
-	brain := &GeneralBrain{
-		botToken: botToken,
-		appToken: appToken,
-	}
-
-	return brain
+func NewGeneralBrain(ctx context.Context) drepo.Brain {
+	return &GeneralBrain{}
 }
 
 var _ entity.Brain = (*generalBrain)(nil)
