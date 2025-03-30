@@ -138,6 +138,6 @@ func wrapBedrockError(err error, modelID string) error {
                     within the specified region.\n
                     `, modelID))
 	default:
-		return failure.Wrap(err, failure.Messagef("Couldn't invoke model: \"%s\". Here's why: %w\n", modelID, err))
+		return failure.Wrap(err, failure.Messagef("Couldn't invoke model: %s", modelID))
 	}
 }
