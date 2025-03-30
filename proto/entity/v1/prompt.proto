@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package entity.v1;
+
+enum Role {
+  ROLE_UNSPECIFIED = 0;
+  ROLE_USER = 1;
+  ROLE_ASSISTANT = 2;
+}
+
+message Prompt {
+  Role role = 1;
+  string message = 2;
+}

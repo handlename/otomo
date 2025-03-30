@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package service.v1;
+
+import "entity/v1/answer.proto";
+import "entity/v1/prompt.proto";
+
+service Local {
+  rpc GetReply(GetReplyRequest) returns (GetReplyResponse) {}
+}
+
+message GetReplyRequest {
+  entity.v1.Prompt prompt = 1;
+}
+
+message GetReplyResponse {
+  entity.v1.Answer answer = 1;
+}
