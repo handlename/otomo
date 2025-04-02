@@ -1,4 +1,4 @@
 #!/bin/sh
 
 cd $LAMBDA_TASK_ROOT
-./app
+./app --log-level debug server
