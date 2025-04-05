@@ -22,27 +22,27 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type GetReplyRequest struct {
+type LocalGetReplyRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Prompt        *v1.Prompt             `protobuf:"bytes,1,opt,name=prompt,proto3" json:"prompt,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetReplyRequest) Reset() {
-	*x = GetReplyRequest{}
+func (x *LocalGetReplyRequest) Reset() {
+	*x = LocalGetReplyRequest{}
 	mi := &file_service_v1_local_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetReplyRequest) String() string {
+func (x *LocalGetReplyRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetReplyRequest) ProtoMessage() {}
+func (*LocalGetReplyRequest) ProtoMessage() {}
 
-func (x *GetReplyRequest) ProtoReflect() protoreflect.Message {
+func (x *LocalGetReplyRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_service_v1_local_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -54,39 +54,39 @@ func (x *GetReplyRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetReplyRequest.ProtoReflect.Descriptor instead.
-func (*GetReplyRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use LocalGetReplyRequest.ProtoReflect.Descriptor instead.
+func (*LocalGetReplyRequest) Descriptor() ([]byte, []int) {
 	return file_service_v1_local_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *GetReplyRequest) GetPrompt() *v1.Prompt {
+func (x *LocalGetReplyRequest) GetPrompt() *v1.Prompt {
 	if x != nil {
 		return x.Prompt
 	}
 	return nil
 }
 
-type GetReplyResponse struct {
+type LocalGetReplyResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Answer        *v1.Answer             `protobuf:"bytes,1,opt,name=answer,proto3" json:"answer,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetReplyResponse) Reset() {
-	*x = GetReplyResponse{}
+func (x *LocalGetReplyResponse) Reset() {
+	*x = LocalGetReplyResponse{}
 	mi := &file_service_v1_local_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetReplyResponse) String() string {
+func (x *LocalGetReplyResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetReplyResponse) ProtoMessage() {}
+func (*LocalGetReplyResponse) ProtoMessage() {}
 
-func (x *GetReplyResponse) ProtoReflect() protoreflect.Message {
+func (x *LocalGetReplyResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_service_v1_local_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -98,12 +98,12 @@ func (x *GetReplyResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetReplyResponse.ProtoReflect.Descriptor instead.
-func (*GetReplyResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use LocalGetReplyResponse.ProtoReflect.Descriptor instead.
+func (*LocalGetReplyResponse) Descriptor() ([]byte, []int) {
 	return file_service_v1_local_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *GetReplyResponse) GetAnswer() *v1.Answer {
+func (x *LocalGetReplyResponse) GetAnswer() *v1.Answer {
 	if x != nil {
 		return x.Answer
 	}
@@ -115,13 +115,13 @@ var File_service_v1_local_proto protoreflect.FileDescriptor
 const file_service_v1_local_proto_rawDesc = "" +
 	"\n" +
 	"\x16service/v1/local.proto\x12\n" +
-	"service.v1\x1a\x16entity/v1/answer.proto\x1a\x16entity/v1/prompt.proto\"<\n" +
-	"\x0fGetReplyRequest\x12)\n" +
-	"\x06prompt\x18\x01 \x01(\v2\x11.entity.v1.PromptR\x06prompt\"=\n" +
-	"\x10GetReplyResponse\x12)\n" +
-	"\x06answer\x18\x01 \x01(\v2\x11.entity.v1.AnswerR\x06answer2P\n" +
-	"\x05Local\x12G\n" +
-	"\bGetReply\x12\x1b.service.v1.GetReplyRequest\x1a\x1c.service.v1.GetReplyResponse\"\x00B\xa6\x01\n" +
+	"service.v1\x1a\x16entity/v1/answer.proto\x1a\x16entity/v1/prompt.proto\"A\n" +
+	"\x14LocalGetReplyRequest\x12)\n" +
+	"\x06prompt\x18\x01 \x01(\v2\x11.entity.v1.PromptR\x06prompt\"B\n" +
+	"\x15LocalGetReplyResponse\x12)\n" +
+	"\x06answer\x18\x01 \x01(\v2\x11.entity.v1.AnswerR\x06answer2Z\n" +
+	"\x05Local\x12Q\n" +
+	"\bGetReply\x12 .service.v1.LocalGetReplyRequest\x1a!.service.v1.LocalGetReplyResponse\"\x00B\xa6\x01\n" +
 	"\x0ecom.service.v1B\n" +
 	"LocalProtoP\x01Z?github.com/handlename/otomo/internal/proto/service/v1;servicev1\xa2\x02\x03SXX\xaa\x02\n" +
 	"Service.V1\xca\x02\n" +
@@ -141,16 +141,16 @@ func file_service_v1_local_proto_rawDescGZIP() []byte {
 
 var file_service_v1_local_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_service_v1_local_proto_goTypes = []any{
-	(*GetReplyRequest)(nil),  // 0: service.v1.GetReplyRequest
-	(*GetReplyResponse)(nil), // 1: service.v1.GetReplyResponse
-	(*v1.Prompt)(nil),        // 2: entity.v1.Prompt
-	(*v1.Answer)(nil),        // 3: entity.v1.Answer
+	(*LocalGetReplyRequest)(nil),  // 0: service.v1.LocalGetReplyRequest
+	(*LocalGetReplyResponse)(nil), // 1: service.v1.LocalGetReplyResponse
+	(*v1.Prompt)(nil),             // 2: entity.v1.Prompt
+	(*v1.Answer)(nil),             // 3: entity.v1.Answer
 }
 var file_service_v1_local_proto_depIdxs = []int32{
-	2, // 0: service.v1.GetReplyRequest.prompt:type_name -> entity.v1.Prompt
-	3, // 1: service.v1.GetReplyResponse.answer:type_name -> entity.v1.Answer
-	0, // 2: service.v1.Local.GetReply:input_type -> service.v1.GetReplyRequest
-	1, // 3: service.v1.Local.GetReply:output_type -> service.v1.GetReplyResponse
+	2, // 0: service.v1.LocalGetReplyRequest.prompt:type_name -> entity.v1.Prompt
+	3, // 1: service.v1.LocalGetReplyResponse.answer:type_name -> entity.v1.Answer
+	0, // 2: service.v1.Local.GetReply:input_type -> service.v1.LocalGetReplyRequest
+	1, // 3: service.v1.Local.GetReply:output_type -> service.v1.LocalGetReplyResponse
 	3, // [3:4] is the sub-list for method output_type
 	2, // [2:3] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name

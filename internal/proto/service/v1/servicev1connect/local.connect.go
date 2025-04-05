@@ -39,7 +39,7 @@ const (
 
 // LocalClient is a client for the service.v1.Local service.
 type LocalClient interface {
-	GetReply(context.Context, *connect.Request[v1.GetReplyRequest]) (*connect.Response[v1.GetReplyResponse], error)
+	GetReply(context.Context, *connect.Request[v1.LocalGetReplyRequest]) (*connect.Response[v1.LocalGetReplyResponse], error)
 }
 
 // NewLocalClient constructs a client for the service.v1.Local service. By default, it uses the
@@ -53,7 +53,7 @@ func NewLocalClient(httpClient connect.HTTPClient, baseURL string, opts ...conne
 	baseURL = strings.TrimRight(baseURL, "/")
 	localMethods := v1.File_service_v1_local_proto.Services().ByName("Local").Methods()
 	return &localClient{
-		getReply: connect.NewClient[v1.GetReplyRequest, v1.GetReplyResponse](
+		getReply: connect.NewClient[v1.LocalGetReplyRequest, v1.LocalGetReplyResponse](
 			httpClient,
 			baseURL+LocalGetReplyProcedure,
 			connect.WithSchema(localMethods.ByName("GetReply")),
@@ -64,17 +64,17 @@ func NewLocalClient(httpClient connect.HTTPClient, baseURL string, opts ...conne
 
 // localClient implements LocalClient.
 type localClient struct {
-	getReply *connect.Client[v1.GetReplyRequest, v1.GetReplyResponse]
+	getReply *connect.Client[v1.LocalGetReplyRequest, v1.LocalGetReplyResponse]
 }
 
 // GetReply calls service.v1.Local.GetReply.
-func (c *localClient) GetReply(ctx context.Context, req *connect.Request[v1.GetReplyRequest]) (*connect.Response[v1.GetReplyResponse], error) {
+func (c *localClient) GetReply(ctx context.Context, req *connect.Request[v1.LocalGetReplyRequest]) (*connect.Response[v1.LocalGetReplyResponse], error) {
 	return c.getReply.CallUnary(ctx, req)
 }
 
 // LocalHandler is an implementation of the service.v1.Local service.
 type LocalHandler interface {
-	GetReply(context.Context, *connect.Request[v1.GetReplyRequest]) (*connect.Response[v1.GetReplyResponse], error)
+	GetReply(context.Context, *connect.Request[v1.LocalGetReplyRequest]) (*connect.Response[v1.LocalGetReplyResponse], error)
 }
 
 // NewLocalHandler builds an HTTP handler from the service implementation. It returns the path on
@@ -103,6 +103,6 @@ func NewLocalHandler(svc LocalHandler, opts ...connect.HandlerOption) (string, h
 // UnimplementedLocalHandler returns CodeUnimplemented from all methods.
 type UnimplementedLocalHandler struct{}
 
-func (UnimplementedLocalHandler) GetReply(context.Context, *connect.Request[v1.GetReplyRequest]) (*connect.Response[v1.GetReplyResponse], error) {
+func (UnimplementedLocalHandler) GetReply(context.Context, *connect.Request[v1.LocalGetReplyRequest]) (*connect.Response[v1.LocalGetReplyResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("service.v1.Local.GetReply is not implemented"))
 }

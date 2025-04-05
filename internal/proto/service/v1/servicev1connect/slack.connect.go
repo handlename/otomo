@@ -39,7 +39,7 @@ const (
 
 // SlackClient is a client for the service.v1.Slack service.
 type SlackClient interface {
-	Challenge(context.Context, *connect.Request[v1.ChallengeRequest]) (*connect.Response[v1.ChallengeResponse], error)
+	Challenge(context.Context, *connect.Request[v1.SlackChallengeRequest]) (*connect.Response[v1.SlackChallengeResponse], error)
 }
 
 // NewSlackClient constructs a client for the service.v1.Slack service. By default, it uses the
@@ -53,7 +53,7 @@ func NewSlackClient(httpClient connect.HTTPClient, baseURL string, opts ...conne
 	baseURL = strings.TrimRight(baseURL, "/")
 	slackMethods := v1.File_service_v1_slack_proto.Services().ByName("Slack").Methods()
 	return &slackClient{
-		challenge: connect.NewClient[v1.ChallengeRequest, v1.ChallengeResponse](
+		challenge: connect.NewClient[v1.SlackChallengeRequest, v1.SlackChallengeResponse](
 			httpClient,
 			baseURL+SlackChallengeProcedure,
 			connect.WithSchema(slackMethods.ByName("Challenge")),
@@ -64,17 +64,17 @@ func NewSlackClient(httpClient connect.HTTPClient, baseURL string, opts ...conne
 
 // slackClient implements SlackClient.
 type slackClient struct {
-	challenge *connect.Client[v1.ChallengeRequest, v1.ChallengeResponse]
+	challenge *connect.Client[v1.SlackChallengeRequest, v1.SlackChallengeResponse]
 }
 
 // Challenge calls service.v1.Slack.Challenge.
-func (c *slackClient) Challenge(ctx context.Context, req *connect.Request[v1.ChallengeRequest]) (*connect.Response[v1.ChallengeResponse], error) {
+func (c *slackClient) Challenge(ctx context.Context, req *connect.Request[v1.SlackChallengeRequest]) (*connect.Response[v1.SlackChallengeResponse], error) {
 	return c.challenge.CallUnary(ctx, req)
 }
 
 // SlackHandler is an implementation of the service.v1.Slack service.
 type SlackHandler interface {
-	Challenge(context.Context, *connect.Request[v1.ChallengeRequest]) (*connect.Response[v1.ChallengeResponse], error)
+	Challenge(context.Context, *connect.Request[v1.SlackChallengeRequest]) (*connect.Response[v1.SlackChallengeResponse], error)
 }
 
 // NewSlackHandler builds an HTTP handler from the service implementation. It returns the path on
@@ -103,6 +103,6 @@ func NewSlackHandler(svc SlackHandler, opts ...connect.HandlerOption) (string, h
 // UnimplementedSlackHandler returns CodeUnimplemented from all methods.
 type UnimplementedSlackHandler struct{}
 
-func (UnimplementedSlackHandler) Challenge(context.Context, *connect.Request[v1.ChallengeRequest]) (*connect.Response[v1.ChallengeResponse], error) {
+func (UnimplementedSlackHandler) Challenge(context.Context, *connect.Request[v1.SlackChallengeRequest]) (*connect.Response[v1.SlackChallengeResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("service.v1.Slack.Challenge is not implemented"))
 }

@@ -21,7 +21,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type ChallengeRequest struct {
+type SlackChallengeRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Token         string                 `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
 	Challenge     string                 `protobuf:"bytes,2,opt,name=challenge,proto3" json:"challenge,omitempty"`
@@ -30,20 +30,20 @@ type ChallengeRequest struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ChallengeRequest) Reset() {
-	*x = ChallengeRequest{}
+func (x *SlackChallengeRequest) Reset() {
+	*x = SlackChallengeRequest{}
 	mi := &file_service_v1_slack_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ChallengeRequest) String() string {
+func (x *SlackChallengeRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ChallengeRequest) ProtoMessage() {}
+func (*SlackChallengeRequest) ProtoMessage() {}
 
-func (x *ChallengeRequest) ProtoReflect() protoreflect.Message {
+func (x *SlackChallengeRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_service_v1_slack_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -55,53 +55,53 @@ func (x *ChallengeRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ChallengeRequest.ProtoReflect.Descriptor instead.
-func (*ChallengeRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use SlackChallengeRequest.ProtoReflect.Descriptor instead.
+func (*SlackChallengeRequest) Descriptor() ([]byte, []int) {
 	return file_service_v1_slack_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *ChallengeRequest) GetToken() string {
+func (x *SlackChallengeRequest) GetToken() string {
 	if x != nil {
 		return x.Token
 	}
 	return ""
 }
 
-func (x *ChallengeRequest) GetChallenge() string {
+func (x *SlackChallengeRequest) GetChallenge() string {
 	if x != nil {
 		return x.Challenge
 	}
 	return ""
 }
 
-func (x *ChallengeRequest) GetType() string {
+func (x *SlackChallengeRequest) GetType() string {
 	if x != nil {
 		return x.Type
 	}
 	return ""
 }
 
-type ChallengeResponse struct {
+type SlackChallengeResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Challenge     string                 `protobuf:"bytes,1,opt,name=challenge,proto3" json:"challenge,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ChallengeResponse) Reset() {
-	*x = ChallengeResponse{}
+func (x *SlackChallengeResponse) Reset() {
+	*x = SlackChallengeResponse{}
 	mi := &file_service_v1_slack_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ChallengeResponse) String() string {
+func (x *SlackChallengeResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ChallengeResponse) ProtoMessage() {}
+func (*SlackChallengeResponse) ProtoMessage() {}
 
-func (x *ChallengeResponse) ProtoReflect() protoreflect.Message {
+func (x *SlackChallengeResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_service_v1_slack_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -113,12 +113,12 @@ func (x *ChallengeResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ChallengeResponse.ProtoReflect.Descriptor instead.
-func (*ChallengeResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use SlackChallengeResponse.ProtoReflect.Descriptor instead.
+func (*SlackChallengeResponse) Descriptor() ([]byte, []int) {
 	return file_service_v1_slack_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ChallengeResponse) GetChallenge() string {
+func (x *SlackChallengeResponse) GetChallenge() string {
 	if x != nil {
 		return x.Challenge
 	}
@@ -130,15 +130,15 @@ var File_service_v1_slack_proto protoreflect.FileDescriptor
 const file_service_v1_slack_proto_rawDesc = "" +
 	"\n" +
 	"\x16service/v1/slack.proto\x12\n" +
-	"service.v1\"Z\n" +
-	"\x10ChallengeRequest\x12\x14\n" +
+	"service.v1\"_\n" +
+	"\x15SlackChallengeRequest\x12\x14\n" +
 	"\x05token\x18\x01 \x01(\tR\x05token\x12\x1c\n" +
 	"\tchallenge\x18\x02 \x01(\tR\tchallenge\x12\x12\n" +
-	"\x04type\x18\x03 \x01(\tR\x04type\"1\n" +
-	"\x11ChallengeResponse\x12\x1c\n" +
-	"\tchallenge\x18\x01 \x01(\tR\tchallenge2S\n" +
-	"\x05Slack\x12J\n" +
-	"\tChallenge\x12\x1c.service.v1.ChallengeRequest\x1a\x1d.service.v1.ChallengeResponse\"\x00B\xa6\x01\n" +
+	"\x04type\x18\x03 \x01(\tR\x04type\"6\n" +
+	"\x16SlackChallengeResponse\x12\x1c\n" +
+	"\tchallenge\x18\x01 \x01(\tR\tchallenge2]\n" +
+	"\x05Slack\x12T\n" +
+	"\tChallenge\x12!.service.v1.SlackChallengeRequest\x1a\".service.v1.SlackChallengeResponse\"\x00B\xa6\x01\n" +
 	"\x0ecom.service.v1B\n" +
 	"SlackProtoP\x01Z?github.com/handlename/otomo/internal/proto/service/v1;servicev1\xa2\x02\x03SXX\xaa\x02\n" +
 	"Service.V1\xca\x02\n" +
@@ -158,12 +158,12 @@ func file_service_v1_slack_proto_rawDescGZIP() []byte {
 
 var file_service_v1_slack_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_service_v1_slack_proto_goTypes = []any{
-	(*ChallengeRequest)(nil),  // 0: service.v1.ChallengeRequest
-	(*ChallengeResponse)(nil), // 1: service.v1.ChallengeResponse
+	(*SlackChallengeRequest)(nil),  // 0: service.v1.SlackChallengeRequest
+	(*SlackChallengeResponse)(nil), // 1: service.v1.SlackChallengeResponse
 }
 var file_service_v1_slack_proto_depIdxs = []int32{
-	0, // 0: service.v1.Slack.Challenge:input_type -> service.v1.ChallengeRequest
-	1, // 1: service.v1.Slack.Challenge:output_type -> service.v1.ChallengeResponse
+	0, // 0: service.v1.Slack.Challenge:input_type -> service.v1.SlackChallengeRequest
+	1, // 1: service.v1.Slack.Challenge:output_type -> service.v1.SlackChallengeResponse
 	1, // [1:2] is the sub-list for method output_type
 	0, // [0:1] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name

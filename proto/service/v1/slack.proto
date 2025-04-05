@@ -6,15 +6,15 @@ package service.v1;
 // import "entity/v1/prompt.proto";
 
 service Slack {
-  rpc Challenge(ChallengeRequest) returns (ChallengeResponse) {}
+  rpc Challenge(SlackChallengeRequest) returns (SlackChallengeResponse) {}
 }
 
-message ChallengeRequest {
+message SlackChallengeRequest {
   string token = 1;
   string challenge = 2;
   string type = 3;
 }
 
-message ChallengeResponse {
+message SlackChallengeResponse {
   string challenge = 1;
 }

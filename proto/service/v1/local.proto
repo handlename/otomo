@@ -6,13 +6,13 @@ import "entity/v1/answer.proto";
 import "entity/v1/prompt.proto";
 
 service Local {
-  rpc GetReply(GetReplyRequest) returns (GetReplyResponse) {}
+  rpc GetReply(LocalGetReplyRequest) returns (LocalGetReplyResponse) {}
 }
 
-message GetReplyRequest {
+message LocalGetReplyRequest {
   entity.v1.Prompt prompt = 1;
 }
 
-message GetReplyResponse {
+message LocalGetReplyResponse {
   entity.v1.Answer answer = 1;
 }

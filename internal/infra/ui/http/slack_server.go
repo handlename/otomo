@@ -1,8 +1,9 @@
 package http
 
 import (
-	"connectrpc.com/connect"
 	"context"
+
+	"connectrpc.com/connect"
 	servicev1 "github.com/handlename/otomo/internal/proto/service/v1"
 	"github.com/handlename/otomo/internal/proto/service/v1/servicev1connect"
 )
@@ -13,6 +14,6 @@ type SlackHandler struct {
 }
 
 // Challenge implements servicev1connect.SlackHandler.
-func (s *SlackHandler) Challenge(context.Context, *connect.Request[servicev1.ChallengeRequest]) (*connect.Response[servicev1.ChallengeResponse], error) {
+func (s *SlackHandler) Challenge(context.Context, *connect.Request[servicev1.SlackChallengeRequest]) (*connect.Response[servicev1.SlackChallengeResponse], error) {
 	panic("unimplemented")
 }

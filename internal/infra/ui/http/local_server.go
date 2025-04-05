@@ -23,7 +23,7 @@ type LocalHandler struct {
 }
 
 // GetReply implements servicev1connect.LocalHandler.
-func (h *LocalHandler) GetReply(ctx context.Context, req *connect.Request[servicev1.GetReplyRequest]) (*connect.Response[servicev1.GetReplyResponse], error) {
+func (h *LocalHandler) GetReply(ctx context.Context, req *connect.Request[servicev1.LocalGetReplyRequest]) (*connect.Response[servicev1.LocalGetReplyResponse], error) {
 	msgr := &service.NopSlack{}
 
 	brain, err := h.RepoBrain.New(ctx)
@@ -44,7 +44,7 @@ func (h *LocalHandler) GetReply(ctx context.Context, req *connect.Request[servic
 		return nil, failure.Wrap(err)
 	}
 
-	res := connect.NewResponse(&servicev1.GetReplyResponse{
+	res := connect.NewResponse(&servicev1.LocalGetReplyResponse{
 		Answer: &entityv1.Answer{
 			Message: msgr.Memory,
 			Cost:    0,
