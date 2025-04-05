@@ -26,13 +26,11 @@ func (a *Accesslog) Wrap(next http.Handler) http.Handler {
 		}
 		next.ServeHTTP(aw, req)
 
-		reqTime := time.Since(start)
-
 		log.Info().
 			Str("method", req.Method).
 			Str("path", req.URL.Path).
 			Int("status", aw.statusCode).
-			Int("req_time", int(reqTime.Milliseconds())).
+			Float64("req_time", time.Since(start).Seconds()*1000). // in msec
 			Int("res_size", aw.size).
 			Msg("request")
 	})
