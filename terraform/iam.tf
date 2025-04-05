@@ -52,4 +52,18 @@ data "aws_iam_policy_document" "lambda" {
 
     resources = ["*"]
   }
+
+  statement {
+    actions = [
+      "ssm:GetParameter",
+      "ssm:GetParameter*",
+    ]
+
+    effect = "Allow"
+
+    resources = [
+      "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.id}:parameter/${local.service}",
+      "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.id}:parameter/${local.service}/*",
+    ]
+  }
 }
