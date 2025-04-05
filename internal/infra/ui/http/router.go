@@ -5,15 +5,19 @@ import (
 	"net/http"
 
 	"github.com/handlename/otomo/internal/infra/repository"
-	"github.com/handlename/otomo/internal/proto/service/v1/servicev1connect"
 )
 
 func NewMux(ctx context.Context) *http.ServeMux {
 	mux := http.NewServeMux()
-	mux.Handle(servicev1connect.NewLocalHandler(&LocalHandler{
+	
+	localHandler := &LocalHandler{
 		RepoSession: &repository.VolatileSession{},
 		RepoBrain:   repository.NewGeneralBrain(ctx),
-	}))
-	mux.Handle(servicev1connect.NewSlackHandler(&SlackHandler{}))
+	}
+	mux.HandleFunc("POST /local/reply", localHandler.Reply)
+	
+	slackHandler := &SlackHandler{}
+	mux.HandleFunc("POST /slack/event", slackHandler.Event)
+	
 	return mux
 }
