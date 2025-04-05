@@ -14,6 +14,6 @@ func NewMux(ctx context.Context) *http.ServeMux {
 		RepoSession: &repository.VolatileSession{},
 		RepoBrain:   repository.NewGeneralBrain(ctx),
 	}))
-	mux.Handle(servicev1connect.NewSlackHandler(&servicev1connect.UnimplementedSlackHandler{}))
+	mux.Handle(servicev1connect.NewSlackHandler(&SlackHandler{}))
 	return mux
 }
