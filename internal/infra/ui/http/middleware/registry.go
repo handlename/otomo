@@ -8,6 +8,8 @@ import (
 
 type registryKey struct{}
 
+var _ Middleware = (*Registry[struct{}])(nil)
+
 type Registry[R any] struct {
 	reg R
 }
@@ -18,6 +20,7 @@ func NewRegistry[R any](reg R) *Registry[R] {
 	}
 }
 
+// Wrap implements Middleware.
 func (r *Registry[R]) Wrap(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		ctx := context.WithValue(req.Context(), registryKey{}, r.reg)
