@@ -2,9 +2,6 @@
   FunctionName: '{{ must_env `SERVICE_NAME` }}',
   Environment: {
     Variables: {
-      SLACK_APP_TOKEN: 'dummy',
-      SLACK_BOT_TOKEN: 'dummy',
-      BEDROCK_MODEL_ID: '{{ must_env `BEDROCK_MODEL_ID` }}',
     },
   },
   Handler: 'bootstarp.sh',

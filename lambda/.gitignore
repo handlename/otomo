@@ -25,3 +25,4 @@ go.work
 
 # Build artifact
 build/
+tmp/
