@@ -8,7 +8,7 @@ import (
 	"github.com/handlename/otomo/internal/infra/ui/http/middleware"
 )
 
-func New(ctx context.Context, prefix string) *http.ServeMux {
+func New(ctx context.Context, prefix string) http.Handler {
 	reg := NewRegistry(ctx)
 	mids := []middleware.Middleware{
 		middleware.NewRegistry(reg),
