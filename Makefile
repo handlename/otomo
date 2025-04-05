@@ -3,3 +3,6 @@ test:
 
 generate:
 	go generate ./...
+
+deploy:
+	cd lambda && $(MAKE) deploy
