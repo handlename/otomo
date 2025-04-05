@@ -42,6 +42,6 @@ func eventHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	w.WriteHeader(http.StatusLocked)
+	w.WriteHeader(http.StatusOK)
 	w.Write(resb)
 }
