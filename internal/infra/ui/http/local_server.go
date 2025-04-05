@@ -17,7 +17,7 @@ import (
 
 var _ servicev1connect.LocalHandler = (*LocalHandler)(nil)
 
-type LocalHandler struct{
+type LocalHandler struct {
 	RepoSession drepo.Session
 	RepoBrain drepo.Brain
 }
