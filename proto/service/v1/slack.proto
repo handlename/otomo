@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package service.v1;
+
+// import "entity/v1/answer.proto";
+// import "entity/v1/prompt.proto";
+
+service Slack {
+  rpc Challenge(ChallengeRequest) returns (ChallengeResponse) {}
+}
+
+message ChallengeRequest {
+  string token = 1;
+  string challenge = 2;
+  string type = 3;
+}
+
+message ChallengeResponse {
+  string challenge = 1;
+}
