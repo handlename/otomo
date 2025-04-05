@@ -1,15 +1,19 @@
 package slack
 
-import "context"
+import (
+	"context"
+
+	"github.com/handlename/otomo/internal/infra/service"
+)
 
 type registry struct {
-	Dummy string
+	Slack *service.Slack
 }
 
 type registryKey struct{}
 
-func NewRegistry(ctx context.Context) *registry {
+func NewRegistry(ctx context.Context, slack *service.Slack) *registry {
 	return &registry{
-		Dummy: "dummy",
+		Slack: slack,
 	}
 }

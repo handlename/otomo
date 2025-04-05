@@ -15,8 +15,9 @@ type Root struct {
 }
 
 type Slack struct {
-	AppToken string `toml:"app_token"`
-	BotToken string `toml:"bot_token"`
+	SigningSecret string `toml:"signing_secret"`
+	AppToken      string `toml:"app_token"`
+	BotToken      string `toml:"bot_token"`
 }
 
 type Bedrock struct {

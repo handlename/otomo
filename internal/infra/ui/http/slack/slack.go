@@ -4,11 +4,14 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/handlename/otomo/config"
+	"github.com/handlename/otomo/internal/infra/service"
 	"github.com/handlename/otomo/internal/infra/ui/http/middleware"
 )
 
 func New(ctx context.Context, prefix string) http.Handler {
-	reg := NewRegistry(ctx)
+	slack := service.NewSlack(config.Config.Slack.SigningSecret)
+	reg := NewRegistry(ctx, slack)
 	mids := []middleware.Middleware{
 		middleware.NewRegistry(reg),
 		middleware.NewAccesslog(),
