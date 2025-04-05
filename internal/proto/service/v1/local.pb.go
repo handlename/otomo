@@ -7,6 +7,7 @@
 package servicev1
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	v1 "github.com/handlename/otomo/internal/proto/entity/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -115,9 +116,9 @@ var File_service_v1_local_proto protoreflect.FileDescriptor
 const file_service_v1_local_proto_rawDesc = "" +
 	"\n" +
 	"\x16service/v1/local.proto\x12\n" +
-	"service.v1\x1a\x16entity/v1/answer.proto\x1a\x16entity/v1/prompt.proto\"A\n" +
-	"\x14LocalGetReplyRequest\x12)\n" +
-	"\x06prompt\x18\x01 \x01(\v2\x11.entity.v1.PromptR\x06prompt\"B\n" +
+	"service.v1\x1a\x1bbuf/validate/validate.proto\x1a\x16entity/v1/answer.proto\x1a\x16entity/v1/prompt.proto\"J\n" +
+	"\x14LocalGetReplyRequest\x122\n" +
+	"\x06prompt\x18\x01 \x01(\v2\x11.entity.v1.PromptB\a\xbaH\x04r\x02\x10\x01R\x06prompt\"B\n" +
 	"\x15LocalGetReplyResponse\x12)\n" +
 	"\x06answer\x18\x01 \x01(\v2\x11.entity.v1.AnswerR\x06answer2Z\n" +
 	"\x05Local\x12Q\n" +

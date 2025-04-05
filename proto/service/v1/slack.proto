@@ -2,17 +2,16 @@ syntax = "proto3";
 
 package service.v1;
 
-// import "entity/v1/answer.proto";
-// import "entity/v1/prompt.proto";
+import "buf/validate/validate.proto";
 
 service Slack {
   rpc Challenge(SlackChallengeRequest) returns (SlackChallengeResponse) {}
 }
 
 message SlackChallengeRequest {
-  string token = 1;
-  string challenge = 2;
-  string type = 3;
+  string token = 1 [(buf.validate.field).string.min_len = 1];
+  string challenge = 2 [(buf.validate.field).string.min_len = 1];
+  string type = 3 [(buf.validate.field).string.const = "url_verification"];
 }
 
 message SlackChallengeResponse {

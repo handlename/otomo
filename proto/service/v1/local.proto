@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package service.v1;
 
+import "buf/validate/validate.proto";
 import "entity/v1/answer.proto";
 import "entity/v1/prompt.proto";
 
@@ -10,7 +11,7 @@ service Local {
 }
 
 message LocalGetReplyRequest {
-  entity.v1.Prompt prompt = 1;
+  entity.v1.Prompt prompt = 1 [(buf.validate.field).string.min_len = 1];
 }
 
 message LocalGetReplyResponse {
