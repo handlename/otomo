@@ -10,7 +10,7 @@ import (
 
 func NewMux(ctx context.Context) *http.ServeMux {
 	mux := http.NewServeMux()
-	mux.Handle("/slack/", http.StripPrefix("/slack", slack.New(ctx)))
+	mux.Handle("/slack/", slack.New(ctx, "/slack"))
 	mux.Handle("/local/", http.StripPrefix("/local", local.New(ctx)))
 	return mux
 }
