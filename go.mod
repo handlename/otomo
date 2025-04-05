@@ -13,6 +13,7 @@ require (
 	github.com/morikuni/failure/v2 v2.0.0-20240419002657-2551069d1c86
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.33.0
+	github.com/samber/lo v1.49.1
 	github.com/stretchr/testify v1.10.0
 )
 
