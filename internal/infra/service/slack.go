@@ -7,6 +7,7 @@ import (
 
 	"github.com/handlename/otomo/internal/errorcode"
 	"github.com/morikuni/failure/v2"
+	"github.com/rs/zerolog/log"
 	"github.com/slack-go/slack"
 )
 
@@ -42,5 +43,6 @@ func (s *Slack) Verify(header http.Header, body []byte) error {
 }
 
 func (s *Slack) Send(ctx context.Context, msg string) error {
+	log.Debug().Str("msg", msg).Msg("not implemented yet")
 	return nil
 }
