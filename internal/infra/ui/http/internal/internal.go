@@ -11,6 +11,5 @@ func New(ctx context.Context, prefix string) http.Handler {
 	reg := NewRegistry(ctx)
 	r := tanukirpc.NewRouter(reg)
 	r.Post(prefix+"/slack/event", tanukirpc.NewHandler(slackEventHandler))
-	r.Post(prefix+"/reply", tanukirpc.NewHandler(replyHandler))
 	return r
 }

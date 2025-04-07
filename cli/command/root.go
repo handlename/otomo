@@ -9,5 +9,4 @@ type Root struct {
 	Version  kong.VersionFlag `help:"Show version."`
 
 	Server Server `cmd:"" help:"Run as server"`
-	Local  Local  `cmd:"" help:"Interuction on local"`
 }
