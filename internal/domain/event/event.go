@@ -1,6 +1,7 @@
 package event
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -14,6 +15,7 @@ type Event interface {
 	Kind() Kind
 	OccuredAt() time.Time
 	Data() any
+	String() string
 }
 
 var _ Event = (*baseEvent)(nil)
@@ -52,4 +54,14 @@ func (e *baseEvent) Kind() Kind {
 // OccuredAt implements Event.
 func (e *baseEvent) OccuredAt() time.Time {
 	return e.ts
+}
+
+// String implements Event.
+func (e *baseEvent) String() string {
+	return fmt.Sprintf("[id:%s kind:%s occured_at:%s data:%+v]",
+		e.ID(),
+		e.Kind(),
+		e.OccuredAt(),
+		e.Data(),
+	)
 }
