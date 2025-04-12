@@ -1,0 +1,48 @@
+package testutil
+
+import (
+	"errors"
+
+	"github.com/handlename/otomo/internal/domain/event"
+)
+
+var _ (event.Publisher) = (*MockEventPublisher)(nil)
+
+type MockEventPublisher struct {
+	Handlers map[event.Kind][]event.Handler
+	History   []event.Event
+}
+
+func NewMockPublisher() *MockEventPublisher {
+	return &MockEventPublisher{
+		Handlers: make(map[event.Kind][]event.Handler),
+		History:   make([]event.Event, 0),
+	}
+}
+
+// Publish implements event.Publisher.
+func (p *MockEventPublisher) Publish(event event.Event) error {
+	p.History = append(p.History, event)
+	handlers := p.Handlers[event.Kind()]
+
+	errs := []error{}
+	for _, handler := range handlers {
+		if err := handler(event); err != nil {
+			errs = append(errs, err)
+		}
+	}
+
+	if 0 < len(errs) {
+		return errors.Join(errs...)
+	}
+
+	return nil
+}
+
+// Subscribe implements event.Publisher.
+func (p *MockEventPublisher) Subscribe(kind event.Kind, handler event.Handler) {
+	if _, exists := p.Handlers[kind]; !exists {
+		p.Handlers[kind] = []event.Handler{}
+	}
+	p.Handlers[kind] = append(p.Handlers[kind], handler)
+}
