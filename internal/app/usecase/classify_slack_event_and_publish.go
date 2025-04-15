@@ -50,7 +50,7 @@ func (u *ClassifySlackEventAndPublish) Run(ctx context.Context, input ClassifySl
 			Challenge: challenge.Challenge,
 		}, nil
 	case slackevents.CallbackEvent:
-		mev, ok := input.Event.InnerEvent.Data.(slackevents.AppMentionEvent)
+		mev, ok := input.Event.InnerEvent.Data.(*slackevents.AppMentionEvent)
 		if !ok {
 			log.Warn().Any("data", input.Event.InnerEvent.Data).Msg("failed to assert as AppMentionEvent")
 			return &ClassifySlackEventAndPublishOutput{

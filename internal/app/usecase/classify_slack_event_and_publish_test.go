@@ -56,7 +56,7 @@ func Test_ClassifySlackEventAndPublish_handleAppMention(t *testing.T) {
 	sev := slackevents.EventsAPIEvent{
 		Type: slackevents.CallbackEvent,
 		InnerEvent: slackevents.EventsAPIInnerEvent{
-			Data: slackevents.AppMentionEvent{
+			Data: &slackevents.AppMentionEvent{
 				Text:            "hello, otomo!",
 				ThreadTimeStamp: fmt.Sprintf("%f", float64(now.UnixNano())/1e9),
 				EventTimeStamp:  fmt.Sprintf("%f", float64(now.UnixNano())/1e9),
