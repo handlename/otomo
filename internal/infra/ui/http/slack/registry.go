@@ -7,13 +7,15 @@ import (
 )
 
 type registry struct {
-	Slack *service.Slack
+	Publisher *service.EventPublisher
+	Slack     *service.Slack
 }
 
 type registryKey struct{}
 
-func NewRegistry(ctx context.Context, slack *service.Slack) *registry {
+func NewRegistry(ctx context.Context, publisher *service.EventPublisher, slack *service.Slack) *registry {
 	return &registry{
-		Slack: slack,
+		Publisher: publisher,
+		Slack:     slack,
 	}
 }

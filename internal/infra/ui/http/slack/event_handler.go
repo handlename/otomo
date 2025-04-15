@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/handlename/otomo/internal/app/usecase"
 	"github.com/handlename/otomo/internal/errorcode"
 	"github.com/handlename/otomo/internal/infra/ui/http/middleware"
 	"github.com/morikuni/failure/v2"
@@ -59,32 +60,18 @@ func eventHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	switch event.Type {
-	case slackevents.URLVerification:
-		log.Info().Msg("url verification received")
+	uc := usecase.NewClassifySlackEventAndPublish(reg.Publisher)
+	out, err := uc.Run(r.Context(), usecase.ClassifySlackEventAndPublishInput{
+		Event:   event,
+		RawBody: body,
+	})
 
-		var challenge *slackevents.ChallengeResponse
-		if err := json.Unmarshal(body, &challenge); err != nil {
-			// TODO: write error
-			panic(err)
-		}
-
-		w.Header().Set("Content-Type", "text/plain")
-		fmt.Fprint(w, challenge.Challenge)
-		return
-	default:
-		log.Info().Any("event", event).Msg("event parsed")
-	}
-
-	res := eventResponse{
-		Message: "hello",
-	}
-	resb, err := json.Marshal(res)
+	res, err := json.Marshal(out)
 	if err != nil {
 		// TODO: write error
 		panic(err)
 	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write(resb)
+	w.Write(res)
 }
