@@ -24,7 +24,7 @@ func NewEventPublisher() *EventPublisher {
 func (p *EventPublisher) Publish(event event.Event) error {
 	p.mutex.RLock()
 	handlers := p.handlers[event.Kind()]
-	p.mutex.Unlock()
+	p.mutex.RUnlock()
 
 	errs := []error{}
 	for _, handler := range handlers {
@@ -44,7 +44,7 @@ func (p *EventPublisher) Publish(event event.Event) error {
 func (p *EventPublisher) Subscribe(kind event.Kind, handler event.Handler) {
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
-	
+
 	if _, exists := p.handlers[kind]; !exists {
 		p.handlers[kind] = []event.Handler{}
 	}
