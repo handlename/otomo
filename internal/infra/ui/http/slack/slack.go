@@ -10,8 +10,8 @@ import (
 )
 
 func New(ctx context.Context, prefix string) http.Handler {
+	slack := service.NewSlack(config.Config.Slack.BotToken, config.Config.Slack.SigningSecret)
 	publisher := service.NewEventPublisher()
-	slack := service.NewSlack(config.Config.Slack.SigningSecret)
 	reg := NewRegistry(ctx, publisher, slack)
 	mids := []middleware.Middleware{
 		middleware.NewRegistry(reg),

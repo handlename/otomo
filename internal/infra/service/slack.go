@@ -13,11 +13,13 @@ import (
 
 type Slack struct {
 	signingSecret string
+	client        *slack.Client
 }
 
-func NewSlack(signingSecret string) *Slack {
+func NewSlack(token string, signingSecret string) *Slack {
 	return &Slack{
 		signingSecret: signingSecret,
+		client:        slack.New(token),
 	}
 }
 
@@ -45,4 +47,11 @@ func (s *Slack) Verify(header http.Header, body []byte) error {
 func (s *Slack) Send(ctx context.Context, msg string) error {
 	log.Debug().Str("msg", msg).Msg("not implemented yet")
 	return nil
+}
+
+func (s *Slack) AddReaction(ctx context.Context, channelID, messageID string, emoji string) error {
+	return s.client.AddReaction(emoji, slack.ItemRef{
+		Channel:   channelID,
+		Timestamp: messageID,
+	})
 }

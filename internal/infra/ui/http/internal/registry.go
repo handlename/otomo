@@ -17,7 +17,7 @@ type registry struct {
 
 func NewRegistry(ctx context.Context) *registry {
 	return &registry{
-		Slack:       service.NewSlack(config.Config.Slack.SigningSecret),
+		Slack:       service.NewSlack(config.Config.Slack.BotToken, config.Config.Slack.SigningSecret),
 		RepoSession: &irepo.VolatileSession{}, // TODO: replace
 		RepoBrain:   irepo.NewGeneralBrain(ctx),
 	}
