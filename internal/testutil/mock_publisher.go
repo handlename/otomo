@@ -9,14 +9,14 @@ import (
 var _ (event.Publisher) = (*MockEventPublisher)(nil)
 
 type MockEventPublisher struct {
-	Handlers map[event.Kind][]event.Handler
-	History   []event.Event
+	Handlers map[event.Kind][]event.Subscriber
+	History  []event.Event
 }
 
 func NewMockPublisher() *MockEventPublisher {
 	return &MockEventPublisher{
-		Handlers: make(map[event.Kind][]event.Handler),
-		History:   make([]event.Event, 0),
+		Handlers: make(map[event.Kind][]event.Subscriber),
+		History:  make([]event.Event, 0),
 	}
 }
 
@@ -40,9 +40,9 @@ func (p *MockEventPublisher) Publish(event event.Event) error {
 }
 
 // Subscribe implements event.Publisher.
-func (p *MockEventPublisher) Subscribe(kind event.Kind, handler event.Handler) {
+func (p *MockEventPublisher) Subscribe(kind event.Kind, handler event.Subscriber) {
 	if _, exists := p.Handlers[kind]; !exists {
-		p.Handlers[kind] = []event.Handler{}
+		p.Handlers[kind] = []event.Subscriber{}
 	}
 	p.Handlers[kind] = append(p.Handlers[kind], handler)
 }

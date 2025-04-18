@@ -10,13 +10,13 @@ import (
 var _ event.Publisher = (*EventPublisher)(nil)
 
 type EventPublisher struct {
-	handlers map[event.Kind][]event.Handler
+	handlers map[event.Kind][]event.Subscriber
 	mutex    sync.RWMutex
 }
 
 func NewEventPublisher() *EventPublisher {
 	return &EventPublisher{
-		handlers: make(map[event.Kind][]event.Handler),
+		handlers: make(map[event.Kind][]event.Subscriber),
 	}
 }
 
@@ -41,12 +41,12 @@ func (p *EventPublisher) Publish(event event.Event) error {
 }
 
 // Subscribe implements event.Publisher.
-func (p *EventPublisher) Subscribe(kind event.Kind, handler event.Handler) {
+func (p *EventPublisher) Subscribe(kind event.Kind, handler event.Subscriber) {
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 
 	if _, exists := p.handlers[kind]; !exists {
-		p.handlers[kind] = []event.Handler{}
+		p.handlers[kind] = []event.Subscriber{}
 	}
 	p.handlers[kind] = append(p.handlers[kind], handler)
 }
