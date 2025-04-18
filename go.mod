@@ -150,5 +150,3 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	pluginrpc.com/pluginrpc v0.5.0 // indirect
 )
-
-tool github.com/bufbuild/buf/cmd/buf
