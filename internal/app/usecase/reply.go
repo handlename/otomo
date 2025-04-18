@@ -5,6 +5,7 @@ import (
 
 	"github.com/handlename/otomo/internal/domain/entity"
 	"github.com/handlename/otomo/internal/domain/event"
+	"github.com/handlename/otomo/internal/domain/repository"
 	"github.com/handlename/otomo/internal/infra/service"
 	"github.com/morikuni/failure/v2"
 	"github.com/rs/zerolog/log"
@@ -17,21 +18,23 @@ type ReplyInput struct {
 type ReplyOutput struct{}
 
 type Reply struct {
-	otomo *entity.Otomo
-	slack *service.Slack // TODO: repalce with service.Messenger
+	otomo           *entity.Otomo
+	slack           *service.Slack // TODO: repalce with service.Messenger
+	repoInstruction repository.Instruction
 }
 
-func NewReply(otomo *entity.Otomo, slack *service.Slack) *Reply {
+func NewReply(otomo *entity.Otomo, slack *service.Slack, repoInstruction repository.Instruction) *Reply {
 	return &Reply{
-		otomo: otomo,
-		slack: slack,
+		otomo:           otomo,
+		slack:           slack,
+		repoInstruction: repoInstruction,
 	}
 }
 
 func (r *Reply) Run(ctx context.Context, input ReplyInput) (*ReplyOutput, error) {
 	rep, err := r.otomo.Think(ctx,
 		*entity.NewContext(""),
-		entity.NewInstruction("", input.EventData.RawInstruction),
+		r.repoInstruction.NewFromInstructionReceivedData(ctx, input.EventData),
 	)
 	if err != nil {
 		return nil, failure.Wrap(err)

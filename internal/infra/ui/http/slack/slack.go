@@ -16,12 +16,13 @@ import (
 func New(ctx context.Context, prefix string) http.Handler {
 	slack := service.NewSlack(config.Config.Slack.BotToken, config.Config.Slack.SigningSecret)
 	repoBrain := repository.NewGeneralBrain(ctx)
+	repoSlackInstruction := repository.NewSlackInstruction()
 	brain := lo.Must(repoBrain.New(ctx))
 	otomo := entity.NewOtomo(brain)
 
 	publisher := service.NewEventPublisher()
 	usecase.NewAckInstruction(slack).Subscribe(publisher)
-	usecase.NewReply(otomo, slack).Subscribe(publisher)
+	usecase.NewReply(otomo, slack, repoSlackInstruction).Subscribe(publisher)
 
 	reg := NewRegistry(ctx, publisher, slack)
 	mids := []middleware.Middleware{

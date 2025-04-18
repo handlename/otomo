@@ -1,6 +1,8 @@
 package config
 
 import (
+	"fmt"
+
 	"github.com/handlename/otomo/internal/errorcode"
 	config "github.com/kayac/go-config"
 	"github.com/morikuni/failure/v2"
@@ -16,8 +18,9 @@ type Root struct {
 
 type Slack struct {
 	SigningSecret string `toml:"signing_secret"`
-	AppToken      string `toml:"app_token"`
+	BotUserID     string `toml:"bot_user_id"`
 	BotToken      string `toml:"bot_token"`
+	AppToken      string `toml:"app_token"`
 }
 
 type Bedrock struct {
@@ -39,10 +42,15 @@ func Load(path string) error {
 }
 
 func Validate() error {
-	if s := Config.Slack; s.AppToken == "" || s.BotToken == "" {
+	// TODO: use github.com/go-playground/validator
+
+	if s := Config.Slack; s.SigningSecret == "" || s.AppToken == "" || s.BotToken == "" || s.BotUserID == "" {
 		return failure.New(
 			errorcode.ErrInvalidArgument,
-			failure.Message("both of Slack App token and Slack Bot token are required"),
+			failure.Message("configuration for Slack is not satisfied"),
+			failure.Context(map[string]string{
+				"slack": fmt.Sprintf("%+v", s),
+			}),
 		)
 	}
 
