@@ -59,7 +59,7 @@ func (u *ClassifySlackEventAndPublish) Run(ctx context.Context, input ClassifySl
 				"event": ev.String(),
 			})
 		}
-		log.Debug().Any("event", ev).Msg("event published")
+		log.Debug().Str("event", ev.String()).Msg("event published")
 	}
 
 	return &ClassifySlackEventAndPublishOutput{
