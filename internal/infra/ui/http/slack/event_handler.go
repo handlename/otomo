@@ -7,9 +7,7 @@ import (
 	"net/http"
 
 	"github.com/handlename/otomo/internal/app/usecase"
-	"github.com/handlename/otomo/internal/errorcode"
 	"github.com/handlename/otomo/internal/infra/ui/http/middleware"
-	"github.com/morikuni/failure/v2"
 	"github.com/rs/zerolog/log"
 	"github.com/slack-go/slack/slackevents"
 )
@@ -22,8 +20,6 @@ type eventResponse struct {
 }
 
 func eventHandler(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-
 	reg, err := middleware.GetRegistry[*registry](r.Context())
 	if err != nil {
 		// TODO: write error
@@ -35,19 +31,7 @@ func eventHandler(w http.ResponseWriter, r *http.Request) {
 		// TODO: write error
 		panic(err)
 	}
-
-	// TODO: move to middleware
-	if err := reg.Slack.Verify(r.Header, body); err != nil {
-		if failure.Is(err, errorcode.ErrInvalidArgument) {
-			log.Debug().Err(err).Msg("invalid signing")
-			w.WriteHeader(http.StatusBadRequest)
-			fmt.Fprintf(w, "invilid signing")
-			return
-		}
-
-		// TODO: write error
-		panic(err)
-	}
+	defer r.Body.Close()
 
 	event, err := slackevents.ParseEvent(
 		json.RawMessage(body),
