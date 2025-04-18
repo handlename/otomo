@@ -92,6 +92,7 @@ func (u *ClassifySlackEventAndPublish) handleCallbackEvent(_ context.Context, in
 		}
 
 		return event.Event(event.NewInstructionReceived(event.InstructionReceivedData{
+			ChannelID:      iev.Channel,
 			MessageID:      iev.EventTimeStamp,
 			ThreadID:       iev.ThreadTimeStamp,
 			RawInstruction: iev.Text,

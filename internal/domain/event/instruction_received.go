@@ -5,6 +5,7 @@ import "time"
 const KindInstructionReceived Kind = "instruction_received"
 
 type InstructionReceivedData struct {
+	ChannelID      string
 	MessageID      string
 	ThreadID       string
 	RawInstruction string
