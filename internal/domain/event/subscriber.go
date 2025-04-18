@@ -1,3 +1,5 @@
 package event
 
-type Subscriber func(event Event) error
+import "context"
+
+type Subscriber func(context.Context, Event) error

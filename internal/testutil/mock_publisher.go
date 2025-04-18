@@ -1,6 +1,7 @@
 package testutil
 
 import (
+	"context"
 	"errors"
 
 	"github.com/handlename/otomo/internal/domain/event"
@@ -21,13 +22,13 @@ func NewMockPublisher() *MockEventPublisher {
 }
 
 // Publish implements event.Publisher.
-func (p *MockEventPublisher) Publish(event event.Event) error {
+func (p *MockEventPublisher) Publish(ctx context.Context, event event.Event) error {
 	p.History = append(p.History, event)
 	handlers := p.Handlers[event.Kind()]
 
 	errs := []error{}
 	for _, handler := range handlers {
-		if err := handler(event); err != nil {
+		if err := handler(ctx, event); err != nil {
 			errs = append(errs, err)
 		}
 	}

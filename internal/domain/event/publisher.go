@@ -1,6 +1,8 @@
 package event
 
+import "context"
+
 type Publisher interface {
 	Subscribe(Kind, Subscriber)
-	Publish(Event) error
+	Publish(context.Context, Event) error
 }

@@ -54,7 +54,7 @@ func (u *ClassifySlackEventAndPublish) Run(ctx context.Context, input ClassifySl
 	}
 
 	if ev != nil {
-		if err := u.publisher.Publish(ev); err != nil {
+		if err := u.publisher.Publish(ctx, ev); err != nil {
 			return nil, failure.Wrap(err, failure.Message("failed to publish event"), failure.Context{
 				"event": ev.String(),
 			})

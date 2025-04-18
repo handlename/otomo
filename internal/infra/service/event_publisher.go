@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"sync"
 
@@ -21,14 +22,14 @@ func NewEventPublisher() *EventPublisher {
 }
 
 // Publish implements event.Publisher.
-func (p *EventPublisher) Publish(event event.Event) error {
+func (p *EventPublisher) Publish(ctx context.Context, event event.Event) error {
 	p.mutex.RLock()
 	handlers := p.handlers[event.Kind()]
 	p.mutex.RUnlock()
 
 	errs := []error{}
 	for _, handler := range handlers {
-		if err := handler(event); err != nil {
+		if err := handler(ctx, event); err != nil {
 			errs = append(errs, err)
 		}
 	}
