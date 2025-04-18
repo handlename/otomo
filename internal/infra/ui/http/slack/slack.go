@@ -26,6 +26,7 @@ func New(ctx context.Context, prefix string) http.Handler {
 	reg := NewRegistry(ctx, publisher, slack)
 	mids := []middleware.Middleware{
 		middleware.NewRegistry(reg),
+		middleware.NewSlackRetryIgnorere(),
 		middleware.NewSlackEventVerifier(slack),
 		middleware.NewAccesslog(),
 	}
