@@ -32,7 +32,7 @@ func (u *ReplyToUser) Run(ctx context.Context, otomo *entity.Otomo, instruction 
 		)
 	}
 
-	if err := u.messenger.Send(ctx, rep.Body()); err != nil {
+	if err := u.messenger.PostMessage(ctx, "", "", rep.Body()); err != nil {
 		return failure.Wrap(err,
 			failure.WithCode(errorcode.ErrInternal),
 			failure.Message("failed to send reply"),

@@ -7,7 +7,6 @@ import (
 
 	"github.com/handlename/otomo/internal/errorcode"
 	"github.com/morikuni/failure/v2"
-	"github.com/rs/zerolog/log"
 	"github.com/slack-go/slack"
 )
 
@@ -44,9 +43,13 @@ func (s *Slack) Verify(header http.Header, body []byte) error {
 	return nil
 }
 
-func (s *Slack) Send(ctx context.Context, msg string) error {
-	log.Debug().Str("msg", msg).Msg("not implemented yet")
-	return nil
+func (s *Slack) PostMessage(ctx context.Context, channelID, messageID, msg string) error {
+	_, _, err := s.client.PostMessage(
+		channelID,
+		slack.MsgOptionTS(messageID),
+		slack.MsgOptionText(msg, false),
+	)
+	return err
 }
 
 func (s *Slack) AddReaction(ctx context.Context, channelID, messageID string, emoji string) error {
