@@ -3,10 +3,10 @@ package usecase
 import (
 	"context"
 
+	"github.com/handlename/otomo/internal/app/service"
 	"github.com/handlename/otomo/internal/domain/entity"
 	"github.com/handlename/otomo/internal/domain/event"
 	"github.com/handlename/otomo/internal/domain/repository"
-	"github.com/handlename/otomo/internal/infra/service"
 	"github.com/morikuni/failure/v2"
 	"github.com/rs/zerolog/log"
 )
@@ -19,11 +19,11 @@ type ReplyOutput struct{}
 
 type Reply struct {
 	otomo           *entity.Otomo
-	slack           *service.Slack // TODO: repalce with service.Messenger
+	slack           service.Messenger
 	repoInstruction repository.Instruction
 }
 
-func NewReply(otomo *entity.Otomo, slack *service.Slack, repoInstruction repository.Instruction) *Reply {
+func NewReply(otomo *entity.Otomo, slack service.Messenger, repoInstruction repository.Instruction) *Reply {
 	return &Reply{
 		otomo:           otomo,
 		slack:           slack,
