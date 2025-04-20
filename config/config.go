@@ -1,9 +1,7 @@
 package config
 
 import (
-	"fmt"
-
-	"github.com/handlename/otomo/internal/errorcode"
+	"github.com/go-playground/validator/v10"
 	config "github.com/kayac/go-config"
 	"github.com/morikuni/failure/v2"
 )
@@ -11,21 +9,21 @@ import (
 var Config Root
 
 type Root struct {
-	Port    int
-	Slack   Slack   `toml:"slack"`
-	Bedrock Bedrock `toml:"bedrock"`
+	Port    int     `validate:"required"`
+	Slack   Slack   `toml:"slack" validate:"required"`
+	Bedrock Bedrock `toml:"bedrock" validate:"required"`
 }
 
 type Slack struct {
-	SigningSecret string `toml:"signing_secret"`
-	BotUserID     string `toml:"bot_user_id"`
-	BotToken      string `toml:"bot_token"`
-	AppToken      string `toml:"app_token"`
+	SigningSecret string `toml:"signing_secret" validate:"required"`
+	BotUserID     string `toml:"bot_user_id" validate:"required"`
+	BotToken      string `toml:"bot_token" validate:"required"`
+	AppToken      string `toml:"app_token" validate:"required"`
 }
 
 type Bedrock struct {
-	ModelType string `toml:"model_type"`
-	ModelID   string `toml:"model_id"`
+	ModelType string `toml:"model_type" validate:"required"`
+	ModelID   string `toml:"model_id" validate:"required"`
 }
 
 // Load load config data to otomo.Config from TOML file specified by path.
@@ -42,16 +40,9 @@ func Load(path string) error {
 }
 
 func Validate() error {
-	// TODO: use github.com/go-playground/validator
-
-	if s := Config.Slack; s.SigningSecret == "" || s.AppToken == "" || s.BotToken == "" || s.BotUserID == "" {
-		return failure.New(
-			errorcode.ErrInvalidArgument,
-			failure.Message("configuration for Slack is not satisfied"),
-			failure.Context(map[string]string{
-				"slack": fmt.Sprintf("%+v", s),
-			}),
-		)
+	v := validator.New(validator.WithRequiredStructEnabled())
+	if err := v.Struct(Config); err != nil {
+		return failure.Wrap(err, failure.Message("failed to validate Config"))
 	}
 
 	return nil
