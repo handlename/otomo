@@ -14,7 +14,7 @@ require (
 	github.com/mackee/tanukirpc v0.5.3
 	github.com/morikuni/failure/v2 v2.0.0-20240419002657-2551069d1c86
 	github.com/pkg/errors v0.9.1
-	github.com/rs/zerolog v1.33.0
+	github.com/rs/zerolog v1.34.0
 	github.com/samber/lo v1.49.1
 	github.com/slack-go/slack v0.16.0
 	github.com/stretchr/testify v1.10.0
