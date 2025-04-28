@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/handlename/otomo/internal/domain/event"
+	"github.com/handlename/otomo/internal/infra/service"
 	"github.com/handlename/otomo/internal/testutil"
 	"github.com/samber/lo"
 	"github.com/slack-go/slack/slackevents"
@@ -58,9 +59,9 @@ func Test_ClassifySlackEventAndPublish_handleAppMention(t *testing.T) {
 		InnerEvent: slackevents.EventsAPIInnerEvent{
 			Data: &slackevents.AppMentionEvent{
 				Text:            "hello, otomo!",
-				ThreadTimeStamp: fmt.Sprintf("%f", float64(now.UnixNano())/1e9),
-				EventTimeStamp:  fmt.Sprintf("%f", float64(now.UnixNano())/1e9),
-				TimeStamp:       fmt.Sprintf("%f", float64(now.UnixNano())/1e9),
+				ThreadTimeStamp: fmt.Sprintf("%f", service.Time.UnixNanoToSeconds(now.UnixNano())),
+				EventTimeStamp:  fmt.Sprintf("%f", service.Time.UnixNanoToSeconds(now.UnixNano())),
+				TimeStamp:       fmt.Sprintf("%f", service.Time.UnixNanoToSeconds(now.UnixNano())),
 			},
 		},
 	}
@@ -93,5 +94,5 @@ func Test_ClassifySlackEventAndPublish_handleAppMention(t *testing.T) {
 	assert.Equal(t, fmt.Sprintf("%f", float64(now.UnixNano())/1e9), data.MessageID)
 	assert.Equal(t, fmt.Sprintf("%f", float64(now.UnixNano())/1e9), data.ThreadID)
 	assert.Equal(t, "hello, otomo!", data.RawInstruction)
-	assert.Equal(t, now.UnixNano(), data.SentAt.UnixNano())
+	assert.Equal(t, service.Time.UnixNanoToSeconds(now.UnixNano()), service.Time.UnixNanoToSeconds(data.SentAt.UnixNano()))
 }
