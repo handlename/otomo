@@ -6,7 +6,7 @@ require (
 	github.com/alecthomas/kong v1.9.0
 	github.com/aws/aws-sdk-go-v2 v1.36.3
 	github.com/aws/aws-sdk-go-v2/config v1.29.14
-	github.com/aws/aws-sdk-go-v2/service/bedrockruntime v1.26.1
+	github.com/aws/aws-sdk-go-v2/service/bedrockruntime v1.30.0
 	github.com/fujiwara/ridge v0.12.1
 	github.com/go-playground/validator/v10 v10.26.0
 	github.com/google/uuid v1.6.0
