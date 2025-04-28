@@ -4,11 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strconv"
-	"strings"
-	"time"
 
 	"github.com/handlename/otomo/internal/domain/event"
+	"github.com/handlename/otomo/internal/infra/service"
 	"github.com/morikuni/failure/v2"
 	"github.com/rs/zerolog/log"
 	"github.com/slack-go/slack/slackevents"
@@ -81,7 +79,7 @@ func (u *ClassifySlackEventAndPublish) handleURLVerification(_ context.Context, 
 func (u *ClassifySlackEventAndPublish) handleCallbackEvent(_ context.Context, input ClassifySlackEventAndPublishInput) (event.Event, error) {
 	switch iev := input.Event.InnerEvent.Data.(type) {
 	case *slackevents.AppMentionEvent:
-		sentAt, err := parseUnixTimestamp(iev.TimeStamp)
+		sentAt, err := service.Time.ParseUnixTimestamp(iev.TimeStamp)
 		if err != nil {
 			return nil, failure.Wrap(err,
 				failure.Message("failed to parse timestamp"),
