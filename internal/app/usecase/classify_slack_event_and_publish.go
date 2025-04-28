@@ -107,20 +107,3 @@ func (u *ClassifySlackEventAndPublish) handleCallbackEvent(_ context.Context, in
 		)
 	}
 }
-
-func parseUnixTimestamp(s string) (*time.Time, error) {
-	parts := strings.Split(s, ".")
-
-	sec, err := strconv.ParseInt(parts[0], 10, 64)
-	if err != nil {
-		return nil, failure.Wrap(err)
-	}
-
-	msec, err := strconv.ParseInt(parts[1], 10, 64)
-	if err != nil {
-		return nil, failure.Wrap(err)
-	}
-
-	t := time.Unix(sec, msec*1000)
-	return &t, nil
-}
