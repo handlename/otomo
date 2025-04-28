@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"encoding/json"
-	"fmt"
 	"testing"
 	"time"
 
@@ -59,9 +58,9 @@ func Test_ClassifySlackEventAndPublish_handleAppMention(t *testing.T) {
 		InnerEvent: slackevents.EventsAPIInnerEvent{
 			Data: &slackevents.AppMentionEvent{
 				Text:            "hello, otomo!",
-				ThreadTimeStamp: fmt.Sprintf("%f", service.Time.UnixNanoToSeconds(now.UnixNano())),
-				EventTimeStamp:  fmt.Sprintf("%f", service.Time.UnixNanoToSeconds(now.UnixNano())),
-				TimeStamp:       fmt.Sprintf("%f", service.Time.UnixNanoToSeconds(now.UnixNano())),
+				ThreadTimeStamp: service.Time.UnixNanoToSlackID(now.UnixNano()),
+				EventTimeStamp:  service.Time.UnixNanoToSlackID(now.UnixNano()),
+				TimeStamp:       service.Time.UnixNanoToSlackID(now.UnixNano()),
 			},
 		},
 	}
@@ -91,8 +90,8 @@ func Test_ClassifySlackEventAndPublish_handleAppMention(t *testing.T) {
 	data, ok := mockPublisher.History[0].Data().(event.InstructionReceivedData)
 	require.True(t, ok)
 
-	assert.Equal(t, fmt.Sprintf("%f", float64(now.UnixNano())/1e9), data.MessageID)
-	assert.Equal(t, fmt.Sprintf("%f", float64(now.UnixNano())/1e9), data.ThreadID)
+	assert.Equal(t, service.Time.UnixNanoToSlackID(now.UnixNano()), data.MessageID)
+	assert.Equal(t, service.Time.UnixNanoToSlackID(now.UnixNano()), data.ThreadID)
 	assert.Equal(t, "hello, otomo!", data.RawInstruction)
 	assert.Equal(t, service.Time.UnixNanoToSeconds(now.UnixNano()), service.Time.UnixNanoToSeconds(data.SentAt.UnixNano()))
 }
