@@ -18,7 +18,9 @@ func Test_Reply_Run(t *testing.T) {
 
 	// Arrange
 
-	mockBrain := &service.MockBrain{}
+	mockBrain := &service.MockBrain{
+		BaseBrain: *entity.NewBaseBrain(),
+	}
 	mockOtomo := entity.NewOtomo(mockBrain)
 	mockMessenger := &service.MockMessenger{}
 	mockInstructionRepo := &repository.MockInstructionRepository{}
@@ -59,6 +61,7 @@ func Test_Reply_Run_Error(t *testing.T) {
 	// Create mock brain with error
 	mockError := assert.AnError
 	mockBrain := &service.MockBrain{
+		BaseBrain: *entity.NewBaseBrain(),
 		ThinkFunc: func(ctx context.Context, ectx entity.Context, instruction *entity.Instruction) (*entity.Answer, error) {
 			return nil, mockError
 		},
@@ -70,7 +73,7 @@ func Test_Reply_Run_Error(t *testing.T) {
 	uc := NewReply(mockOtomo, mockMessenger, mockInstructionRepo)
 
 	// Act
-	
+
 	input := ReplyInput{
 		EventData: event.InstructionReceivedData{
 			ChannelID:      "test-channel",
@@ -83,7 +86,7 @@ func Test_Reply_Run_Error(t *testing.T) {
 	output, err := uc.Run(ctx, input)
 
 	// Assert
-	
+
 	require.Error(t, err)
 	assert.Nil(t, output)
 

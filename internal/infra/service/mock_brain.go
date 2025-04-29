@@ -16,8 +16,11 @@ func (r *MockAnswer) Body() string {
 	return r.body
 }
 
+var _ entity.Brain = (*MockBrain)(nil)
+
 // MockBrain is a mock implementation for entity.Brain
 type MockBrain struct {
+	entity.BaseBrain
 	ThinkFunc func(ctx context.Context, ectx entity.Context, instruction *entity.Instruction) (*entity.Answer, error)
 }
 
@@ -26,6 +29,6 @@ func (b *MockBrain) Think(ctx context.Context, ectx entity.Context, instruction 
 	if b.ThinkFunc != nil {
 		return b.ThinkFunc(ctx, ectx, instruction)
 	}
-	
+
 	return entity.NewAnswer("mock response"), nil
 }

@@ -11,8 +11,10 @@ import (
 type StrawBrain struct{}
 
 // New implements repository.Brain.
-func (g *StrawBrain) New(context.Context) (entity.Brain, error) {
-	return &strawBrain{}, nil
+func (g *StrawBrain) New(ctx context.Context) (entity.Brain, error) {
+	return &strawBrain{
+		*entity.NewBaseBrain(),
+	}, nil
 }
 
 func NewStrawBrain(ctx context.Context) drepo.Brain {
@@ -21,7 +23,9 @@ func NewStrawBrain(ctx context.Context) drepo.Brain {
 
 var _ entity.Brain = (*strawBrain)(nil)
 
-type strawBrain struct{}
+type strawBrain struct {
+	entity.BaseBrain
+}
 
 // Think implements entity.Brain.
 func (g *strawBrain) Think(_ context.Context, _ entity.Context, ins *entity.Instruction) (*entity.Answer, error) {

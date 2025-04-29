@@ -22,8 +22,9 @@ type Slack struct {
 }
 
 type Bedrock struct {
-	ModelType string `toml:"model_type" validate:"required"`
-	ModelID   string `toml:"model_id" validate:"required"`
+	ModelType  string `toml:"model_type" validate:"required"`
+	ModelID    string `toml:"model_id" validate:"required"`
+	BasePrompt string `toml:"base_prompt"`
 }
 
 // Load load config data to otomo.Config from TOML file specified by path.
