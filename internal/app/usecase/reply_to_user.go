@@ -15,7 +15,7 @@ type ReplyToUser struct {
 	messenger   service.Messenger
 }
 
-func (u *ReplyToUser) Run(ctx context.Context, otomo *entity.Otomo, instruction *entity.Instruction) error {
+func (u *ReplyToUser) Run(ctx context.Context, otomo entity.Otomo, instruction *entity.Instruction) error {
 	sess, err := u.repoSession.RestoreByInstructionID(instruction.ID())
 	if err != nil {
 		return failure.Wrap(err,

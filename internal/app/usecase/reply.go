@@ -18,12 +18,12 @@ type ReplyInput struct {
 type ReplyOutput struct{}
 
 type Reply struct {
-	otomo           *entity.Otomo
+	otomo           entity.Otomo
 	slack           service.Messenger
 	repoInstruction repository.Instruction
 }
 
-func NewReply(otomo *entity.Otomo, slack service.Messenger, repoInstruction repository.Instruction) *Reply {
+func NewReply(otomo entity.Otomo, slack service.Messenger, repoInstruction repository.Instruction) *Reply {
 	return &Reply{
 		otomo:           otomo,
 		slack:           slack,
