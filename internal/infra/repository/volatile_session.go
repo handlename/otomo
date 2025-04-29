@@ -21,11 +21,6 @@ func (v *VolatileSession) Restore(valueobject.SessionID) (*entity.Session, error
 	return v.session, nil
 }
 
-// RestoreByInstructionID implements repository.Session.
-func (v *VolatileSession) RestoreByInstructionID(valueobject.InstructionID) (*entity.Session, error) {
-	return v.Restore("")
-}
-
 // Save implements repository.Session.
 func (v *VolatileSession) Save(sess *entity.Session) error {
 	v.session = sess

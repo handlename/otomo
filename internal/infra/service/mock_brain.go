@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/handlename/otomo/internal/domain/entity"
+	vo "github.com/handlename/otomo/internal/domain/valueobject"
 )
 
 // MockAnswer implements entity.Answer interface
@@ -20,13 +21,13 @@ var _ entity.Brain = (*MockBrain)(nil)
 
 // MockBrain is a mock implementation for entity.Brain
 type MockBrain struct {
-	ThinkFunc func(ctx context.Context, ectx entity.Context, instruction *entity.Instruction) (*entity.Answer, error)
+	ThinkFunc func(ctx context.Context, ectx entity.Context, prompt vo.Prompt) (*entity.Answer, error)
 }
 
 // Think mocks the Brain's Think method
-func (b *MockBrain) Think(ctx context.Context, ectx entity.Context, instruction *entity.Instruction) (*entity.Answer, error) {
+func (b *MockBrain) Think(ctx context.Context, ectx entity.Context, prompt vo.Prompt) (*entity.Answer, error) {
 	if b.ThinkFunc != nil {
-		return b.ThinkFunc(ctx, ectx, instruction)
+		return b.ThinkFunc(ctx, ectx, prompt)
 	}
 
 	return entity.NewAnswer("mock response"), nil

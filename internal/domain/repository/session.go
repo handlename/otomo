@@ -7,6 +7,5 @@ import (
 
 type Session interface {
 	Restore(vo.SessionID) (*entity.Session, error)
-	RestoreByInstructionID(vo.InstructionID) (*entity.Session, error)
 	Save(*entity.Session) error
 }

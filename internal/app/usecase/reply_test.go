@@ -5,9 +5,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/handlename/otomo/config"
 	"github.com/handlename/otomo/internal/domain/entity"
 	"github.com/handlename/otomo/internal/domain/event"
-	"github.com/handlename/otomo/internal/infra/repository"
+	vo "github.com/handlename/otomo/internal/domain/valueobject"
 	"github.com/handlename/otomo/internal/infra/service"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
@@ -22,8 +23,7 @@ func Test_Reply_Run(t *testing.T) {
 	mockBrain := &service.MockBrain{}
 	mockOtomo := lo.Must(entity.NewOtomo(mockBrain))
 	mockMessenger := &service.MockMessenger{}
-	mockInstructionRepo := &repository.MockInstructionRepository{}
-	uc := NewReply(mockOtomo, mockMessenger, mockInstructionRepo)
+	uc := NewReply(mockOtomo, mockMessenger)
 
 	// Act
 
@@ -60,15 +60,14 @@ func Test_Reply_Run_Error(t *testing.T) {
 	// Create mock brain with error
 	mockError := assert.AnError
 	mockBrain := &service.MockBrain{
-		ThinkFunc: func(ctx context.Context, ectx entity.Context, instruction *entity.Instruction) (*entity.Answer, error) {
+		ThinkFunc: func(ctx context.Context, ectx entity.Context, prompt vo.Prompt) (*entity.Answer, error) {
 			return nil, mockError
 		},
 	}
 
 	mockOtomo := lo.Must(entity.NewOtomo(mockBrain))
 	mockMessenger := &service.MockMessenger{}
-	mockInstructionRepo := &repository.MockInstructionRepository{}
-	uc := NewReply(mockOtomo, mockMessenger, mockInstructionRepo)
+	uc := NewReply(mockOtomo, mockMessenger)
 
 	// Act
 
@@ -90,4 +89,50 @@ func Test_Reply_Run_Error(t *testing.T) {
 
 	// Verify messenger was not called
 	assert.Equal(t, 0, len(mockMessenger.History))
+}
+
+func Test_Reply_buildPrompt(t *testing.T) {
+	// Store the original bot user ID
+	originalBotUserID := config.Config.Slack.BotUserID
+	// Set a known bot user ID for testing
+	config.Config.Slack.BotUserID = "U12345678"
+	// Restore the original bot user ID after the test
+	defer func() { config.Config.Slack.BotUserID = originalBotUserID }()
+
+	r := Reply{}
+
+	// Create test cases
+	tests := []struct {
+		name     string
+		raw      string
+		expected vo.Prompt
+	}{
+		{
+			name:     "should trim spaces",
+			raw:      "  hello world  ",
+			expected: "hello world",
+		},
+		{
+			name:     "should remove bot user ID",
+			raw:      "<U12345678> hello world",
+			expected: " hello world",
+		},
+		{
+			name:     "should trim spaces and remove bot user ID",
+			raw:      "  <U12345678> hello world  ",
+			expected: " hello world",
+		},
+		{
+			name:     "should handle message with no spaces to trim or bot user ID",
+			raw:      "hello world",
+			expected: "hello world",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := r.buildPrompt(tt.raw)
+			assert.Equal(t, tt.expected, got)
+		})
+	}
 }

@@ -2,11 +2,14 @@ package usecase
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
+	"github.com/handlename/otomo/config"
 	"github.com/handlename/otomo/internal/app/service"
 	"github.com/handlename/otomo/internal/domain/entity"
 	"github.com/handlename/otomo/internal/domain/event"
-	"github.com/handlename/otomo/internal/domain/repository"
+	vo "github.com/handlename/otomo/internal/domain/valueobject"
 	"github.com/morikuni/failure/v2"
 	"github.com/rs/zerolog/log"
 )
@@ -18,23 +21,21 @@ type ReplyInput struct {
 type ReplyOutput struct{}
 
 type Reply struct {
-	otomo           entity.Otomo
-	slack           service.Messenger
-	repoInstruction repository.Instruction
+	otomo entity.Otomo
+	slack service.Messenger
 }
 
-func NewReply(otomo entity.Otomo, slack service.Messenger, repoInstruction repository.Instruction) *Reply {
+func NewReply(otomo entity.Otomo, slack service.Messenger) *Reply {
 	return &Reply{
-		otomo:           otomo,
-		slack:           slack,
-		repoInstruction: repoInstruction,
+		otomo: otomo,
+		slack: slack,
 	}
 }
 
 func (r *Reply) Run(ctx context.Context, input ReplyInput) (*ReplyOutput, error) {
 	rep, err := r.otomo.Think(ctx,
 		*entity.NewContext(""),
-		r.repoInstruction.NewFromInstructionReceivedData(ctx, input.EventData),
+		r.buildPrompt(input.EventData.RawInstruction),
 	)
 	if err != nil {
 		return nil, failure.Wrap(err)
@@ -58,4 +59,10 @@ func (r *Reply) Subscribe(publisher event.Publisher) {
 		_, err := r.Run(ctx, input)
 		return err
 	})
+}
+
+func (r *Reply) buildPrompt(raw string) vo.Prompt {
+	raw = strings.TrimSpace(raw)
+	raw = strings.TrimPrefix(raw, fmt.Sprintf("<%s>", config.Config.Slack.BotUserID))
+	return vo.Prompt(raw)
 }
