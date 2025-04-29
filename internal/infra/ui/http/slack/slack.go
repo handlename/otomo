@@ -18,7 +18,7 @@ func New(ctx context.Context, prefix string) http.Handler {
 	repoBrain := repository.NewGeneralBrain(ctx)
 	repoSlackInstruction := repository.NewSlackInstruction()
 	brain := lo.Must(repoBrain.New(ctx))
-	otomo := entity.NewOtomo(brain)
+	otomo := lo.Must(entity.NewOtomo(brain))
 
 	publisher := service.NewEventPublisher()
 	usecase.NewAckInstruction(slack).Subscribe(publisher)

@@ -23,7 +23,11 @@ func slackEventHandler(ctx tanukirpc.Context[*registry], req *slackEventRequest)
 		return nil, tanukirpc.WrapErrorWithStatus(http.StatusInternalServerError, err)
 	}
 
-	otomo := entity.NewOtomo(brain)
+	otomo , err := entity.NewOtomo(brain)
+	if err != nil {
+		return nil, tanukirpc.WrapErrorWithStatus(http.StatusInternalServerError, err)
+	}
+
 	inst := entity.NewInstruction("dummy", req.Message)
 	uc := usecase.NewReplyToUser(ctx.Registry().RepoSession, ctx.Registry().Slack)
 	if err := uc.Run(ctx, otomo, inst); err != nil {

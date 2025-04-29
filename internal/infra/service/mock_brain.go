@@ -20,7 +20,6 @@ var _ entity.Brain = (*MockBrain)(nil)
 
 // MockBrain is a mock implementation for entity.Brain
 type MockBrain struct {
-	entity.BaseBrain
 	ThinkFunc func(ctx context.Context, ectx entity.Context, instruction *entity.Instruction) (*entity.Answer, error)
 }
 

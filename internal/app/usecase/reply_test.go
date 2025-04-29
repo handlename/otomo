@@ -9,6 +9,7 @@ import (
 	"github.com/handlename/otomo/internal/domain/event"
 	"github.com/handlename/otomo/internal/infra/repository"
 	"github.com/handlename/otomo/internal/infra/service"
+	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -18,10 +19,8 @@ func Test_Reply_Run(t *testing.T) {
 
 	// Arrange
 
-	mockBrain := &service.MockBrain{
-		BaseBrain: *entity.NewBaseBrain(),
-	}
-	mockOtomo := entity.NewOtomo(mockBrain)
+	mockBrain := &service.MockBrain{}
+	mockOtomo := lo.Must(entity.NewOtomo(mockBrain))
 	mockMessenger := &service.MockMessenger{}
 	mockInstructionRepo := &repository.MockInstructionRepository{}
 	uc := NewReply(mockOtomo, mockMessenger, mockInstructionRepo)
@@ -61,13 +60,12 @@ func Test_Reply_Run_Error(t *testing.T) {
 	// Create mock brain with error
 	mockError := assert.AnError
 	mockBrain := &service.MockBrain{
-		BaseBrain: *entity.NewBaseBrain(),
 		ThinkFunc: func(ctx context.Context, ectx entity.Context, instruction *entity.Instruction) (*entity.Answer, error) {
 			return nil, mockError
 		},
 	}
 
-	mockOtomo := entity.NewOtomo(mockBrain)
+	mockOtomo := lo.Must(entity.NewOtomo(mockBrain))
 	mockMessenger := &service.MockMessenger{}
 	mockInstructionRepo := &repository.MockInstructionRepository{}
 	uc := NewReply(mockOtomo, mockMessenger, mockInstructionRepo)
