@@ -53,7 +53,16 @@ func NewOtomo(brain Brain) (*otomo, error) {
 }
 
 func (o *otomo) Think(ctx context.Context, context Context, instruction *Instruction) (*Reply, error) {
-	ans, err := o.brain.Think(ctx, context, instruction)
+	var prompt strings.Builder
+	if err := o.basePrompt.Execute(&prompt, map[string]any{
+		"UserPrompt": instruction.Body(),
+	}); err != nil {
+		return nil, errors.Wrap(err, "failed to execute base prompt")
+	}
+
+	ins := NewInstruction(instruction.ID(), prompt.String())
+
+	ans, err := o.brain.Think(ctx, context, ins)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to think")
 	}
