@@ -3,7 +3,7 @@ module github.com/handlename/otomo
 go 1.24
 
 require (
-	github.com/alecthomas/kong v1.9.0
+	github.com/alecthomas/kong v1.10.0
 	github.com/aws/aws-sdk-go-v2 v1.36.3
 	github.com/aws/aws-sdk-go-v2/config v1.29.14
 	github.com/aws/aws-sdk-go-v2/service/bedrockruntime v1.30.0
@@ -11,11 +11,11 @@ require (
 	github.com/go-playground/validator/v10 v10.26.0
 	github.com/google/uuid v1.6.0
 	github.com/kayac/go-config v0.7.0
-	github.com/mackee/tanukirpc v0.5.3
+	github.com/mackee/tanukirpc v0.6.1
 	github.com/morikuni/failure/v2 v2.0.0-20240419002657-2551069d1c86
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.34.0
-	github.com/samber/lo v1.49.1
+	github.com/samber/lo v1.50.0
 	github.com/slack-go/slack v0.16.0
 	github.com/stretchr/testify v1.10.0
 )
