@@ -9,7 +9,7 @@ func (s *Session) Context() Context { return s.context }
 
 func NewSession() *Session {
 	return &Session{
-		context: Context{},
+		context: nil,
 	}
 }
 
