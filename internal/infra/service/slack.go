@@ -3,8 +3,11 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
+	"strings"
 
+	"github.com/handlename/otomo/config"
 	"github.com/handlename/otomo/internal/app/service"
 	"github.com/handlename/otomo/internal/domain/entity"
 	"github.com/handlename/otomo/internal/errorcode"
@@ -79,7 +82,10 @@ func (s *Slack) FetchThread(ctx context.Context, channelID string, threadID stri
 		}
 
 		t.AddMessages(lo.Map(msgs, func(m slack.Message, _ int) entity.ThreadMessage {
-			return entity.NewThreadMessage(entity.ThreadMessageID(m.Timestamp), m.Text)
+			body := m.Text
+			body = strings.TrimSpace(body)
+			body = strings.TrimPrefix(body, fmt.Sprintf("<%s>", config.Config.Slack.BotUserID))
+			return entity.NewThreadMessage(entity.ThreadMessageID(m.Timestamp), m.User, body)
 		})...)
 	}
 

@@ -2,6 +2,7 @@ package entity
 
 import (
 	"context"
+	"fmt"
 
 	vo "github.com/handlename/otomo/internal/domain/valueobject"
 	"github.com/samber/lo"
@@ -56,7 +57,8 @@ func (c *ct) Prompt() vo.Prompt {
 		[]vo.Prompt{
 			c.systemPrompt,
 			vo.NewPrompt("thread", "", lo.Map(c.thread.Messages(), func(msg ThreadMessage, _ int) vo.Prompt {
-				return vo.NewPrompt("message", msg.Body(), nil)
+				tag := vo.PromptTag(fmt.Sprintf("message user=%s", msg.User()))
+				return vo.NewPrompt(tag, msg.Body(), nil)
 			})),
 			c.userPrompt,
 		},

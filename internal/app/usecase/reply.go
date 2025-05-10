@@ -42,9 +42,9 @@ func (r *Reply) Run(ctx context.Context, input ReplyInput) (*ReplyOutput, error)
 		return nil, failure.Wrap(err)
 	}
 	thread.Messages()
-	log.Debug().Strs("thread", lo.Map(thread.Messages(), func(m entity.ThreadMessage, _ int) string {
-		return m.Body()
-	}))
+	log.Debug().Strs("messages", lo.Map(thread.Messages(), func(m entity.ThreadMessage, _ int) string {
+		return m.String()
+	})).Msg("fetched thread")
 	c.SetThread(thread)
 
 	rep, err := r.otomo.Think(ctx, c)

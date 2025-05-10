@@ -21,35 +21,35 @@ func Test_Thread_MessagesOrdered(t *testing.T) {
 		{
 			name: "orderd input",
 			input: []entity.ThreadMessage{
-				entity.NewThreadMessage(entity.ThreadMessageID("1"), "mes1"),
-				entity.NewThreadMessage(entity.ThreadMessageID("2"), "mes2"),
+				entity.NewThreadMessage(entity.ThreadMessageID("1"), "alice", "mes1"),
+				entity.NewThreadMessage(entity.ThreadMessageID("2"), "bob", "mes2"),
 			},
 			expected: []entity.ThreadMessage{
-				entity.NewThreadMessage(entity.ThreadMessageID("1"), "mes1"),
-				entity.NewThreadMessage(entity.ThreadMessageID("2"), "mes2"),
+				entity.NewThreadMessage(entity.ThreadMessageID("1"), "alice", "mes1"),
+				entity.NewThreadMessage(entity.ThreadMessageID("2"), "bob", "mes2"),
 			},
 		},
 		{
 			name: "unordered input",
 			input: []entity.ThreadMessage{
-				entity.NewThreadMessage(entity.ThreadMessageID("2"), "mes2"),
-				entity.NewThreadMessage(entity.ThreadMessageID("1"), "mes1"),
+				entity.NewThreadMessage(entity.ThreadMessageID("2"), "bob", "mes2"),
+				entity.NewThreadMessage(entity.ThreadMessageID("1"), "alice", "mes1"),
 			},
 			expected: []entity.ThreadMessage{
-				entity.NewThreadMessage(entity.ThreadMessageID("1"), "mes1"),
-				entity.NewThreadMessage(entity.ThreadMessageID("2"), "mes2"),
+				entity.NewThreadMessage(entity.ThreadMessageID("1"), "alice", "mes1"),
+				entity.NewThreadMessage(entity.ThreadMessageID("2"), "bob", "mes2"),
 			},
 		},
 		{
 			name: "duplicated input",
 			input: []entity.ThreadMessage{
-				entity.NewThreadMessage(entity.ThreadMessageID("1"), "mes1"),
-				entity.NewThreadMessage(entity.ThreadMessageID("1"), "mes1"),
-				entity.NewThreadMessage(entity.ThreadMessageID("2"), "mes2"),
+				entity.NewThreadMessage(entity.ThreadMessageID("1"), "alice", "mes1"),
+				entity.NewThreadMessage(entity.ThreadMessageID("1"), "alice", "mes1"),
+				entity.NewThreadMessage(entity.ThreadMessageID("2"), "bob", "mes2"),
 			},
 			expected: []entity.ThreadMessage{
-				entity.NewThreadMessage(entity.ThreadMessageID("1"), "mes1"),
-				entity.NewThreadMessage(entity.ThreadMessageID("2"), "mes2"),
+				entity.NewThreadMessage(entity.ThreadMessageID("1"), "alice", "mes1"),
+				entity.NewThreadMessage(entity.ThreadMessageID("2"), "bob", "mes2"),
 			},
 		},
 	}
