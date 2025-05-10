@@ -6,7 +6,6 @@ import (
 	"github.com/handlename/otomo/config"
 	"github.com/handlename/otomo/internal/domain/entity"
 	drepo "github.com/handlename/otomo/internal/domain/repository"
-	vo "github.com/handlename/otomo/internal/domain/valueobject"
 	"github.com/handlename/otomo/internal/infra/service"
 	"github.com/morikuni/failure/v2"
 )
@@ -40,8 +39,8 @@ type generalBrain struct {
 }
 
 // Think implements entity.Brain.
-func (g *generalBrain) Think(ctx context.Context, context entity.Context, prompt vo.Prompt) (*entity.Answer, error) {
-	res, err := g.client.Invoke(ctx, prompt.String())
+func (g *generalBrain) Think(ctx context.Context, c entity.Context) (*entity.Answer, error) {
+	res, err := g.client.Invoke(ctx, c.Prompt().String())
 	if err != nil {
 		return nil, failure.Wrap(err, failure.Message("failed to invoke bedrock"))
 	}

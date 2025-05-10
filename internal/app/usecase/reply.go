@@ -10,7 +10,6 @@ import (
 	"github.com/handlename/otomo/internal/domain/entity"
 	"github.com/handlename/otomo/internal/domain/event"
 	vo "github.com/handlename/otomo/internal/domain/valueobject"
-	"github.com/handlename/otomo/internal/infra/repository"
 	"github.com/morikuni/failure/v2"
 	"github.com/rs/zerolog/log"
 )
@@ -34,10 +33,11 @@ func NewReply(otomo entity.Otomo, slack service.Messenger) *Reply {
 }
 
 func (r *Reply) Run(ctx context.Context, input ReplyInput) (*ReplyOutput, error) {
-	c := repository.SlackContext{}.New()
-	// TODO: calls sctx.AddRefresher()
+	c := entity.NewContext()
+	// TODO: c.SetThread()
+	c.SetUserPrompt(input.EventData.RawInstruction)
 
-	rep, err := r.otomo.Think(ctx, c, r.buildPrompt(input.EventData.RawInstruction))
+	rep, err := r.otomo.Think(ctx, c)
 	if err != nil {
 		return nil, failure.Wrap(err)
 	}

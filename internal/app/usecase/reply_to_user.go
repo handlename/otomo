@@ -6,9 +6,7 @@ import (
 	"github.com/handlename/otomo/internal/app/service"
 	"github.com/handlename/otomo/internal/domain/entity"
 	repo "github.com/handlename/otomo/internal/domain/repository"
-	vo "github.com/handlename/otomo/internal/domain/valueobject"
 	"github.com/handlename/otomo/internal/errorcode"
-	"github.com/handlename/otomo/internal/infra/repository"
 	"github.com/morikuni/failure/v2"
 )
 
@@ -17,11 +15,11 @@ type ReplyToUser struct {
 	messenger   service.Messenger
 }
 
-func (u *ReplyToUser) Run(ctx context.Context, otomo entity.Otomo, prompt vo.Prompt) error {
-	sctx := repository.SlackContext{}.New()
-	// TODO: calls sctx.AddRefresher()
+func (u *ReplyToUser) Run(ctx context.Context, otomo entity.Otomo, userPrompt string) error {
+	c := entity.NewContext()
+	c.SetUserPrompt(userPrompt)
 
-	rep, err := otomo.Think(ctx, sctx, prompt)
+	rep, err := otomo.Think(ctx, c)
 	if err != nil {
 		return failure.Wrap(err,
 			failure.WithCode(errorcode.ErrInternal),

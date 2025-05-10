@@ -60,7 +60,7 @@ func Test_Reply_Run_Error(t *testing.T) {
 	// Create mock brain with error
 	mockError := assert.AnError
 	mockBrain := &service.MockBrain{
-		ThinkFunc: func(ctx context.Context, ectx entity.Context, prompt vo.Prompt) (*entity.Answer, error) {
+		ThinkFunc: func(ctx context.Context, c entity.Context) (*entity.Answer, error) {
 			return nil, mockError
 		},
 	}

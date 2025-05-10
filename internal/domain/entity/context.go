@@ -1,43 +1,69 @@
 package entity
 
-import "context"
+import (
+	"context"
+
+	vo "github.com/handlename/otomo/internal/domain/valueobject"
+	"github.com/samber/lo"
+)
 
 type Context interface {
-	// AddRefresher adds function to refresh items.
-	AddRefresher(ContextRefresher)
+	SetThread(Thread)
+	SetSystemPrompt(string)
+	SetUserPrompt(string)
+	GetUserPrompt() vo.Prompt
 
-	// Refresh rereshes its context items.
-	Refresh(context.Context) error
-
-	// Items returns slice of ContextItem.
-	// If Refresh() is not called, Items may return empty slice.
-	Items() []ContextItem
+	// Prompt returns all of data in context as valueobject.Prompt
+	Prompt() vo.Prompt
 }
 
-type ContextRefresher func(context.Context) error
+type ContextRefresher func(context.Context, Context) error
 
-type ContextItem interface {
-	// Text returns itself as string.
-	Text() string
+func NewContext() Context {
+	return &ct{
+		systemPrompt: vo.NewPrompt("", "", []vo.Prompt{}),
+		userPrompt:   vo.NewPrompt("", "", []vo.Prompt{}),
+		thread:       NewThread(ThreadID("")),
+	}
 }
 
-// var _ Context = (*Context2)(nil)
+type ct struct {
+	systemPrompt vo.Prompt
+	userPrompt   vo.Prompt
+	thread       Thread
+}
 
-// // Context2 is contextual knowledge linked to a Session used by Otomo when interpreting Instructions.
-// type Context2 struct {
-// }
+// GetUserPrompt implements Context.
+func (c *ct) GetUserPrompt() vo.Prompt {
+	return c.userPrompt
+}
 
-// // AddRefresher implements Context.
-// func (c *Context2) AddRefresher(ContextRefresher) {
-// 	panic("unimplemented")
-// }
+// SetSystemPrompt implements Context.
+func (c *ct) SetSystemPrompt(body string) {
+	c.systemPrompt = vo.NewPrompt(vo.PromptTagSystem, body, []vo.Prompt{})
+}
 
-// // Refresh implements Context.
-// func (c *Context2) Refresh(context.Context) error {
-// 	panic("unimplemented")
-// }
+// SetUserPrompt implements Context.
+func (c *ct) SetUserPrompt(body string) {
+	c.userPrompt = vo.NewPrompt(vo.PromptTagUser, body, []vo.Prompt{})
+}
 
-// // Items implements Context.
-// func (c *Context2) Items() []ContextItem {
-// 	panic("unimplemented")
-// }
+// Prompt implements Context.
+func (c *ct) Prompt() vo.Prompt {
+	return vo.NewPrompt(
+		"",
+		"", // TODO
+		[]vo.Prompt{
+			c.systemPrompt,
+			vo.NewPrompt("thread", "", lo.Map(c.thread.Messages(), func(msg ThreadMessage, _ int) vo.Prompt {
+				return vo.NewPrompt("message", msg.Body(), nil)
+			})),
+			c.userPrompt,
+		},
+	)
+}
+
+// SetThread implements Context.
+func (c *ct) SetThread(thread Thread) {
+	c.thread = thread
+}

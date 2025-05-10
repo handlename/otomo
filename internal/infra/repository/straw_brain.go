@@ -6,7 +6,6 @@ import (
 
 	"github.com/handlename/otomo/internal/domain/entity"
 	drepo "github.com/handlename/otomo/internal/domain/repository"
-	vo "github.com/handlename/otomo/internal/domain/valueobject"
 )
 
 type StrawBrain struct{}
@@ -25,7 +24,7 @@ var _ entity.Brain = (*strawBrain)(nil)
 type strawBrain struct{}
 
 // Think implements entity.Brain.
-func (g *strawBrain) Think(_ context.Context, _ entity.Context, prompt vo.Prompt) (*entity.Answer, error) {
-	ans := entity.NewAnswer(fmt.Sprintf(`Did you say "%s" ?`, prompt))
+func (g *strawBrain) Think(_ context.Context, c entity.Context) (*entity.Answer, error) {
+	ans := entity.NewAnswer(fmt.Sprintf(`Did you say "%s" ?`, c.GetUserPrompt().String()))
 	return ans, nil
 }

@@ -9,15 +9,30 @@ import (
 
 type PromptTag string
 
+const (
+	PromptTagSystem PromptTag = "system_instruction"
+	PromptTagUser   PromptTag = "user_question"
+)
+
 type Prompt interface {
 	Tag() PromptTag
 	String() string
+	Clone() Prompt
 }
 
 type prompt struct {
 	tag      PromptTag
 	body     string
 	children []Prompt
+}
+
+// Clone implements Prompt.
+func (p *prompt) Clone() Prompt {
+	return &prompt{
+		tag:      p.tag,
+		body:     p.body,
+		children: p.children,
+	}
 }
 
 // Tag implements Prompt.
