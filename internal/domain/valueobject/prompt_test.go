@@ -23,27 +23,27 @@ func Test_Prompt_String(t *testing.T) {
 			prompt: vo.NewPromptWithChildren(
 				nil,
 				[]vo.Prompt{
-					vo.NewPlainPrompt(nil, "plain0-1"),
+					vo.NewPlainPrompt("plain0-1"),
 					vo.NewPromptWithChildren(
-						vo.NewTaggedPrompt(nil, "tag1"),
+						vo.NewTaggedPrompt("tag1"),
 						[]vo.Prompt{
-							vo.NewPlainPrompt(nil, "plain1-1"),
+							vo.NewPlainPrompt("plain1-1"),
 						},
 					),
 					vo.NewPromptWithChildren(
-						vo.NewTaggedPrompt(nil, "tag2"),
+						vo.NewTaggedPrompt("tag2"),
 						[]vo.Prompt{
-							vo.NewPlainPrompt(nil, "plain2-1"),
-							vo.NewPlainPrompt(nil, "plain2-2"),
+							vo.NewPlainPrompt("plain2-1"),
+							vo.NewPlainPrompt("plain2-2"),
 							vo.NewPromptWithChildren(
-								vo.NewTaggedPrompt(nil, "tag2-1"),
+								vo.NewTaggedPrompt("tag2-1"),
 								[]vo.Prompt{
-									vo.NewPlainPrompt(nil, "plain2-1-1"),
+									vo.NewPlainPrompt("plain2-1-1"),
 								},
 							),
 						},
 					),
-					vo.NewPlainPrompt(nil, "plain0-2"),
+					vo.NewPlainPrompt("plain0-2"),
 				},
 			),
 			expected: `plain0-1
