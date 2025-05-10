@@ -26,7 +26,8 @@ type Thread interface {
 
 func NewThread(id ThreadID) Thread {
 	return &thread{
-		id: id,
+		id:       id,
+		messages: []ThreadMessage{},
 	}
 }
 

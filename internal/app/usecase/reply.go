@@ -12,6 +12,7 @@ import (
 	vo "github.com/handlename/otomo/internal/domain/valueobject"
 	"github.com/morikuni/failure/v2"
 	"github.com/rs/zerolog/log"
+	"github.com/samber/lo"
 )
 
 type ReplyInput struct {
@@ -34,8 +35,17 @@ func NewReply(otomo entity.Otomo, slack service.Messenger) *Reply {
 
 func (r *Reply) Run(ctx context.Context, input ReplyInput) (*ReplyOutput, error) {
 	c := entity.NewContext()
-	// TODO: c.SetThread()
 	c.SetUserPrompt(input.EventData.RawInstruction)
+
+	thread, err := r.slack.FetchThread(ctx, input.EventData.ChannelID, input.EventData.ThreadID)
+	if err != nil {
+		return nil, failure.Wrap(err)
+	}
+	thread.Messages()
+	log.Debug().Strs("thread", lo.Map(thread.Messages(), func(m entity.ThreadMessage, _ int) string {
+		return m.Body()
+	}))
+	c.SetThread(thread)
 
 	rep, err := r.otomo.Think(ctx, c)
 	if err != nil {

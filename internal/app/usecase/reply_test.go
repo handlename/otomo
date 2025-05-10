@@ -22,7 +22,11 @@ func Test_Reply_Run(t *testing.T) {
 
 	mockBrain := &service.MockBrain{}
 	mockOtomo := lo.Must(entity.NewOtomo(mockBrain))
-	mockMessenger := &service.MockMessenger{}
+	mockMessenger := &service.MockMessenger{
+		FetchThreadFunc: func(ctx context.Context, channelID string, threadID string) (entity.Thread, error) {
+			return entity.NewThread(""), nil
+		},
+	}
 	uc := NewReply(mockOtomo, mockMessenger)
 
 	// Act
