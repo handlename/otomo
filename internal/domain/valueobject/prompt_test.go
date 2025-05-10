@@ -15,28 +15,32 @@ func Test_Prompt_String(t *testing.T) {
 	}{
 		{
 			name:     "empty prompt",
-			prompt:   vo.NewPromptWithChildren(nil, []vo.Prompt{}),
+			prompt:   vo.NewPrompt("", "", []vo.Prompt{}),
 			expected: "",
 		},
 		{
 			name: "complex prompt",
-			prompt: vo.NewPromptWithChildren(
-				nil,
+			prompt: vo.NewPrompt(
+				"",
+				"",
 				[]vo.Prompt{
 					vo.NewPlainPrompt("plain0-1"),
-					vo.NewPromptWithChildren(
-						vo.NewTaggedPrompt("tag1"),
+					vo.NewPrompt(
+						"tag1",
+						"",
 						[]vo.Prompt{
 							vo.NewPlainPrompt("plain1-1"),
 						},
 					),
-					vo.NewPromptWithChildren(
-						vo.NewTaggedPrompt("tag2"),
+					vo.NewPrompt(
+						"tag2",
+						"",
 						[]vo.Prompt{
 							vo.NewPlainPrompt("plain2-1"),
 							vo.NewPlainPrompt("plain2-2"),
-							vo.NewPromptWithChildren(
-								vo.NewTaggedPrompt("tag2-1"),
+							vo.NewPrompt(
+								"tag2-1",
+								"",
 								[]vo.Prompt{
 									vo.NewPlainPrompt("plain2-1-1"),
 								},

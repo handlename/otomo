@@ -61,7 +61,7 @@ func (o *otomo) Think(ctx context.Context, context Context, prompt vo.Prompt) (*
 		return nil, errors.Wrap(err, "failed to execute base prompt")
 	}
 
-	ans, err := o.brain.Think(ctx, context, vo.NewPlainPrompt(nil, buf.String()))
+	ans, err := o.brain.Think(ctx, context, vo.NewPlainPrompt(buf.String()))
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to think")
 	}

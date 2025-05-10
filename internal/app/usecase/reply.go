@@ -34,7 +34,7 @@ func NewReply(otomo entity.Otomo, slack service.Messenger) *Reply {
 }
 
 func (r *Reply) Run(ctx context.Context, input ReplyInput) (*ReplyOutput, error) {
-	sctx := repository.SlackContext{}.New()
+	c := repository.SlackContext{}.New()
 	// TODO: calls sctx.AddRefresher()
 
 	rep, err := r.otomo.Think(ctx, c, r.buildPrompt(input.EventData.RawInstruction))
@@ -65,5 +65,5 @@ func (r *Reply) Subscribe(publisher event.Publisher) {
 func (r *Reply) buildPrompt(raw string) vo.Prompt {
 	raw = strings.TrimSpace(raw)
 	raw = strings.TrimPrefix(raw, fmt.Sprintf("<%s>", config.Config.Slack.BotUserID))
-	return vo.NewPlainPrompt(nil, raw)
+	return vo.NewPlainPrompt(raw)
 }

@@ -47,28 +47,14 @@ func (p *prompt) String() string {
 	return buf.String()
 }
 
-func NewPromptWithChildren(parent Prompt, children []Prompt) Prompt {
-	if parent == nil {
-		parent = NewPrompt("", "")
-	}
-
-	return &prompt{
-		tag:      parent.Tag(),
-		children: children,
-	}
-}
-
-func NewTaggedPrompt(tag PromptTag) Prompt {
-	return NewPrompt(tag, "")
-}
-
 func NewPlainPrompt(body string) Prompt {
-	return NewPrompt("", body)
+	return NewPrompt("", body, nil)
 }
 
-func NewPrompt(tag PromptTag, body string) Prompt {
+func NewPrompt(tag PromptTag, body string, children []Prompt) Prompt {
 	return &prompt{
-		tag:  tag,
-		body: body,
+		tag:      tag,
+		body:     body,
+		children: children,
 	}
 }
