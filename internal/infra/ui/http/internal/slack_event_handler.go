@@ -30,7 +30,7 @@ func slackEventHandler(ctx tanukirpc.Context[*registry], req *slackEventRequest)
 	}
 
 	uc := usecase.NewReplyToUser(ctx.Registry().RepoSession, ctx.Registry().Slack)
-	if err := uc.Run(ctx, otomo, valueobject.Prompt(req.Message)); err != nil {
+	if err := uc.Run(ctx, otomo, valueobject.NewPlainPrompt(nil, req.Message)); err != nil {
 		return nil, tanukirpc.WrapErrorWithStatus(http.StatusInternalServerError, err)
 	}
 

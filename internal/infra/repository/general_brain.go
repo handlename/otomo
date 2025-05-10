@@ -41,7 +41,7 @@ type generalBrain struct {
 
 // Think implements entity.Brain.
 func (g *generalBrain) Think(ctx context.Context, context entity.Context, prompt vo.Prompt) (*entity.Answer, error) {
-	res, err := g.client.Invoke(ctx, string(prompt))
+	res, err := g.client.Invoke(ctx, prompt.String())
 	if err != nil {
 		return nil, failure.Wrap(err, failure.Message("failed to invoke bedrock"))
 	}

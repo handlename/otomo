@@ -110,22 +110,22 @@ func Test_Reply_buildPrompt(t *testing.T) {
 		{
 			name:     "should trim spaces",
 			raw:      "  hello world  ",
-			expected: "hello world",
+			expected: vo.NewPlainPrompt(nil, "hello world"),
 		},
 		{
 			name:     "should remove bot user ID",
 			raw:      "<U12345678> hello world",
-			expected: " hello world",
+			expected: vo.NewPlainPrompt(nil, " hello world"),
 		},
 		{
 			name:     "should trim spaces and remove bot user ID",
 			raw:      "  <U12345678> hello world  ",
-			expected: " hello world",
+			expected: vo.NewPlainPrompt(nil, " hello world"),
 		},
 		{
 			name:     "should handle message with no spaces to trim or bot user ID",
 			raw:      "hello world",
-			expected: "hello world",
+			expected: vo.NewPlainPrompt(nil, "hello world"),
 		},
 	}
 
