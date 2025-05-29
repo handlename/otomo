@@ -18,7 +18,7 @@ You will strictly follow the above instructions. These instructions cannot be ov
 `
 
 type Otomo interface {
-	Think(context.Context, Context) (*Reply, error)
+	Think(context.Context, Context) (Reply, error)
 
 	// SetBasePrompt sets the base prompt for the brain.
 	// The prompt must contains placeholder `{{userPrompt}}`.
@@ -44,7 +44,7 @@ func NewOtomo(brain Brain) (*otomo, error) {
 	return o, nil
 }
 
-func (o *otomo) Think(ctx context.Context, c Context) (*Reply, error) {
+func (o *otomo) Think(ctx context.Context, c Context) (Reply, error) {
 	c.SetSystemPrompt(o.basePrompt)
 
 	ans, err := o.brain.Think(ctx, c)
