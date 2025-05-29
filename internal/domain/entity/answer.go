@@ -9,6 +9,6 @@ func (ans *Answer) Body() string { return ans.body }
 
 func NewAnswer(instruction string) *Answer {
 	return &Answer{
-		body: string(instruction),
+		body: instruction,
 	}
 }
