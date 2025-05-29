@@ -6,6 +6,6 @@ import (
 )
 
 type Session interface {
-	Restore(vo.SessionID) (*entity.Session, error)
-	Save(*entity.Session) error
+	Restore(vo.SessionID) (entity.Session, error)
+	Save(entity.Session) error
 }

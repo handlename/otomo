@@ -9,11 +9,11 @@ import (
 var _ drepo.Session = (*VolatileSession)(nil)
 
 type VolatileSession struct {
-	session *entity.Session
+	session entity.Session
 }
 
 // Restore implements repository.Session.
-func (v *VolatileSession) Restore(valueobject.SessionID) (*entity.Session, error) {
+func (v *VolatileSession) Restore(valueobject.SessionID) (entity.Session, error) {
 	if v.session == nil {
 		v.session = entity.NewSession()
 	}
@@ -22,7 +22,7 @@ func (v *VolatileSession) Restore(valueobject.SessionID) (*entity.Session, error
 }
 
 // Save implements repository.Session.
-func (v *VolatileSession) Save(sess *entity.Session) error {
+func (v *VolatileSession) Save(sess entity.Session) error {
 	v.session = sess
 	return nil
 }
