@@ -1,18 +1,16 @@
 # otomo
 
-otomo is ...
+otomo is a Slack bot powered by gen-AI.
 
-## Synopsis
+## Abilities
 
-```console
-$ otomo ...
-```
+- Respond to mentions
+- Summarize thread
+- ...
 
 ## Installation
 
-```console
-$ brew install handlename/tap/otomo
-```
+TBD
 
 ## Lisence
 
