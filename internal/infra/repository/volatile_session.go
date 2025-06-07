@@ -3,7 +3,6 @@ package repository
 import (
 	"github.com/handlename/otomo/internal/domain/entity"
 	drepo "github.com/handlename/otomo/internal/domain/repository"
-	"github.com/handlename/otomo/internal/domain/valueobject"
 )
 
 var _ drepo.Session = (*VolatileSession)(nil)
@@ -13,7 +12,7 @@ type VolatileSession struct {
 }
 
 // Restore implements repository.Session.
-func (v *VolatileSession) Restore(valueobject.SessionID) (entity.Session, error) {
+func (v *VolatileSession) Restore(entity.SessionID) (entity.Session, error) {
 	if v.session == nil {
 		v.session = entity.NewSession()
 	}

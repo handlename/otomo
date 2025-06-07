@@ -1,5 +1,7 @@
 package entity
 
+type SessionID string
+
 // Session represents a series of exchanges between User(s) and an Otomo.
 type Session interface {
 	UpdateContext(Context)
