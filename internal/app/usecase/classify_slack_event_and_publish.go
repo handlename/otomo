@@ -89,13 +89,17 @@ func (u *ClassifySlackEventAndPublish) handleCallbackEvent(_ context.Context, in
 			)
 		}
 
-		return event.Event(event.NewInstructionReceived(event.InstructionReceivedData{
+		ev, err := event.NewInstructionReceived(event.InstructionReceivedData{
 			ChannelID:      iev.Channel,
 			MessageID:      iev.EventTimeStamp,
 			ThreadID:       iev.ThreadTimeStamp,
 			RawInstruction: iev.Text,
 			SentAt:         *sentAt,
-		})), nil
+		})
+		if err != nil {
+			return nil, failure.Wrap(err)
+		}
+		return event.Event(ev), nil
 	default:
 		return nil, failure.New(
 			"failed to assert Slack inner event",
