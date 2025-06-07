@@ -29,6 +29,7 @@ func New(ctx context.Context, prefix string) http.Handler {
 		middleware.NewSlackRetryIgnorere(),
 		middleware.NewSlackEventVerifier(slack),
 		middleware.NewAccesslog(),
+		middleware.NewRecover(),
 	}
 
 	mux := http.NewServeMux()
