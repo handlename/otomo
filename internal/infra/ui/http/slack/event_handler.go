@@ -49,6 +49,10 @@ func eventHandler(w http.ResponseWriter, r *http.Request) {
 		Event:   event,
 		RawBody: body,
 	})
+	if err != nil {
+		// TODO: write error
+		panic(err)
+	}
 
 	res, err := json.Marshal(out)
 	if err != nil {
