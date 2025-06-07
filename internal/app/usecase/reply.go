@@ -37,15 +37,16 @@ func (r *Reply) Run(ctx context.Context, input ReplyInput) (*ReplyOutput, error)
 	c := entity.NewContext()
 	c.SetUserPrompt(input.EventData.RawInstruction)
 
-	thread, err := r.slack.FetchThread(ctx, input.EventData.ChannelID, input.EventData.ThreadID)
-	if err != nil {
-		return nil, failure.Wrap(err)
+	if input.EventData.ThreadID != "" {
+		thread, err := r.slack.FetchThread(ctx, input.EventData.ChannelID, input.EventData.ThreadID)
+		if err != nil {
+			return nil, failure.Wrap(err)
+		}
+		log.Debug().Strs("messages", lo.Map(thread.Messages(), func(m entity.ThreadMessage, _ int) string {
+			return m.String()
+		})).Msg("fetched thread")
+		c.SetThread(thread)
 	}
-	thread.Messages()
-	log.Debug().Strs("messages", lo.Map(thread.Messages(), func(m entity.ThreadMessage, _ int) string {
-		return m.String()
-	})).Msg("fetched thread")
-	c.SetThread(thread)
 
 	rep, err := r.otomo.Think(ctx, c)
 	if err != nil {
