@@ -18,12 +18,7 @@ type slackEventResponse struct {
 }
 
 func slackEventHandler(ctx tanukirpc.Context[*registry], req *slackEventRequest) (*slackEventResponse, error)  {
-	brain, err := ctx.Registry().RepoBrain.New(ctx)
-	if err != nil {
-		return nil, tanukirpc.WrapErrorWithStatus(http.StatusInternalServerError, err)
-	}
-
-	otomo , err := entity.NewOtomo(brain)
+	otomo , err := entity.NewOtomo(ctx.Registry().Brain)
 	if err != nil {
 		return nil, tanukirpc.WrapErrorWithStatus(http.StatusInternalServerError, err)
 	}
