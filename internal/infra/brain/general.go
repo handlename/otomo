@@ -1,45 +1,35 @@
-package repository
+package brain
 
 import (
 	"context"
 
 	"github.com/handlename/otomo/config"
 	"github.com/handlename/otomo/internal/domain/entity"
-	drepo "github.com/handlename/otomo/internal/domain/repository"
 	"github.com/handlename/otomo/internal/infra/service"
 	"github.com/morikuni/failure/v2"
 )
 
-var _ drepo.Brain = (*GeneralBrain)(nil)
+var _ entity.BrainThinker = (*General)(nil)
 
-type GeneralBrain struct{}
+type General struct {
+	client *service.Bedrock
+}
 
-// New implements repository.Brain.
-func (g *GeneralBrain) New(ctx context.Context) (entity.Brain, error) {
+func NewGeneral(ctx context.Context) (entity.BrainThinker, error) {
 	client, err := service.NewBedrock(ctx, config.Config.Bedrock.ModelID)
 	if err != nil {
 		return nil, failure.Wrap(err, failure.Message("failed to create bedrock client"))
 	}
 
-	brain := &generalBrain{
+	brain := &General{
 		client: client,
 	}
 
 	return brain, nil
 }
 
-func NewGeneralBrain(ctx context.Context) drepo.Brain {
-	return &GeneralBrain{}
-}
-
-var _ entity.Brain = (*generalBrain)(nil)
-
-type generalBrain struct {
-	client *service.Bedrock
-}
-
-// Think implements entity.Brain.
-func (g *generalBrain) Think(ctx context.Context, c entity.Context) (*entity.Answer, error) {
+// Think implements entity.BrainThinker.
+func (g *General) Think(ctx context.Context, c entity.Context) (*entity.Answer, error) {
 	res, err := g.client.Invoke(ctx, c.Prompt().String())
 	if err != nil {
 		return nil, failure.Wrap(err, failure.Message("failed to invoke bedrock"))

@@ -7,7 +7,7 @@ import (
 	"github.com/handlename/otomo/config"
 	"github.com/handlename/otomo/internal/app/usecase"
 	"github.com/handlename/otomo/internal/domain/entity"
-	"github.com/handlename/otomo/internal/infra/repository"
+	"github.com/handlename/otomo/internal/infra/brain"
 	"github.com/handlename/otomo/internal/infra/service"
 	"github.com/handlename/otomo/internal/infra/ui/http/middleware"
 	"github.com/samber/lo"
@@ -15,8 +15,8 @@ import (
 
 func New(ctx context.Context, prefix string) http.Handler {
 	slack := service.NewSlack(config.Config.Slack.BotToken, config.Config.Slack.SigningSecret)
-	repoBrain := repository.NewGeneralBrain(ctx)
-	brain := lo.Must(repoBrain.New(ctx))
+	brainThinker := lo.Must(brain.NewGeneral(ctx))
+	brain := entity.NewBrain(brainThinker)
 	otomo := lo.Must(entity.NewOtomo(brain))
 
 	publisher := service.NewEventPublisher()

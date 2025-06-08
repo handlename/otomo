@@ -9,6 +9,7 @@ import (
 	"github.com/handlename/otomo/internal/domain/entity"
 	"github.com/handlename/otomo/internal/domain/event"
 	vo "github.com/handlename/otomo/internal/domain/valueobject"
+	"github.com/handlename/otomo/internal/infra/brain"
 	"github.com/handlename/otomo/internal/infra/service"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
@@ -20,7 +21,11 @@ func Test_Reply_Run(t *testing.T) {
 
 	// Arrange
 
-	mockBrain := &service.MockBrain{}
+	mockBrain := entity.NewBrain(&brain.Mock{
+		ThinkFunc: func(context.Context, entity.Context) (*entity.Answer, error) {
+			return entity.NewAnswer("mock response"), nil
+		},
+	})
 	mockOtomo := lo.Must(entity.NewOtomo(mockBrain))
 	mockMessenger := &service.MockMessenger{
 		FetchThreadFunc: func(ctx context.Context, channelID string, threadID string) (entity.Thread, error) {
@@ -63,11 +68,11 @@ func Test_Reply_Run_Error(t *testing.T) {
 
 	// Create mock brain with error
 	mockError := assert.AnError
-	mockBrain := &service.MockBrain{
+	mockBrain := entity.NewBrain(&brain.Mock{
 		ThinkFunc: func(ctx context.Context, c entity.Context) (*entity.Answer, error) {
 			return nil, mockError
 		},
-	}
+	})
 
 	mockOtomo := lo.Must(entity.NewOtomo(mockBrain))
 	mockMessenger := &service.MockMessenger{}
