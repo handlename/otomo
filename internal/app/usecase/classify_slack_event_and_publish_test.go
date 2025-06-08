@@ -58,6 +58,7 @@ func Test_ClassifySlackEventAndPublish_handleAppMention(t *testing.T) {
 		InnerEvent: slackevents.EventsAPIInnerEvent{
 			Data: &slackevents.AppMentionEvent{
 				Text:            "hello, otomo!",
+				Channel:         "C1234",
 				ThreadTimeStamp: service.Time.UnixNanoToSlackID(now.UnixNano()),
 				EventTimeStamp:  service.Time.UnixNanoToSlackID(now.UnixNano()),
 				TimeStamp:       service.Time.UnixNanoToSlackID(now.UnixNano()),
