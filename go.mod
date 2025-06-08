@@ -7,7 +7,7 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.36.3
 	github.com/aws/aws-sdk-go-v2/config v1.29.14
 	github.com/aws/aws-sdk-go-v2/service/bedrockruntime v1.30.0
-	github.com/fujiwara/ridge v0.12.1
+	github.com/fujiwara/ridge v0.13.0
 	github.com/go-playground/validator/v10 v10.26.0
 	github.com/google/uuid v1.6.0
 	github.com/kayac/go-config v0.7.0
@@ -23,7 +23,7 @@ require (
 require (
 	github.com/BurntSushi/toml v1.3.0 // indirect
 	github.com/ajg/form v1.5.1 // indirect
-	github.com/aws/aws-lambda-go v1.47.0 // indirect
+	github.com/aws/aws-lambda-go v1.48.0 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.10 // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.67 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.30 // indirect
