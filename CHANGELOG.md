@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.0.2](https://github.com/handlename/otomo/compare/v0.0.1...v0.0.2) - 2025-06-14
+- Report test result by @handlename in https://github.com/handlename/otomo/pull/15
+- Fix release by goreleaser by @handlename in https://github.com/handlename/otomo/pull/17
+
 ## [v0.0.1](https://github.com/handlename/otomo/commits/v0.0.1) - 2025-06-14
 - chore(deps): bump github.com/aws/aws-sdk-go-v2/config from 1.29.9 to 1.29.12 by @dependabot in https://github.com/handlename/otomo/pull/3
 - chore(deps): bump github.com/rs/zerolog from 1.33.0 to 1.34.0 by @dependabot in https://github.com/handlename/otomo/pull/5
