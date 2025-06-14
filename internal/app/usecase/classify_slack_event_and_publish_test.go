@@ -94,5 +94,5 @@ func Test_ClassifySlackEventAndPublish_handleAppMention(t *testing.T) {
 	assert.Equal(t, service.Time.UnixNanoToSlackID(now.UnixNano()), data.MessageID)
 	assert.Equal(t, service.Time.UnixNanoToSlackID(now.UnixNano()), data.ThreadID)
 	assert.Equal(t, "hello, otomo!", data.RawInstruction)
-	assert.Equal(t, service.Time.UnixNanoToSeconds(now.UnixNano()), service.Time.UnixNanoToSeconds(data.SentAt.UnixNano()))
+	assert.Equal(t, now.Unix(), data.SentAt.Unix())
 }
