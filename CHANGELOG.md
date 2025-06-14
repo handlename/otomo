@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.0.3](https://github.com/handlename/otomo/compare/v0.0.2...v0.0.3) - 2025-06-14
+- Use format github-actions on Actions by @handlename in https://github.com/handlename/otomo/pull/18
+- Release only for linux by @handlename in https://github.com/handlename/otomo/pull/20
+
 ## [v0.0.2](https://github.com/handlename/otomo/compare/v0.0.1...v0.0.2) - 2025-06-14
 - Report test result by @handlename in https://github.com/handlename/otomo/pull/15
 - Fix release by goreleaser by @handlename in https://github.com/handlename/otomo/pull/17
