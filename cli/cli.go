@@ -31,7 +31,7 @@ func Run() ExitCode {
 		return ExitCodeError
 	}
 
-	otomo.InitLogger(root.LogLevel)
+	otomo.InitLogger(root.LogLevel, root.LogConsole)
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
