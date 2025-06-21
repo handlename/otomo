@@ -21,7 +21,6 @@ type Otomo interface {
 	Think(context.Context, Context) (Reply, error)
 
 	// SetSystemPrompt sets the base prompt for the brain.
-	// The prompt must contains placeholder `{{userPrompt}}`.
 	SetSystemPrompt(prompt string) error
 }
 
