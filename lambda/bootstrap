@@ -1,4 +1,7 @@
 #!/bin/sh
 
 cd $LAMBDA_TASK_ROOT
-./ssmwrap -env 'path=/otomo/*' -- ./app --log-level debug server
+./ssmwrap -env 'path=/otomo/*' -- \
+    ./app \
+    --log-level debug server \
+    --no-log-console

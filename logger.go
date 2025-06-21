@@ -1,6 +1,7 @@
 package otomo
 
 import (
+	"io"
 	"os"
 	"strings"
 	"time"
@@ -10,15 +11,10 @@ import (
 	"github.com/rs/zerolog/pkgerrors"
 )
 
-func InitLogger(level string) {
+func InitLogger(level string, console bool) {
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
-
-	log.Logger = log.Output(zerolog.ConsoleWriter{
-		Out:        os.Stderr,
-		TimeFormat: time.RFC3339,
-		NoColor:    !color,
-	})
+	log.Logger = log.Output(logWriter(console)).With().Caller().Logger()
 
 	switch strings.ToLower(level) {
 	case "trace":
@@ -37,4 +33,14 @@ func InitLogger(level string) {
 		// fallback to `info`
 		zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	}
+}
+
+func logWriter(console bool) io.Writer {
+	if console {
+		return zerolog.ConsoleWriter{
+			Out:        os.Stderr,
+			TimeFormat: time.RFC3339,
+		}
+	}
+	return os.Stderr
 }
