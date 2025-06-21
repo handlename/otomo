@@ -4,7 +4,7 @@ import (
 	"context"
 )
 
-const BrainBasePromptUserPromptPlaceholder = "{{userPrompt}}"
+const BrainSystemPromptUserPromptPlaceholder = "{{userPrompt}}"
 
 type Brain interface {
 	// Think returns the answer to the instruction.
