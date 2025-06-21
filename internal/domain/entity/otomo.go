@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/pkg/errors"
+	"github.com/rs/zerolog/log"
 )
 
 const DefaultSystemPrompt = `
@@ -54,4 +55,5 @@ func (o *otomo) Think(ctx context.Context, c Context) (Reply, error) {
 // SetSystemPrompt implements Otomo.
 func (o *otomo) SetSystemPrompt(prompt string) {
 	o.systemPrompt = prompt
+	log.Info().Str("prompt", prompt).Msg("system prompt loaded")
 }
