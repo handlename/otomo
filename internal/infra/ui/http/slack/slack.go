@@ -18,7 +18,7 @@ func New(ctx context.Context, prefix string) http.Handler {
 	brainThinker := lo.Must(brain.NewGeneral(ctx))
 	brain := entity.NewBrain(brainThinker)
 	otomo := entity.NewOtomo(brain)
-	otomo.SetSystemPrompt(config.Config.Bedrock.SystemPrompt)
+	otomo.SetSystemPrompt(config.Config.LLM.SystemPrompt)
 
 	publisher := service.NewEventPublisher()
 	usecase.NewAckInstruction(slack).Subscribe(publisher)

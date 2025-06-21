@@ -20,7 +20,7 @@ type slackEventResponse struct {
 
 func slackEventHandler(ctx tanukirpc.Context[*registry], req *slackEventRequest) (*slackEventResponse, error)  {
 	otomo:= entity.NewOtomo(ctx.Registry().Brain)
-	if p := config.Config.Bedrock.SystemPrompt; p != "" {
+	if p := config.Config.LLM.SystemPrompt; p != "" {
 		otomo.SetSystemPrompt(p)
 	}
 

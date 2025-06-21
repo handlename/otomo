@@ -16,7 +16,7 @@ type General struct {
 }
 
 func NewGeneral(ctx context.Context) (entity.BrainThinker, error) {
-	client, err := service.NewBedrock(ctx, config.Config.Bedrock.ModelID)
+	client, err := service.NewBedrock(ctx, config.Config.LLM.ModelID)
 	if err != nil {
 		return nil, failure.Wrap(err, failure.Message("failed to create bedrock client"))
 	}

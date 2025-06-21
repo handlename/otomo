@@ -9,9 +9,9 @@ import (
 var Config Root
 
 type Root struct {
-	Port    int     `validate:"required"`
-	Slack   Slack   `toml:"slack" validate:"required"`
-	Bedrock Bedrock `toml:"bedrock" validate:"required"`
+	Port  int   `validate:"required"`
+	Slack Slack `toml:"slack" validate:"required"`
+	LLM   LLM   `toml:"llm" validate:"required"`
 }
 
 type Slack struct {
@@ -21,7 +21,7 @@ type Slack struct {
 	AppToken      string `toml:"app_token" validate:"required"`
 }
 
-type Bedrock struct {
+type LLM struct {
 	ModelType    string `toml:"model_type" validate:"required"`
 	ModelID      string `toml:"model_id" validate:"required"`
 	SystemPrompt string `toml:"system_prompt"`
