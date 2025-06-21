@@ -17,15 +17,14 @@ func InitLogger(level string) {
 	log.Logger = log.Output(zerolog.ConsoleWriter{
 		Out:        os.Stderr,
 		TimeFormat: time.RFC3339,
+		NoColor:    !color,
 	})
 
 	switch strings.ToLower(level) {
 	case "trace":
 		zerolog.SetGlobalLevel(zerolog.TraceLevel)
-		log.Logger = log.With().Caller().Logger()
 	case "debug":
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-		log.Logger = log.With().Caller().Logger()
 	case "info":
 		zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	case "warn":
