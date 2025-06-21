@@ -3,6 +3,7 @@ package internal
 import (
 	"net/http"
 
+	"github.com/handlename/otomo/config"
 	"github.com/handlename/otomo/internal/app/usecase"
 	"github.com/handlename/otomo/internal/domain/entity"
 	"github.com/mackee/tanukirpc"
@@ -18,9 +19,9 @@ type slackEventResponse struct {
 }
 
 func slackEventHandler(ctx tanukirpc.Context[*registry], req *slackEventRequest) (*slackEventResponse, error)  {
-	otomo, err := entity.NewOtomo(ctx.Registry().Brain)
-	if err != nil {
-		return nil, tanukirpc.WrapErrorWithStatus(http.StatusInternalServerError, err)
+	otomo:= entity.NewOtomo(ctx.Registry().Brain)
+	if p := config.Config.LLM.SystemPrompt; p != "" {
+		otomo.SetSystemPrompt(p)
 	}
 
 	uc := usecase.NewReplyToUser(ctx.Registry().RepoSession, ctx.Registry().Slack)

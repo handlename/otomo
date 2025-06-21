@@ -11,7 +11,6 @@ import (
 	vo "github.com/handlename/otomo/internal/domain/valueobject"
 	"github.com/handlename/otomo/internal/infra/brain"
 	"github.com/handlename/otomo/internal/infra/service"
-	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -26,7 +25,7 @@ func Test_Reply_Run(t *testing.T) {
 			return entity.NewAnswer("mock response"), nil
 		},
 	})
-	mockOtomo := lo.Must(entity.NewOtomo(mockBrain))
+	mockOtomo := entity.NewOtomo(mockBrain)
 	mockMessenger := &service.MockMessenger{
 		FetchThreadFunc: func(ctx context.Context, channelID string, threadID string) (entity.Thread, error) {
 			return entity.NewThread(""), nil
@@ -74,7 +73,7 @@ func Test_Reply_Run_Error(t *testing.T) {
 		},
 	})
 
-	mockOtomo := lo.Must(entity.NewOtomo(mockBrain))
+	mockOtomo := (entity.NewOtomo(mockBrain))
 	mockMessenger := &service.MockMessenger{}
 	uc := NewReply(mockOtomo, mockMessenger)
 
