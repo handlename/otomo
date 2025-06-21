@@ -3,7 +3,6 @@ package entity
 import (
 	"context"
 
-	"github.com/morikuni/failure/v2"
 	"github.com/pkg/errors"
 )
 
@@ -21,7 +20,7 @@ type Otomo interface {
 	Think(context.Context, Context) (Reply, error)
 
 	// SetSystemPrompt sets the base prompt for the brain.
-	SetSystemPrompt(prompt string) error
+	SetSystemPrompt(prompt string)
 }
 
 var _ Otomo = (*otomo)(nil)
@@ -35,10 +34,7 @@ func NewOtomo(brain Brain) (*otomo, error) {
 	o := &otomo{
 		brain: brain,
 	}
-
-	if err := o.SetSystemPrompt(DefaultSystemPrompt); err != nil {
-		return nil, failure.Wrap(err, failure.Message("failed to set default base prompt"))
-	}
+	o.SetSystemPrompt(DefaultSystemPrompt)
 
 	return o, nil
 }
@@ -56,7 +52,6 @@ func (o *otomo) Think(ctx context.Context, c Context) (Reply, error) {
 }
 
 // SetSystemPrompt implements Otomo.
-func (o *otomo) SetSystemPrompt(prompt string) error {
+func (o *otomo) SetSystemPrompt(prompt string) {
 	o.systemPrompt = prompt
-	return nil
 }
