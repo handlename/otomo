@@ -17,7 +17,7 @@ func New(ctx context.Context, prefix string) http.Handler {
 	slack := service.NewSlack(config.Config.Slack.BotToken, config.Config.Slack.SigningSecret)
 	brainThinker := lo.Must(brain.NewGeneral(ctx))
 	brain := entity.NewBrain(brainThinker)
-	otomo := lo.Must(entity.NewOtomo(brain))
+	otomo := entity.NewOtomo(brain)
 
 	publisher := service.NewEventPublisher()
 	usecase.NewAckInstruction(slack).Subscribe(publisher)

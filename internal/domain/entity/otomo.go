@@ -30,13 +30,13 @@ type otomo struct {
 	systemPrompt string
 }
 
-func NewOtomo(brain Brain) (*otomo, error) {
+func NewOtomo(brain Brain) *otomo {
 	o := &otomo{
 		brain: brain,
 	}
 	o.SetSystemPrompt(DefaultSystemPrompt)
 
-	return o, nil
+	return o
 }
 
 func (o *otomo) Think(ctx context.Context, c Context) (Reply, error) {
