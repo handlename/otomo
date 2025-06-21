@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.1.0](https://github.com/handlename/otomo/compare/v0.0.2...v0.1.0) - 2025-06-21
+- Use format github-actions on Actions by @handlename in https://github.com/handlename/otomo/pull/18
+- Release only for linux by @handlename in https://github.com/handlename/otomo/pull/20
+- Format logs for CloudWatch Logs by @handlename in https://github.com/handlename/otomo/pull/21
+- Customize system prompt by @handlename in https://github.com/handlename/otomo/pull/22
+
 ## [v0.0.2](https://github.com/handlename/otomo/compare/v0.0.1...v0.0.2) - 2025-06-14
 - Report test result by @handlename in https://github.com/handlename/otomo/pull/15
 - Fix release by goreleaser by @handlename in https://github.com/handlename/otomo/pull/17
