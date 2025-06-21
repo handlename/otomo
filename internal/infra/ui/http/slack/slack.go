@@ -18,7 +18,9 @@ func New(ctx context.Context, prefix string) http.Handler {
 	brainThinker := lo.Must(brain.NewGeneral(ctx))
 	brain := entity.NewBrain(brainThinker)
 	otomo := entity.NewOtomo(brain)
-	otomo.SetSystemPrompt(config.Config.LLM.SystemPrompt)
+	if p := config.Config.LLM.SystemPrompt; p != "" {
+		otomo.SetSystemPrompt(p)
+	}
 
 	publisher := service.NewEventPublisher()
 	usecase.NewAckInstruction(slack).Subscribe(publisher)
