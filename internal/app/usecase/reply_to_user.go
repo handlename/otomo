@@ -5,14 +5,12 @@ import (
 
 	"github.com/handlename/otomo/internal/app/service"
 	"github.com/handlename/otomo/internal/domain/entity"
-	repo "github.com/handlename/otomo/internal/domain/repository"
 	"github.com/handlename/otomo/internal/errorcode"
 	"github.com/morikuni/failure/v2"
 )
 
 type ReplyToUser struct {
-	repoSession repo.Session
-	messenger   service.Messenger
+	messenger service.Messenger
 }
 
 func (u *ReplyToUser) Run(ctx context.Context, otomo entity.Otomo, userPrompt string) error {
@@ -37,9 +35,8 @@ func (u *ReplyToUser) Run(ctx context.Context, otomo entity.Otomo, userPrompt st
 	return nil
 }
 
-func NewReplyToUser(repoSession repo.Session, messenger service.Messenger) *ReplyToUser {
+func NewReplyToUser(messenger service.Messenger) *ReplyToUser {
 	return &ReplyToUser{
-		repoSession: repoSession,
-		messenger:   messenger,
+		messenger: messenger,
 	}
 }
