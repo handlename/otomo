@@ -11,7 +11,7 @@ require (
 	github.com/go-playground/validator/v10 v10.26.0
 	github.com/google/uuid v1.6.0
 	github.com/kayac/go-config v0.7.0
-	github.com/mackee/tanukirpc v0.6.1
+	github.com/mackee/tanukirpc v0.7.0
 	github.com/morikuni/failure/v2 v2.0.0-20240419002657-2551069d1c86
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.34.0
