@@ -7,7 +7,7 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.37.1
 	github.com/aws/aws-sdk-go-v2/config v1.30.2
 	github.com/aws/aws-sdk-go-v2/service/bedrockruntime v1.30.0
-	github.com/fujiwara/ridge v0.13.0
+	github.com/fujiwara/ridge v0.13.1
 	github.com/go-playground/validator/v10 v10.27.0
 	github.com/google/uuid v1.6.0
 	github.com/kayac/go-config v0.7.0
