@@ -16,7 +16,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.34.0
 	github.com/samber/lo v1.51.0
-	github.com/slack-go/slack v0.17.0
+	github.com/slack-go/slack v0.17.3
 	github.com/stretchr/testify v1.10.0
 )
 
