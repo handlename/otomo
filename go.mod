@@ -4,7 +4,7 @@ go 1.24
 
 require (
 	github.com/alecthomas/kong v1.12.1
-	github.com/aws/aws-sdk-go-v2 v1.38.3
+	github.com/aws/aws-sdk-go-v2 v1.39.2
 	github.com/aws/aws-sdk-go-v2/config v1.30.2
 	github.com/aws/aws-sdk-go-v2/service/bedrockruntime v1.35.0
 	github.com/fujiwara/ridge v0.13.1
