@@ -1,6 +1,6 @@
 module github.com/handlename/otomo
 
-go 1.24
+go 1.24.0
 
 require (
 	github.com/alecthomas/kong v1.13.0
@@ -8,7 +8,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.30.2
 	github.com/aws/aws-sdk-go-v2/service/bedrockruntime v1.45.0
 	github.com/fujiwara/ridge v0.13.1
-	github.com/go-playground/validator/v10 v10.27.0
+	github.com/go-playground/validator/v10 v10.28.0
 	github.com/google/uuid v1.6.0
 	github.com/kayac/go-config v0.7.0
 	github.com/mackee/tanukirpc v0.7.0
@@ -41,7 +41,7 @@ require (
 	github.com/dnephin/pflag v1.0.7 // indirect
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/fsnotify/fsnotify v1.8.0 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.9 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.10 // indirect
 	github.com/go-chi/chi/v5 v5.2.1 // indirect
 	github.com/go-chi/render v1.0.3 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
@@ -56,14 +56,13 @@ require (
 	github.com/pires/go-proxyproto v0.8.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.13.1 // indirect
-	golang.org/x/crypto v0.37.0 // indirect
-	golang.org/x/mod v0.20.0 // indirect
-	golang.org/x/net v0.39.0 // indirect
-	golang.org/x/sync v0.13.0 // indirect
-	golang.org/x/sys v0.32.0 // indirect
-	golang.org/x/term v0.31.0 // indirect
-	golang.org/x/text v0.24.0 // indirect
-	golang.org/x/tools v0.24.0 // indirect
+	golang.org/x/crypto v0.42.0 // indirect
+	golang.org/x/mod v0.27.0 // indirect
+	golang.org/x/sync v0.17.0 // indirect
+	golang.org/x/sys v0.36.0 // indirect
+	golang.org/x/term v0.35.0 // indirect
+	golang.org/x/text v0.29.0 // indirect
+	golang.org/x/tools v0.36.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
