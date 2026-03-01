@@ -1,6 +1,6 @@
 module github.com/handlename/otomo
 
-go 1.24.0
+go 1.25
 
 require (
 	github.com/alecthomas/kong v1.13.0
@@ -16,7 +16,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.34.0
 	github.com/samber/lo v1.52.0
-	github.com/slack-go/slack v0.17.3
+	github.com/slack-go/slack v0.18.0
 	github.com/stretchr/testify v1.11.1
 )
 
