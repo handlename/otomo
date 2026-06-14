@@ -5,49 +5,44 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/handlename/otomo/internal/domain/event"
+	appservice "github.com/handlename/otomo/internal/app/service"
+	"github.com/handlename/otomo/internal/domain/core"
 )
 
-var _ event.Publisher = (*EventPublisher)(nil)
+var _ appservice.Publisher = (*EventPublisher)(nil)
 
 type EventPublisher struct {
-	handlers map[event.Kind][]event.Subscriber
-	mutex    sync.RWMutex
+	subscribers map[core.Kind][]appservice.Subscriber
+	mu          sync.RWMutex
 }
 
 func NewEventPublisher() *EventPublisher {
 	return &EventPublisher{
-		handlers: make(map[event.Kind][]event.Subscriber),
+		subscribers: make(map[core.Kind][]appservice.Subscriber),
 	}
 }
 
-// Publish implements event.Publisher.
-func (p *EventPublisher) Publish(ctx context.Context, event event.Event) error {
-	p.mutex.RLock()
-	handlers := p.handlers[event.Kind()]
-	p.mutex.RUnlock()
-
-	errs := []error{}
-	for _, handler := range handlers {
-		if err := handler(ctx, event); err != nil {
+func (p *EventPublisher) Publish(ctx context.Context, ev core.Event) error {
+	p.mu.RLock()
+	subs, ok := p.subscribers[ev.Kind()]
+	p.mu.RUnlock()
+	if !ok {
+		return nil
+	}
+	var errs []error
+	for _, sub := range subs {
+		if err := sub(ctx, ev); err != nil {
 			errs = append(errs, err)
 		}
 	}
-
-	if 0 < len(errs) {
+	if len(errs) > 0 {
 		return errors.Join(errs...)
 	}
-
 	return nil
 }
 
-// Subscribe implements event.Publisher.
-func (p *EventPublisher) Subscribe(kind event.Kind, handler event.Subscriber) {
-	p.mutex.Lock()
-	defer p.mutex.Unlock()
-
-	if _, exists := p.handlers[kind]; !exists {
-		p.handlers[kind] = []event.Subscriber{}
-	}
-	p.handlers[kind] = append(p.handlers[kind], handler)
+func (p *EventPublisher) Subscribe(kind core.Kind, sub appservice.Subscriber) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.subscribers[kind] = append(p.subscribers[kind], sub)
 }
