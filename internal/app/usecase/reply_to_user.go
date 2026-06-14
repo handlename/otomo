@@ -14,7 +14,7 @@ type ReplyToUser struct {
 	messenger appservice.Messenger
 }
 
-func (u *ReplyToUser) Run(ctx context.Context, otomo chat.Otomo, userPrompt string) error {
+func (u *ReplyToUser) Run(ctx context.Context, otomo *chat.Otomo, userPrompt string) error {
 	c := reasoning.NewContext()
 	c.SetUserPrompt(userPrompt)
 

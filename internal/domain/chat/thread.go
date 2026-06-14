@@ -1,8 +1,8 @@
 package chat
 
 import (
+	"cmp"
 	"slices"
-	"strings"
 
 	"github.com/samber/lo"
 )
@@ -10,47 +10,46 @@ import (
 type ThreadID string
 
 // Thread is an entity representing a sequence of messages in a single conversation context.
-type Thread interface {
-	ID() ThreadID
-	Messages() []ThreadMessage
-	AddMessage(ThreadMessage)
-	AddMessages(...ThreadMessage)
-}
-
-type thread struct {
+type Thread struct {
 	id       ThreadID
-	messages []ThreadMessage
+	messages []*ThreadMessage
 }
 
-func NewThread(id ThreadID) Thread {
-	return &thread{
+func NewThread(id ThreadID) *Thread {
+	return &Thread{
 		id:       id,
-		messages: []ThreadMessage{},
+		messages: []*ThreadMessage{},
 	}
 }
 
-func (t *thread) AddMessage(msg ThreadMessage) {
+func (t *Thread) AddMessage(msg *ThreadMessage) {
 	t.AddMessages(msg)
 }
 
-func (t *thread) AddMessages(msgs ...ThreadMessage) {
-	t.messages = append(t.messages, msgs...)
+func (t *Thread) AddMessages(msgs ...*ThreadMessage) {
+	for _, msg := range msgs {
+		if msg == nil {
+			continue
+		}
+		t.messages = append(t.messages, msg)
+	}
 	t.sortMessages()
 }
 
-func (t *thread) ID() ThreadID {
+func (t *Thread) ID() ThreadID {
 	return t.id
 }
 
-func (t *thread) Messages() []ThreadMessage {
-	return t.messages
+func (t *Thread) Messages() []*ThreadMessage {
+	return slices.Clone(t.messages)
 }
 
-func (t *thread) sortMessages() {
-	t.messages = lo.UniqBy(t.messages, func(msg ThreadMessage) ThreadMessageID {
+func (t *Thread) sortMessages() {
+	t.messages = lo.UniqBy(t.messages, func(msg *ThreadMessage) ThreadMessageID {
 		return msg.ID()
 	})
-	slices.SortFunc(t.messages, func(a, b ThreadMessage) int {
-		return strings.Compare(string(a.ID()), string(b.ID()))
+	slices.SortFunc(t.messages, func(a, b *ThreadMessage) int {
+		return cmp.Compare(a.id, b.id)
 	})
 }
+

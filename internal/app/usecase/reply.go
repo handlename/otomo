@@ -18,11 +18,11 @@ type ReplyInput struct {
 type ReplyOutput struct{}
 
 type Reply struct {
-	otomo chat.Otomo
+	otomo *chat.Otomo
 	slack appservice.Messenger
 }
 
-func NewReply(otomo chat.Otomo, slack appservice.Messenger) *Reply {
+func NewReply(otomo *chat.Otomo, slack appservice.Messenger) *Reply {
 	return &Reply{
 		otomo: otomo,
 		slack: slack,

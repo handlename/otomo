@@ -19,12 +19,12 @@ type slackEventResponse struct {
 }
 
 func slackEventHandler(ctx tanukirpc.Context[*registry], req *slackEventRequest) (*slackEventResponse, error)  {
-	otomo:= chat.NewOtomo(ctx.Registry().Brain)
+	otomo := chat.NewOtomo(ctx.Registry().Brain)
 	if p := config.Config.LLM.SystemPrompt; p != "" {
 		otomo.SetSystemPrompt(p)
 	}
 
-	uc := usecase.NewReplyToUser( ctx.Registry().Slack)
+	uc := usecase.NewReplyToUser(ctx.Registry().Slack)
 	if err := uc.Run(ctx, otomo, req.Message); err != nil {
 		return nil, tanukirpc.WrapErrorWithStatus(http.StatusInternalServerError, err)
 	}
