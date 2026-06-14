@@ -69,13 +69,12 @@ otomo/
 ├── config/                     # Configuration management
 ├── internal/                   # Internal application code
 │   ├── app/                   # Application layer
-│   │   ├── service/           # Application services
+│   │   ├── service/           # Application services (event_publisher.go, messenger.go)
 │   │   └── usecase/           # Use case implementations
 │   ├── domain/                # Domain layer (business logic)
-│   │   ├── entity/            # Domain entities
-│   │   ├── event/             # Domain events
-│   │   ├── repository/        # Repository interfaces
-│   │   └── valueobject/       # Value objects
+│   │   ├── core/              # System-wide core concepts (Prompt, Event, Message)
+│   │   ├── reasoning/         # Reasoning and AI model context (Brain, Context, Answer)
+│   │   └── chat/              # Chat conversation context (Otomo, Thread, Reply)
 │   ├── errorcode/             # Error code definitions
 │   ├── infra/                 # Infrastructure layer
 │   │   ├── brain/             # AI brain implementations
@@ -107,21 +106,23 @@ otomo/
 
 ### Domain Layer
 
-#### Entities
-- **Brain**: Represents the AI brain capability
-- **Thread**: Slack thread representation
-- **ThreadMessage**: Individual messages in threads
-- **Reply**: Bot responses
-- **Answer**: AI-generated answers
-- **Tool**: Available tools/functions for AI
-- **Context**: Conversation context
+#### Core Package (`core`)
+- **Prompt**: AI prompt construction and management (Value Object)
+- **Event**: Interface representing domain events (Entity)
+- **BaseEvent**: Helper for concrete events (Value Object)
+- **Message**: Generic chat message representation (Value Object)
 
-#### Value Objects
-- **Prompt**: AI prompt construction and management
+#### Reasoning Package (`reasoning`)
+- **Brain**: Represents the AI brain capability (Entity)
+- **Context**: Accumulates prompts and history for reasoning (Entity)
+- **Answer**: AI-generated answers (Value Object)
 
-#### Events
-- **InstructionReceived**: Domain event for new user instructions
-- Event publishing and subscription infrastructure
+#### Chat Package (`chat`)
+- **Otomo**: Core AI agent orchestrator (Entity)
+- **Thread**: Slack thread representation (Entity)
+- **ThreadMessage**: Individual messages in threads (Entity)
+- **Reply**: Bot responses (Value Object)
+- **InstructionReceived**: Event dispatched when instruction is received (Value Object)
 
 ### Application Layer
 

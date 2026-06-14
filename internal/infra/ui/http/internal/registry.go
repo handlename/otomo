@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/handlename/otomo/config"
-	"github.com/handlename/otomo/internal/domain/entity"
+	"github.com/handlename/otomo/internal/domain/reasoning"
 	"github.com/handlename/otomo/internal/infra/brain"
 	"github.com/handlename/otomo/internal/infra/service"
 	"github.com/morikuni/failure/v2"
@@ -12,7 +12,7 @@ import (
 
 type registry struct {
 	Slack *service.Slack
-	Brain entity.Brain
+	Brain reasoning.Brain
 }
 
 func NewRegistry(ctx context.Context) (*registry, error) {
@@ -23,6 +23,6 @@ func NewRegistry(ctx context.Context) (*registry, error) {
 
 	return &registry{
 		Slack: service.NewSlack(config.Config.Slack.BotToken, config.Config.Slack.SigningSecret),
-		Brain: entity.NewBrain(brainThinker),
+		Brain: reasoning.NewBrain(brainThinker),
 	}, nil
 }

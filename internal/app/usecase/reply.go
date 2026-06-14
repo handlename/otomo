@@ -2,31 +2,27 @@ package usecase
 
 import (
 	"context"
-	"fmt"
-	"strings"
 
-	"github.com/handlename/otomo/config"
-	"github.com/handlename/otomo/internal/app/service"
-	"github.com/handlename/otomo/internal/domain/entity"
-	"github.com/handlename/otomo/internal/domain/event"
-	vo "github.com/handlename/otomo/internal/domain/valueobject"
+	appservice "github.com/handlename/otomo/internal/app/service"
+	"github.com/handlename/otomo/internal/domain/chat"
+	"github.com/handlename/otomo/internal/domain/core"
+	"github.com/handlename/otomo/internal/domain/reasoning"
 	"github.com/morikuni/failure/v2"
 	"github.com/rs/zerolog/log"
-	"github.com/samber/lo"
 )
 
 type ReplyInput struct {
-	EventData event.InstructionReceivedData
+	EventData chat.InstructionReceivedData
 }
 
 type ReplyOutput struct{}
 
 type Reply struct {
-	otomo entity.Otomo
-	slack service.Messenger
+	otomo chat.Otomo
+	slack appservice.Messenger
 }
 
-func NewReply(otomo entity.Otomo, slack service.Messenger) *Reply {
+func NewReply(otomo chat.Otomo, slack appservice.Messenger) *Reply {
 	return &Reply{
 		otomo: otomo,
 		slack: slack,
@@ -34,7 +30,7 @@ func NewReply(otomo entity.Otomo, slack service.Messenger) *Reply {
 }
 
 func (r *Reply) Run(ctx context.Context, input ReplyInput) (*ReplyOutput, error) {
-	c := entity.NewContext()
+	c := reasoning.NewContext()
 	c.SetUserPrompt(input.EventData.RawInstruction)
 
 	if input.EventData.ThreadID != "" {
@@ -42,10 +38,19 @@ func (r *Reply) Run(ctx context.Context, input ReplyInput) (*ReplyOutput, error)
 		if err != nil {
 			return nil, failure.Wrap(err)
 		}
-		log.Debug().Strs("messages", lo.Map(thread.Messages(), func(m entity.ThreadMessage, _ int) string {
-			return m.String()
-		})).Msg("fetched thread")
-		c.SetThread(thread)
+
+		msgs := make([]core.Message, len(thread.Messages()))
+		for i, m := range thread.Messages() {
+			role := core.RoleUser
+			// For now, treat all history as User unless it is from the bot
+			// Optional: mapping logic can be refined later if needed.
+			msgs[i] = core.Message{
+				Role: role,
+				User: m.User(),
+				Body: m.Body(),
+			}
+		}
+		c.SetMessages(msgs)
 	}
 
 	rep, err := r.otomo.Think(ctx, c)
@@ -57,24 +62,18 @@ func (r *Reply) Run(ctx context.Context, input ReplyInput) (*ReplyOutput, error)
 	return &ReplyOutput{}, err
 }
 
-func (r *Reply) Subscribe(publisher event.Publisher) {
-	publisher.Subscribe(event.KindInstructionReceived, func(ctx context.Context, eev event.Event) error {
-		ev, ok := eev.(*event.InstructionReceived)
+func (r *Reply) Subscribe(publisher appservice.Publisher) {
+	publisher.Subscribe(chat.KindInstructionReceived, func(ctx context.Context, eev core.Event) error {
+		ev, ok := eev.(*chat.InstructionReceived)
 		if !ok {
 			log.Error().Msg("failed to assert event")
 			return nil
 		}
 
 		input := ReplyInput{
-			EventData: ev.Data().(event.InstructionReceivedData),
+			EventData: ev.Data().(chat.InstructionReceivedData),
 		}
 		_, err := r.Run(ctx, input)
 		return err
 	})
-}
-
-func (r *Reply) buildPrompt(raw string) vo.Prompt {
-	raw = strings.TrimSpace(raw)
-	raw = strings.TrimPrefix(raw, fmt.Sprintf("<%s>", config.Config.Slack.BotUserID))
-	return vo.NewPlainPrompt(raw)
 }

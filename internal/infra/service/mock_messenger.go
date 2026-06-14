@@ -4,7 +4,7 @@ import (
 	"context"
 
 	aservice "github.com/handlename/otomo/internal/app/service"
-	"github.com/handlename/otomo/internal/domain/entity"
+	"github.com/handlename/otomo/internal/domain/chat"
 	"github.com/rs/zerolog/log"
 )
 
@@ -14,7 +14,7 @@ var _ aservice.Messenger = (*MockMessenger)(nil)
 type MockMessenger struct {
 	PostMessageFunc func(ctx context.Context, channelID, messageID, message string) error
 	AddReactionFunc func(ctx context.Context, channelID, messageID string, emoji string) error
-	FetchThreadFunc func(ctx context.Context, channelID string, threadID string) (entity.Thread, error)
+	FetchThreadFunc func(ctx context.Context, channelID string, threadID string) (chat.Thread, error)
 
 	History []struct {
 		ChannelID string
@@ -29,10 +29,10 @@ type MockMessenger struct {
 }
 
 // FetchThread implements service.Messenger.
-func (m *MockMessenger) FetchThread(ctx context.Context, channelID string, threadID string) (entity.Thread, error) {
+func (m *MockMessenger) FetchThread(ctx context.Context, channelID string, threadID string) (chat.Thread, error) {
 	if m.FetchThreadFunc == nil {
 		log.Warn().Msg("FetchThreadFunc is empty! you may set the func")
-		return entity.NewThread(""), nil
+		return chat.NewThread(""), nil
 	}
 
 	return m.FetchThreadFunc(ctx, channelID, threadID)

@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/handlename/otomo/internal/domain/event"
+	"github.com/handlename/otomo/internal/domain/chat"
 	"github.com/handlename/otomo/internal/infra/service"
 	"github.com/handlename/otomo/internal/testutil"
 	"github.com/samber/lo"
@@ -28,7 +28,7 @@ func Test_ClassifySlackEventAndPublish_handleChallenge(t *testing.T) {
 		})),
 	}
 
-	mockPublisher := testutil.NewMockPublisher()
+	mockPublisher := testutil.NewMockEventPublisher()
 	uc := NewClassifySlackEventAndPublish(mockPublisher)
 
 	// Act
@@ -43,7 +43,7 @@ func Test_ClassifySlackEventAndPublish_handleChallenge(t *testing.T) {
 		Challenge: "challenge_value",
 	}
 	assert.Equal(t, expect, output)
-	assert.Equal(t, len(mockPublisher.History), 0)
+	assert.Equal(t, len(mockPublisher.Published), 0)
 }
 
 func Test_ClassifySlackEventAndPublish_handleAppMention(t *testing.T) {
@@ -71,7 +71,7 @@ func Test_ClassifySlackEventAndPublish_handleAppMention(t *testing.T) {
 		RawBody: body,
 	}
 
-	mockPublisher := testutil.NewMockPublisher()
+	mockPublisher := testutil.NewMockEventPublisher()
 	uc := NewClassifySlackEventAndPublish(mockPublisher)
 
 	// Act
@@ -86,9 +86,9 @@ func Test_ClassifySlackEventAndPublish_handleAppMention(t *testing.T) {
 		Status: "ok",
 	}
 	assert.Equal(t, expect, output)
-	require.Equal(t, 1, len(mockPublisher.History))
+	require.Equal(t, 1, len(mockPublisher.Published))
 
-	data, ok := mockPublisher.History[0].Data().(event.InstructionReceivedData)
+	data, ok := mockPublisher.Published[0].Data().(chat.InstructionReceivedData)
 	require.True(t, ok)
 
 	assert.Equal(t, service.Time.UnixNanoToSlackID(now.UnixNano()), data.MessageID)

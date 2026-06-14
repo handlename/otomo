@@ -1,2 +1,5 @@
 [tools]
+aws = "2"
 buf = "1"
+terraform = "1"
+"aqua:fujiwara/lambroll" = "1"

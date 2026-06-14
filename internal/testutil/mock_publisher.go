@@ -2,48 +2,36 @@ package testutil
 
 import (
 	"context"
-	"errors"
+	"sync"
 
-	"github.com/handlename/otomo/internal/domain/event"
+	appservice "github.com/handlename/otomo/internal/app/service"
+	"github.com/handlename/otomo/internal/domain/core"
 )
 
-var _ (event.Publisher) = (*MockEventPublisher)(nil)
+var _ appservice.Publisher = (*MockEventPublisher)(nil)
 
 type MockEventPublisher struct {
-	Handlers map[event.Kind][]event.Subscriber
-	History  []event.Event
+	mu          sync.RWMutex
+	subscribers map[core.Kind][]appservice.Subscriber
+	Published   []core.Event
 }
 
-func NewMockPublisher() *MockEventPublisher {
+func NewMockEventPublisher() *MockEventPublisher {
 	return &MockEventPublisher{
-		Handlers: make(map[event.Kind][]event.Subscriber),
-		History:  make([]event.Event, 0),
+		subscribers: make(map[core.Kind][]appservice.Subscriber),
+		Published:   []core.Event{},
 	}
 }
 
-// Publish implements event.Publisher.
-func (p *MockEventPublisher) Publish(ctx context.Context, event event.Event) error {
-	p.History = append(p.History, event)
-	handlers := p.Handlers[event.Kind()]
-
-	errs := []error{}
-	for _, handler := range handlers {
-		if err := handler(ctx, event); err != nil {
-			errs = append(errs, err)
-		}
-	}
-
-	if 0 < len(errs) {
-		return errors.Join(errs...)
-	}
-
+func (m *MockEventPublisher) Publish(ctx context.Context, ev core.Event) error {
+	m.mu.Lock()
+	m.Published = append(m.Published, ev)
+	m.mu.Unlock()
 	return nil
 }
 
-// Subscribe implements event.Publisher.
-func (p *MockEventPublisher) Subscribe(kind event.Kind, handler event.Subscriber) {
-	if _, exists := p.Handlers[kind]; !exists {
-		p.Handlers[kind] = []event.Subscriber{}
-	}
-	p.Handlers[kind] = append(p.Handlers[kind], handler)
+func (m *MockEventPublisher) Subscribe(kind core.Kind, sub appservice.Subscriber) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.subscribers[kind] = append(m.subscribers[kind], sub)
 }

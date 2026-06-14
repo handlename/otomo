@@ -1,4 +1,4 @@
-package event
+package core
 
 import (
 	"fmt"
@@ -10,6 +10,7 @@ import (
 type ID string
 type Kind string
 
+// Event is an entity interface representing something that has occurred in the domain.
 type Event interface {
 	ID() ID
 	Kind() Kind
@@ -18,17 +19,18 @@ type Event interface {
 	String() string
 }
 
-var _ Event = (*baseEvent)(nil)
+var _ Event = (*BaseEvent)(nil)
 
-type baseEvent struct {
+// BaseEvent is a value object helper that provides standard fields for Event implementations.
+type BaseEvent struct {
 	id      ID
 	kind    Kind
 	ts      time.Time
 	payload any
 }
 
-func newBaseEvent(kind Kind, payload any) baseEvent {
-	return baseEvent{
+func NewBaseEvent(kind Kind, payload any) BaseEvent {
+	return BaseEvent{
 		id:      ID(uuid.New().String()),
 		kind:    kind,
 		ts:      time.Now(),
@@ -37,27 +39,27 @@ func newBaseEvent(kind Kind, payload any) baseEvent {
 }
 
 // Data implements Event.
-func (e *baseEvent) Data() any {
+func (e *BaseEvent) Data() any {
 	return e.payload
 }
 
 // ID implements Event.
-func (e *baseEvent) ID() ID {
+func (e *BaseEvent) ID() ID {
 	return e.id
 }
 
 // Kind implements Event.
-func (e *baseEvent) Kind() Kind {
+func (e *BaseEvent) Kind() Kind {
 	return e.kind
 }
 
 // OccuredAt implements Event.
-func (e *baseEvent) OccuredAt() time.Time {
+func (e *BaseEvent) OccuredAt() time.Time {
 	return e.ts
 }
 
 // String implements Event.
-func (e *baseEvent) String() string {
+func (e *BaseEvent) String() string {
 	return fmt.Sprintf("[id:%s kind:%s occured_at:%s data:%+v]",
 		e.ID(),
 		e.Kind(),

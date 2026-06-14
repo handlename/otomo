@@ -1,11 +1,9 @@
-package valueobject
+package core
 
 import (
 	"bytes"
 	"fmt"
 )
-
-// type Prompt string
 
 type PromptTag string
 
@@ -14,6 +12,7 @@ const (
 	PromptTagUser   PromptTag = "user_question"
 )
 
+// Prompt is a value object representing structured prompt tokens.
 type Prompt interface {
 	Tag() PromptTag
 	String() string

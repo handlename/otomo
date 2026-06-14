@@ -1,17 +1,18 @@
-package event
+package chat
 
 import (
 	"time"
 
+	"github.com/handlename/otomo/internal/domain/core"
 	"github.com/morikuni/failure/v2"
 )
 
-const KindInstructionReceived Kind = "instruction_received"
+const KindInstructionReceived core.Kind = "instruction_received"
 
 type InstructionReceivedData struct {
 	ChannelID      string    `validate:"required,startswith=C"`
 	MessageID      string    `validate:"required,numeric"`
-	ThreadID       string    // empty if instruction is not in thread
+	ThreadID       string    
 	RawInstruction string    `validate:"required"`
 	SentAt         time.Time `validate:"required"`
 }
@@ -20,8 +21,9 @@ func (d InstructionReceivedData) Validate() error {
 	return validate.Struct(d)
 }
 
+// InstructionReceived is a value object event dispatched when an instruction is received.
 type InstructionReceived struct {
-	baseEvent
+	core.BaseEvent
 }
 
 func NewInstructionReceived(data InstructionReceivedData) (*InstructionReceived, error) {
@@ -30,6 +32,6 @@ func NewInstructionReceived(data InstructionReceivedData) (*InstructionReceived,
 	}
 
 	return &InstructionReceived{
-		baseEvent: newBaseEvent(KindInstructionReceived, data),
+		BaseEvent: core.NewBaseEvent(KindInstructionReceived, data),
 	}, nil
 }
