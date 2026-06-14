@@ -103,3 +103,6 @@ dist/*
 
 # configuration
 config.toml
+
+# temporary directory
+tmp/
