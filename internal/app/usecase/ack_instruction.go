@@ -3,7 +3,9 @@ package usecase
 import (
 	"context"
 
-	"github.com/handlename/otomo/internal/domain/event"
+	appservice "github.com/handlename/otomo/internal/app/service"
+	"github.com/handlename/otomo/internal/domain/communication"
+	"github.com/handlename/otomo/internal/domain/core"
 	"github.com/handlename/otomo/internal/infra/service"
 	"github.com/rs/zerolog/log"
 )
@@ -34,15 +36,15 @@ func (u *AckInstruction) Run(ctx context.Context, input AckInstructionInput) (*A
 	return &AckInstructionOutput{}, err
 }
 
-func (u *AckInstruction) Subscribe(publisher event.Publisher) {
-	publisher.Subscribe(event.KindInstructionReceived, func(ctx context.Context, eev event.Event) error {
-		ev, ok := eev.(*event.InstructionReceived)
+func (u *AckInstruction) Subscribe(publisher appservice.Publisher) {
+	publisher.Subscribe(communication.KindInstructionReceived, func(ctx context.Context, eev core.Event) error {
+		ev, ok := eev.(*communication.InstructionReceived)
 		if !ok {
 			log.Error().Msg("failed to assert event")
 			return nil
 		}
 
-		data := ev.Data().(event.InstructionReceivedData)
+		data := ev.Data().(communication.InstructionReceivedData)
 		input := AckInstructionInput{
 			ChannelID:      data.ChannelID,
 			MessageID:      data.MessageID,

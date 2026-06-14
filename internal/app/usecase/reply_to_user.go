@@ -3,18 +3,19 @@ package usecase
 import (
 	"context"
 
-	"github.com/handlename/otomo/internal/app/service"
-	"github.com/handlename/otomo/internal/domain/entity"
+	appservice "github.com/handlename/otomo/internal/app/service"
+	"github.com/handlename/otomo/internal/domain/communication"
+	"github.com/handlename/otomo/internal/domain/reasoning"
 	"github.com/handlename/otomo/internal/errorcode"
 	"github.com/morikuni/failure/v2"
 )
 
 type ReplyToUser struct {
-	messenger service.Messenger
+	messenger appservice.Messenger
 }
 
-func (u *ReplyToUser) Run(ctx context.Context, otomo entity.Otomo, userPrompt string) error {
-	c := entity.NewContext()
+func (u *ReplyToUser) Run(ctx context.Context, otomo communication.Otomo, userPrompt string) error {
+	c := reasoning.NewContext()
 	c.SetUserPrompt(userPrompt)
 
 	rep, err := otomo.Think(ctx, c)
@@ -35,7 +36,7 @@ func (u *ReplyToUser) Run(ctx context.Context, otomo entity.Otomo, userPrompt st
 	return nil
 }
 
-func NewReplyToUser(messenger service.Messenger) *ReplyToUser {
+func NewReplyToUser(messenger appservice.Messenger) *ReplyToUser {
 	return &ReplyToUser{
 		messenger: messenger,
 	}

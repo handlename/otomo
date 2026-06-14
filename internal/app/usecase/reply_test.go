@@ -5,10 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/handlename/otomo/config"
-	"github.com/handlename/otomo/internal/domain/entity"
-	"github.com/handlename/otomo/internal/domain/event"
-	vo "github.com/handlename/otomo/internal/domain/valueobject"
+	"github.com/handlename/otomo/internal/domain/communication"
+	"github.com/handlename/otomo/internal/domain/reasoning"
 	"github.com/handlename/otomo/internal/infra/brain"
 	"github.com/handlename/otomo/internal/infra/service"
 	"github.com/stretchr/testify/assert"
@@ -20,15 +18,15 @@ func Test_Reply_Run(t *testing.T) {
 
 	// Arrange
 
-	mockBrain := entity.NewBrain(&brain.Mock{
-		ThinkFunc: func(context.Context, entity.Context) (*entity.Answer, error) {
-			return entity.NewAnswer("mock response"), nil
+	mockBrain := reasoning.NewBrain(&brain.Mock{
+		ThinkFunc: func(context.Context, reasoning.Context) (*reasoning.Answer, error) {
+			return reasoning.NewAnswer("mock response"), nil
 		},
 	})
-	mockOtomo := entity.NewOtomo(mockBrain)
+	mockOtomo := communication.NewOtomo(mockBrain)
 	mockMessenger := &service.MockMessenger{
-		FetchThreadFunc: func(ctx context.Context, channelID string, threadID string) (entity.Thread, error) {
-			return entity.NewThread(""), nil
+		FetchThreadFunc: func(ctx context.Context, channelID string, threadID string) (communication.Thread, error) {
+			return communication.NewThread(""), nil
 		},
 	}
 	uc := NewReply(mockOtomo, mockMessenger)
@@ -36,7 +34,7 @@ func Test_Reply_Run(t *testing.T) {
 	// Act
 
 	input := ReplyInput{
-		EventData: event.InstructionReceivedData{
+		EventData: communication.InstructionReceivedData{
 			ChannelID:      "test-channel",
 			MessageID:      "test-message",
 			ThreadID:       "test-thread",
@@ -67,20 +65,20 @@ func Test_Reply_Run_Error(t *testing.T) {
 
 	// Create mock brain with error
 	mockError := assert.AnError
-	mockBrain := entity.NewBrain(&brain.Mock{
-		ThinkFunc: func(ctx context.Context, c entity.Context) (*entity.Answer, error) {
+	mockBrain := reasoning.NewBrain(&brain.Mock{
+		ThinkFunc: func(ctx context.Context, c reasoning.Context) (*reasoning.Answer, error) {
 			return nil, mockError
 		},
 	})
 
-	mockOtomo := (entity.NewOtomo(mockBrain))
+	mockOtomo := (communication.NewOtomo(mockBrain))
 	mockMessenger := &service.MockMessenger{}
 	uc := NewReply(mockOtomo, mockMessenger)
 
 	// Act
 
 	input := ReplyInput{
-		EventData: event.InstructionReceivedData{
+		EventData: communication.InstructionReceivedData{
 			ChannelID:      "test-channel",
 			MessageID:      "test-message",
 			ThreadID:       "test-thread",
@@ -97,50 +95,4 @@ func Test_Reply_Run_Error(t *testing.T) {
 
 	// Verify messenger was not called
 	assert.Equal(t, 0, len(mockMessenger.History))
-}
-
-func Test_Reply_buildPrompt(t *testing.T) {
-	// Store the original bot user ID
-	originalBotUserID := config.Config.Slack.BotUserID
-	// Set a known bot user ID for testing
-	config.Config.Slack.BotUserID = "U12345678"
-	// Restore the original bot user ID after the test
-	defer func() { config.Config.Slack.BotUserID = originalBotUserID }()
-
-	r := Reply{}
-
-	// Create test cases
-	tests := []struct {
-		name     string
-		raw      string
-		expected vo.Prompt
-	}{
-		{
-			name:     "should trim spaces",
-			raw:      "  hello world  ",
-			expected: vo.NewPlainPrompt("hello world"),
-		},
-		{
-			name:     "should remove bot user ID",
-			raw:      "<U12345678> hello world",
-			expected: vo.NewPlainPrompt(" hello world"),
-		},
-		{
-			name:     "should trim spaces and remove bot user ID",
-			raw:      "  <U12345678> hello world  ",
-			expected: vo.NewPlainPrompt(" hello world"),
-		},
-		{
-			name:     "should handle message with no spaces to trim or bot user ID",
-			raw:      "hello world",
-			expected: vo.NewPlainPrompt("hello world"),
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := r.buildPrompt(tt.raw)
-			assert.Equal(t, tt.expected, got)
-		})
-	}
 }

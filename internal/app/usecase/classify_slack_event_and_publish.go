@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/handlename/otomo/internal/domain/event"
+	appservice "github.com/handlename/otomo/internal/app/service"
+	"github.com/handlename/otomo/internal/domain/communication"
+	"github.com/handlename/otomo/internal/domain/core"
 	"github.com/handlename/otomo/internal/infra/service"
 	"github.com/morikuni/failure/v2"
 	"github.com/rs/zerolog/log"
@@ -23,10 +25,10 @@ type ClassifySlackEventAndPublishOutput struct {
 }
 
 type ClassifySlackEventAndPublish struct {
-	publisher event.Publisher
+	publisher appservice.Publisher
 }
 
-func NewClassifySlackEventAndPublish(publisher event.Publisher) *ClassifySlackEventAndPublish {
+func NewClassifySlackEventAndPublish(publisher appservice.Publisher) *ClassifySlackEventAndPublish {
 	return &ClassifySlackEventAndPublish{
 		publisher: publisher,
 	}
@@ -34,7 +36,7 @@ func NewClassifySlackEventAndPublish(publisher event.Publisher) *ClassifySlackEv
 
 // Run implements Usecase.
 func (u *ClassifySlackEventAndPublish) Run(ctx context.Context, input ClassifySlackEventAndPublishInput) (*ClassifySlackEventAndPublishOutput, error) {
-	var ev event.Event
+	var ev core.Event
 
 	switch input.Event.Type {
 	case slackevents.URLVerification:
@@ -76,7 +78,7 @@ func (u *ClassifySlackEventAndPublish) handleURLVerification(_ context.Context, 
 	}, nil
 }
 
-func (u *ClassifySlackEventAndPublish) handleCallbackEvent(_ context.Context, input ClassifySlackEventAndPublishInput) (event.Event, error) {
+func (u *ClassifySlackEventAndPublish) handleCallbackEvent(_ context.Context, input ClassifySlackEventAndPublishInput) (core.Event, error) {
 	switch iev := input.Event.InnerEvent.Data.(type) {
 	case *slackevents.AppMentionEvent:
 		sentAt, err := service.Time.ParseUnixTimestamp(iev.TimeStamp)
@@ -89,7 +91,7 @@ func (u *ClassifySlackEventAndPublish) handleCallbackEvent(_ context.Context, in
 			)
 		}
 
-		ev, err := event.NewInstructionReceived(event.InstructionReceivedData{
+		ev, err := communication.NewInstructionReceived(communication.InstructionReceivedData{
 			ChannelID:      iev.Channel,
 			MessageID:      iev.EventTimeStamp,
 			ThreadID:       iev.ThreadTimeStamp,
@@ -99,7 +101,7 @@ func (u *ClassifySlackEventAndPublish) handleCallbackEvent(_ context.Context, in
 		if err != nil {
 			return nil, failure.Wrap(err)
 		}
-		return event.Event(ev), nil
+		return ev, nil
 	default:
 		return nil, failure.New(
 			"failed to assert Slack inner event",
