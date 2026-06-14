@@ -1,4 +1,4 @@
-package event
+package communication
 
 import "github.com/go-playground/validator/v10"
 
