@@ -30,7 +30,7 @@ A domain value object representing the constructed prompt template sent to the [
 
 ### Reply
 
-A domain entity representing the bot's response logic, which eventually delivers an [Answer](#answer) to the user.
+A domain value object representing the bot's response logic, which eventually delivers an [Answer](#answer) to the user.
 
 ### Thread
 
