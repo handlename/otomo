@@ -15,47 +15,47 @@ type Context interface {
 	SetMessages([]core.Message)
 	SetSystemPrompt(string)
 	SetUserPrompt(string)
-	GetUserPrompt() core.Prompt
-	Prompt() core.Prompt
+	GetUserPrompt() *core.Prompt
+	Prompt() *core.Prompt
 }
 
 func NewContext() Context {
 	return &ct{
-		systemPrompt: core.NewPrompt("", "", []core.Prompt{}),
-		userPrompt:   core.NewPrompt("", "", []core.Prompt{}),
+		systemPrompt: core.NewPrompt("", "", []*core.Prompt{}),
+		userPrompt:   core.NewPrompt("", "", []*core.Prompt{}),
 		messages:     []core.Message{},
 	}
 }
 
 type ct struct {
-	systemPrompt core.Prompt
-	userPrompt   core.Prompt
+	systemPrompt *core.Prompt
+	userPrompt   *core.Prompt
 	messages     []core.Message
 }
 
-func (c *ct) GetUserPrompt() core.Prompt {
+func (c *ct) GetUserPrompt() *core.Prompt {
 	return c.userPrompt
 }
 
 func (c *ct) SetSystemPrompt(body string) {
-	c.systemPrompt = core.NewPrompt(core.PromptTagSystem, body, []core.Prompt{})
+	c.systemPrompt = core.NewPrompt(core.PromptTagSystem, body, []*core.Prompt{})
 }
 
 func (c *ct) SetUserPrompt(body string) {
-	c.userPrompt = core.NewPrompt(core.PromptTagUser, body, []core.Prompt{})
+	c.userPrompt = core.NewPrompt(core.PromptTagUser, body, []*core.Prompt{})
 }
 
 func (c *ct) SetMessages(messages []core.Message) {
 	c.messages = messages
 }
 
-func (c *ct) Prompt() core.Prompt {
+func (c *ct) Prompt() *core.Prompt {
 	return core.NewPrompt(
 		"",
 		"",
-		[]core.Prompt{
+		[]*core.Prompt{
 			c.systemPrompt,
-			core.NewPrompt("thread", "", lo.Map(c.messages, func(msg core.Message, _ int) core.Prompt {
+			core.NewPrompt("thread", "", lo.Map(c.messages, func(msg core.Message, _ int) *core.Prompt {
 				var tag core.PromptTag
 				if msg.User != "" {
 					tag = core.PromptTag(fmt.Sprintf("message user=%s", msg.User))

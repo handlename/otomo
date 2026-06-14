@@ -10,12 +10,12 @@ import (
 func Test_Prompt_String(t *testing.T) {
 	tests := []struct {
 		name     string
-		prompt   core.Prompt
+		prompt   *core.Prompt
 		expected string
 	}{
 		{
 			name:     "empty prompt",
-			prompt:   core.NewPrompt("", "", []core.Prompt{}),
+			prompt:   core.NewPrompt("", "", []*core.Prompt{}),
 			expected: "",
 		},
 		{
@@ -23,25 +23,25 @@ func Test_Prompt_String(t *testing.T) {
 			prompt: core.NewPrompt(
 				"",
 				"",
-				[]core.Prompt{
+				[]*core.Prompt{
 					core.NewPlainPrompt("plain0-1"),
 					core.NewPrompt(
 						"tag1",
 						"",
-						[]core.Prompt{
+						[]*core.Prompt{
 							core.NewPlainPrompt("plain1-1"),
 						},
 					),
 					core.NewPrompt(
 						"tag2",
 						"",
-						[]core.Prompt{
+						[]*core.Prompt{
 							core.NewPlainPrompt("plain2-1"),
 							core.NewPlainPrompt("plain2-2"),
 							core.NewPrompt(
 								"tag2-1",
 								"",
-								[]core.Prompt{
+								[]*core.Prompt{
 									core.NewPlainPrompt("plain2-1-1"),
 								},
 							),

@@ -13,34 +13,19 @@ const (
 )
 
 // Prompt is a value object representing structured prompt tokens.
-type Prompt interface {
-	Tag() PromptTag
-	String() string
-	Clone() Prompt
-}
-
-type prompt struct {
+type Prompt struct {
 	tag      PromptTag
 	body     string
-	children []Prompt
+	children []*Prompt
 }
 
-// Clone implements Prompt.
-func (p *prompt) Clone() Prompt {
-	return &prompt{
-		tag:      p.tag,
-		body:     p.body,
-		children: p.children,
-	}
-}
-
-// Tag implements Prompt.
-func (p *prompt) Tag() PromptTag {
+// Tag returns the prompt tag.
+func (p *Prompt) Tag() PromptTag {
 	return p.tag
 }
 
-// String implements Prompt.
-func (p *prompt) String() string {
+// String returns the string representation of the prompt.
+func (p *Prompt) String() string {
 	buf := bytes.NewBuffer([]byte{})
 	if p.tag != "" {
 		fmt.Fprintf(buf, "<%s>\n", p.tag)
@@ -51,7 +36,9 @@ func (p *prompt) String() string {
 	}
 
 	for _, c := range p.children {
-		fmt.Fprint(buf, c.String())
+		if c != nil {
+			fmt.Fprint(buf, c.String())
+		}
 	}
 
 	if p.tag != "" {
@@ -61,12 +48,12 @@ func (p *prompt) String() string {
 	return buf.String()
 }
 
-func NewPlainPrompt(body string) Prompt {
+func NewPlainPrompt(body string) *Prompt {
 	return NewPrompt("", body, nil)
 }
 
-func NewPrompt(tag PromptTag, body string, children []Prompt) Prompt {
-	return &prompt{
+func NewPrompt(tag PromptTag, body string, children []*Prompt) *Prompt {
+	return &Prompt{
 		tag:      tag,
 		body:     body,
 		children: children,
