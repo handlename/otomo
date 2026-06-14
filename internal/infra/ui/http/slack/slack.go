@@ -6,7 +6,8 @@ import (
 
 	"github.com/handlename/otomo/config"
 	"github.com/handlename/otomo/internal/app/usecase"
-	"github.com/handlename/otomo/internal/domain/entity"
+	"github.com/handlename/otomo/internal/domain/communication"
+	"github.com/handlename/otomo/internal/domain/reasoning"
 	"github.com/handlename/otomo/internal/infra/brain"
 	"github.com/handlename/otomo/internal/infra/service"
 	"github.com/handlename/otomo/internal/infra/ui/http/middleware"
@@ -16,8 +17,8 @@ import (
 func New(ctx context.Context, prefix string) http.Handler {
 	slack := service.NewSlack(config.Config.Slack.BotToken, config.Config.Slack.SigningSecret)
 	brainThinker := lo.Must(brain.NewGeneral(ctx))
-	brain := entity.NewBrain(brainThinker)
-	otomo := entity.NewOtomo(brain)
+	brain := reasoning.NewBrain(brainThinker)
+	otomo := communication.NewOtomo(brain)
 	if p := config.Config.LLM.SystemPrompt; p != "" {
 		otomo.SetSystemPrompt(p)
 	}

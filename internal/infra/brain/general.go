@@ -4,18 +4,18 @@ import (
 	"context"
 
 	"github.com/handlename/otomo/config"
-	"github.com/handlename/otomo/internal/domain/entity"
+	"github.com/handlename/otomo/internal/domain/reasoning"
 	"github.com/handlename/otomo/internal/infra/service"
 	"github.com/morikuni/failure/v2"
 )
 
-var _ entity.BrainThinker = (*General)(nil)
+var _ reasoning.BrainThinker = (*General)(nil)
 
 type General struct {
 	client *service.Bedrock
 }
 
-func NewGeneral(ctx context.Context) (entity.BrainThinker, error) {
+func NewGeneral(ctx context.Context) (reasoning.BrainThinker, error) {
 	client, err := service.NewBedrock(ctx, config.Config.LLM.ModelID)
 	if err != nil {
 		return nil, failure.Wrap(err, failure.Message("failed to create bedrock client"))
@@ -28,13 +28,13 @@ func NewGeneral(ctx context.Context) (entity.BrainThinker, error) {
 	return brain, nil
 }
 
-// Think implements entity.BrainThinker.
-func (g *General) Think(ctx context.Context, c entity.Context) (*entity.Answer, error) {
+// Think implements reasoning.BrainThinker.
+func (g *General) Think(ctx context.Context, c reasoning.Context) (*reasoning.Answer, error) {
 	res, err := g.client.Invoke(ctx, c.Prompt().String())
 	if err != nil {
 		return nil, failure.Wrap(err, failure.Message("failed to invoke bedrock"))
 	}
 
-	ans := entity.NewAnswer(res)
+	ans := reasoning.NewAnswer(res)
 	return ans, nil
 }
