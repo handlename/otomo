@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/handlename/otomo/internal/domain/communication"
+	"github.com/handlename/otomo/internal/domain/chat"
 	"github.com/handlename/otomo/internal/infra/service"
 	"github.com/handlename/otomo/internal/testutil"
 	"github.com/samber/lo"
@@ -88,7 +88,7 @@ func Test_ClassifySlackEventAndPublish_handleAppMention(t *testing.T) {
 	assert.Equal(t, expect, output)
 	require.Equal(t, 1, len(mockPublisher.Published))
 
-	data, ok := mockPublisher.Published[0].Data().(communication.InstructionReceivedData)
+	data, ok := mockPublisher.Published[0].Data().(chat.InstructionReceivedData)
 	require.True(t, ok)
 
 	assert.Equal(t, service.Time.UnixNanoToSlackID(now.UnixNano()), data.MessageID)

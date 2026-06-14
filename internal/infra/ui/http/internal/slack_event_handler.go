@@ -5,7 +5,7 @@ import (
 
 	"github.com/handlename/otomo/config"
 	"github.com/handlename/otomo/internal/app/usecase"
-	"github.com/handlename/otomo/internal/domain/communication"
+	"github.com/handlename/otomo/internal/domain/chat"
 	"github.com/mackee/tanukirpc"
 )
 
@@ -19,7 +19,7 @@ type slackEventResponse struct {
 }
 
 func slackEventHandler(ctx tanukirpc.Context[*registry], req *slackEventRequest) (*slackEventResponse, error)  {
-	otomo:= communication.NewOtomo(ctx.Registry().Brain)
+	otomo:= chat.NewOtomo(ctx.Registry().Brain)
 	if p := config.Config.LLM.SystemPrompt; p != "" {
 		otomo.SetSystemPrompt(p)
 	}

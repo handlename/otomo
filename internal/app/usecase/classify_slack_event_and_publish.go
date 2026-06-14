@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	appservice "github.com/handlename/otomo/internal/app/service"
-	"github.com/handlename/otomo/internal/domain/communication"
+	"github.com/handlename/otomo/internal/domain/chat"
 	"github.com/handlename/otomo/internal/domain/core"
 	"github.com/handlename/otomo/internal/infra/service"
 	"github.com/morikuni/failure/v2"
@@ -91,7 +91,7 @@ func (u *ClassifySlackEventAndPublish) handleCallbackEvent(_ context.Context, in
 			)
 		}
 
-		ev, err := communication.NewInstructionReceived(communication.InstructionReceivedData{
+		ev, err := chat.NewInstructionReceived(chat.InstructionReceivedData{
 			ChannelID:      iev.Channel,
 			MessageID:      iev.EventTimeStamp,
 			ThreadID:       iev.ThreadTimeStamp,

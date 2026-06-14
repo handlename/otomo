@@ -9,7 +9,7 @@ import (
 
 	"github.com/handlename/otomo/config"
 	"github.com/handlename/otomo/internal/app/service"
-	"github.com/handlename/otomo/internal/domain/communication"
+	"github.com/handlename/otomo/internal/domain/chat"
 	"github.com/handlename/otomo/internal/errorcode"
 	"github.com/morikuni/failure/v2"
 	"github.com/samber/lo"
@@ -68,8 +68,8 @@ func (s *Slack) AddReaction(ctx context.Context, channelID, messageID string, em
 }
 
 // FetchThread implements service.Messenger.
-func (s *Slack) FetchThread(ctx context.Context, channelID string, threadID string) (communication.Thread, error) {
-	t := communication.NewThread(communication.ThreadID(threadID))
+func (s *Slack) FetchThread(ctx context.Context, channelID string, threadID string) (chat.Thread, error) {
+	t := chat.NewThread(chat.ThreadID(threadID))
 	more := true
 	next := ""
 
@@ -81,11 +81,11 @@ func (s *Slack) FetchThread(ctx context.Context, channelID string, threadID stri
 			return nil, failure.Wrap(err)
 		}
 
-		t.AddMessages(lo.Map(msgs, func(m slack.Message, _ int) communication.ThreadMessage {
+		t.AddMessages(lo.Map(msgs, func(m slack.Message, _ int) chat.ThreadMessage {
 			body := m.Text
 			body = strings.TrimSpace(body)
 			body = strings.TrimPrefix(body, fmt.Sprintf("<%s>", config.Config.Slack.BotUserID))
-			return communication.NewThreadMessage(communication.ThreadMessageID(m.Timestamp), m.User, body)
+			return chat.NewThreadMessage(chat.ThreadMessageID(m.Timestamp), m.User, body)
 		})...)
 	}
 

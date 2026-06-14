@@ -4,7 +4,7 @@ import (
 	"context"
 
 	appservice "github.com/handlename/otomo/internal/app/service"
-	"github.com/handlename/otomo/internal/domain/communication"
+	"github.com/handlename/otomo/internal/domain/chat"
 	"github.com/handlename/otomo/internal/domain/reasoning"
 	"github.com/handlename/otomo/internal/errorcode"
 	"github.com/morikuni/failure/v2"
@@ -14,7 +14,7 @@ type ReplyToUser struct {
 	messenger appservice.Messenger
 }
 
-func (u *ReplyToUser) Run(ctx context.Context, otomo communication.Otomo, userPrompt string) error {
+func (u *ReplyToUser) Run(ctx context.Context, otomo chat.Otomo, userPrompt string) error {
 	c := reasoning.NewContext()
 	c.SetUserPrompt(userPrompt)
 

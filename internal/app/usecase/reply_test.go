@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/handlename/otomo/internal/domain/communication"
+	"github.com/handlename/otomo/internal/domain/chat"
 	"github.com/handlename/otomo/internal/domain/reasoning"
 	"github.com/handlename/otomo/internal/infra/brain"
 	"github.com/handlename/otomo/internal/infra/service"
@@ -23,10 +23,10 @@ func Test_Reply_Run(t *testing.T) {
 			return reasoning.NewAnswer("mock response"), nil
 		},
 	})
-	mockOtomo := communication.NewOtomo(mockBrain)
+	mockOtomo := chat.NewOtomo(mockBrain)
 	mockMessenger := &service.MockMessenger{
-		FetchThreadFunc: func(ctx context.Context, channelID string, threadID string) (communication.Thread, error) {
-			return communication.NewThread(""), nil
+		FetchThreadFunc: func(ctx context.Context, channelID string, threadID string) (chat.Thread, error) {
+			return chat.NewThread(""), nil
 		},
 	}
 	uc := NewReply(mockOtomo, mockMessenger)
@@ -34,7 +34,7 @@ func Test_Reply_Run(t *testing.T) {
 	// Act
 
 	input := ReplyInput{
-		EventData: communication.InstructionReceivedData{
+		EventData: chat.InstructionReceivedData{
 			ChannelID:      "test-channel",
 			MessageID:      "test-message",
 			ThreadID:       "test-thread",
@@ -71,14 +71,14 @@ func Test_Reply_Run_Error(t *testing.T) {
 		},
 	})
 
-	mockOtomo := (communication.NewOtomo(mockBrain))
+	mockOtomo := (chat.NewOtomo(mockBrain))
 	mockMessenger := &service.MockMessenger{}
 	uc := NewReply(mockOtomo, mockMessenger)
 
 	// Act
 
 	input := ReplyInput{
-		EventData: communication.InstructionReceivedData{
+		EventData: chat.InstructionReceivedData{
 			ChannelID:      "test-channel",
 			MessageID:      "test-message",
 			ThreadID:       "test-thread",

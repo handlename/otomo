@@ -4,7 +4,7 @@ import (
 	"context"
 
 	appservice "github.com/handlename/otomo/internal/app/service"
-	"github.com/handlename/otomo/internal/domain/communication"
+	"github.com/handlename/otomo/internal/domain/chat"
 	"github.com/handlename/otomo/internal/domain/core"
 	"github.com/handlename/otomo/internal/domain/reasoning"
 	"github.com/morikuni/failure/v2"
@@ -12,17 +12,17 @@ import (
 )
 
 type ReplyInput struct {
-	EventData communication.InstructionReceivedData
+	EventData chat.InstructionReceivedData
 }
 
 type ReplyOutput struct{}
 
 type Reply struct {
-	otomo communication.Otomo
+	otomo chat.Otomo
 	slack appservice.Messenger
 }
 
-func NewReply(otomo communication.Otomo, slack appservice.Messenger) *Reply {
+func NewReply(otomo chat.Otomo, slack appservice.Messenger) *Reply {
 	return &Reply{
 		otomo: otomo,
 		slack: slack,
@@ -63,15 +63,15 @@ func (r *Reply) Run(ctx context.Context, input ReplyInput) (*ReplyOutput, error)
 }
 
 func (r *Reply) Subscribe(publisher appservice.Publisher) {
-	publisher.Subscribe(communication.KindInstructionReceived, func(ctx context.Context, eev core.Event) error {
-		ev, ok := eev.(*communication.InstructionReceived)
+	publisher.Subscribe(chat.KindInstructionReceived, func(ctx context.Context, eev core.Event) error {
+		ev, ok := eev.(*chat.InstructionReceived)
 		if !ok {
 			log.Error().Msg("failed to assert event")
 			return nil
 		}
 
 		input := ReplyInput{
-			EventData: ev.Data().(communication.InstructionReceivedData),
+			EventData: ev.Data().(chat.InstructionReceivedData),
 		}
 		_, err := r.Run(ctx, input)
 		return err

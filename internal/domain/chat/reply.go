@@ -1,4 +1,4 @@
-package communication
+package chat
 
 // Reply is a value object sent to the User as a result of Otomo interpreting an Instruction.
 type Reply interface {

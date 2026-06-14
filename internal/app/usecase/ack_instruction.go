@@ -4,7 +4,7 @@ import (
 	"context"
 
 	appservice "github.com/handlename/otomo/internal/app/service"
-	"github.com/handlename/otomo/internal/domain/communication"
+	"github.com/handlename/otomo/internal/domain/chat"
 	"github.com/handlename/otomo/internal/domain/core"
 	"github.com/handlename/otomo/internal/infra/service"
 	"github.com/rs/zerolog/log"
@@ -37,14 +37,14 @@ func (u *AckInstruction) Run(ctx context.Context, input AckInstructionInput) (*A
 }
 
 func (u *AckInstruction) Subscribe(publisher appservice.Publisher) {
-	publisher.Subscribe(communication.KindInstructionReceived, func(ctx context.Context, eev core.Event) error {
-		ev, ok := eev.(*communication.InstructionReceived)
+	publisher.Subscribe(chat.KindInstructionReceived, func(ctx context.Context, eev core.Event) error {
+		ev, ok := eev.(*chat.InstructionReceived)
 		if !ok {
 			log.Error().Msg("failed to assert event")
 			return nil
 		}
 
-		data := ev.Data().(communication.InstructionReceivedData)
+		data := ev.Data().(chat.InstructionReceivedData)
 		input := AckInstructionInput{
 			ChannelID:      data.ChannelID,
 			MessageID:      data.MessageID,

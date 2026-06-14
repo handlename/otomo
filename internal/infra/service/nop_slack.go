@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/handlename/otomo/internal/app/service"
-	"github.com/handlename/otomo/internal/domain/communication"
+	"github.com/handlename/otomo/internal/domain/chat"
 )
 
 var _ service.Messenger = (*NopSlack)(nil)
@@ -14,7 +14,7 @@ type NopSlack struct {
 }
 
 // FetchThread implements service.Messenger.
-func (n *NopSlack) FetchThread(ctx context.Context, channelID string, threadID string) (communication.Thread, error) {
+func (n *NopSlack) FetchThread(ctx context.Context, channelID string, threadID string) (chat.Thread, error) {
 	panic("unimplemented")
 }
 
