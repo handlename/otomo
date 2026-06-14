@@ -1,53 +1,53 @@
-package valueobject_test
+package core_test
 
 import (
 	"testing"
 
-	vo "github.com/handlename/otomo/internal/domain/valueobject"
+	"github.com/handlename/otomo/internal/domain/core"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_Prompt_String(t *testing.T) {
 	tests := []struct {
 		name     string
-		prompt   vo.Prompt
+		prompt   core.Prompt
 		expected string
 	}{
 		{
 			name:     "empty prompt",
-			prompt:   vo.NewPrompt("", "", []vo.Prompt{}),
+			prompt:   core.NewPrompt("", "", []core.Prompt{}),
 			expected: "",
 		},
 		{
 			name: "complex prompt",
-			prompt: vo.NewPrompt(
+			prompt: core.NewPrompt(
 				"",
 				"",
-				[]vo.Prompt{
-					vo.NewPlainPrompt("plain0-1"),
-					vo.NewPrompt(
+				[]core.Prompt{
+					core.NewPlainPrompt("plain0-1"),
+					core.NewPrompt(
 						"tag1",
 						"",
-						[]vo.Prompt{
-							vo.NewPlainPrompt("plain1-1"),
+						[]core.Prompt{
+							core.NewPlainPrompt("plain1-1"),
 						},
 					),
-					vo.NewPrompt(
+					core.NewPrompt(
 						"tag2",
 						"",
-						[]vo.Prompt{
-							vo.NewPlainPrompt("plain2-1"),
-							vo.NewPlainPrompt("plain2-2"),
-							vo.NewPrompt(
+						[]core.Prompt{
+							core.NewPlainPrompt("plain2-1"),
+							core.NewPlainPrompt("plain2-2"),
+							core.NewPrompt(
 								"tag2-1",
 								"",
-								[]vo.Prompt{
-									vo.NewPlainPrompt("plain2-1-1"),
+								[]core.Prompt{
+									core.NewPlainPrompt("plain2-1-1"),
 								},
 							),
 						},
 					),
-					vo.NewPlainPrompt("plain0-2"),
+					core.NewPlainPrompt("plain0-2"),
 				},
 			),
 			expected: `plain0-1
