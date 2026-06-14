@@ -12,7 +12,7 @@ import (
 
 type registry struct {
 	Slack *service.Slack
-	Brain reasoning.Brain
+	Brain *reasoning.Brain
 }
 
 func NewRegistry(ctx context.Context) (*registry, error) {

@@ -19,7 +19,7 @@ func Test_Reply_Run(t *testing.T) {
 	// Arrange
 
 	mockBrain := reasoning.NewBrain(&brain.Mock{
-		ThinkFunc: func(context.Context, reasoning.Context) (*reasoning.Answer, error) {
+		ThinkFunc: func(context.Context, *reasoning.Context) (*reasoning.Answer, error) {
 			return reasoning.NewAnswer("mock response"), nil
 		},
 	})
@@ -64,7 +64,7 @@ func Test_Reply_Run_WithThread(t *testing.T) {
 	// Arrange
 	var receivedPrompt string
 	mockBrain := reasoning.NewBrain(&brain.Mock{
-		ThinkFunc: func(ctx context.Context, c reasoning.Context) (*reasoning.Answer, error) {
+		ThinkFunc: func(ctx context.Context, c *reasoning.Context) (*reasoning.Answer, error) {
 			receivedPrompt = c.Prompt().String()
 			return reasoning.NewAnswer("mock response"), nil
 		},
@@ -114,7 +114,7 @@ func Test_Reply_Run_Error(t *testing.T) {
 	// Create mock brain with error
 	mockError := assert.AnError
 	mockBrain := reasoning.NewBrain(&brain.Mock{
-		ThinkFunc: func(ctx context.Context, c reasoning.Context) (*reasoning.Answer, error) {
+		ThinkFunc: func(ctx context.Context, c *reasoning.Context) (*reasoning.Answer, error) {
 			return nil, mockError
 		},
 	})

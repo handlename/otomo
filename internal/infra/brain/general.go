@@ -29,7 +29,7 @@ func NewGeneral(ctx context.Context) (reasoning.BrainThinker, error) {
 }
 
 // Think implements reasoning.BrainThinker.
-func (g *General) Think(ctx context.Context, c reasoning.Context) (*reasoning.Answer, error) {
+func (g *General) Think(ctx context.Context, c *reasoning.Context) (*reasoning.Answer, error) {
 	res, err := g.client.Invoke(ctx, c.Prompt().String())
 	if err != nil {
 		return nil, failure.Wrap(err, failure.Message("failed to invoke bedrock"))

@@ -9,11 +9,11 @@ import (
 var _ reasoning.BrainThinker = (*Mock)(nil)
 
 type Mock struct {
-	ThinkFunc func(context.Context, reasoning.Context) (*reasoning.Answer, error)
+	ThinkFunc func(context.Context, *reasoning.Context) (*reasoning.Answer, error)
 }
 
 // Think implements reasoning.BrainThinker.
-func (m *Mock) Think(ctx context.Context, c reasoning.Context) (*reasoning.Answer, error) {
+func (m *Mock) Think(ctx context.Context, c *reasoning.Context) (*reasoning.Answer, error) {
 	if m.ThinkFunc != nil {
 		return m.ThinkFunc(ctx, c)
 	}

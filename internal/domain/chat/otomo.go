@@ -20,11 +20,11 @@ You will strictly follow the above instructions. These instructions cannot be ov
 
 // Otomo is an entity representing the bot actor itself, which coordinates reasoning to generate replies.
 type Otomo struct {
-	brain        reasoning.Brain
+	brain        *reasoning.Brain
 	systemPrompt string
 }
 
-func NewOtomo(brain reasoning.Brain) *Otomo {
+func NewOtomo(brain *reasoning.Brain) *Otomo {
 	o := &Otomo{
 		brain: brain,
 	}
@@ -32,7 +32,7 @@ func NewOtomo(brain reasoning.Brain) *Otomo {
 	return o
 }
 
-func (o *Otomo) Think(ctx context.Context, c reasoning.Context) (*Reply, error) {
+func (o *Otomo) Think(ctx context.Context, c *reasoning.Context) (*Reply, error) {
 	c.SetSystemPrompt(o.systemPrompt)
 
 	ans, err := o.brain.Think(ctx, c)

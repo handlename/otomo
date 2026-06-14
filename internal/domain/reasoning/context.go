@@ -1,55 +1,44 @@
 package reasoning
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/handlename/otomo/internal/domain/core"
 	"github.com/samber/lo"
 )
 
-type ContextRefresher func(context.Context, Context) error
-
 // Context is an entity that accumulates necessary information (prompts, history) for reasoning.
-type Context interface {
-	SetMessages([]core.Message)
-	SetSystemPrompt(string)
-	SetUserPrompt(string)
-	GetUserPrompt() *core.Prompt
-	Prompt() *core.Prompt
+type Context struct {
+	systemPrompt *core.Prompt
+	userPrompt   *core.Prompt
+	messages     []core.Message
 }
 
-func NewContext() Context {
-	return &ct{
+func NewContext() *Context {
+	return &Context{
 		systemPrompt: core.NewPrompt("", "", []*core.Prompt{}),
 		userPrompt:   core.NewPrompt("", "", []*core.Prompt{}),
 		messages:     []core.Message{},
 	}
 }
 
-type ct struct {
-	systemPrompt *core.Prompt
-	userPrompt   *core.Prompt
-	messages     []core.Message
-}
-
-func (c *ct) GetUserPrompt() *core.Prompt {
+func (c *Context) GetUserPrompt() *core.Prompt {
 	return c.userPrompt
 }
 
-func (c *ct) SetSystemPrompt(body string) {
+func (c *Context) SetSystemPrompt(body string) {
 	c.systemPrompt = core.NewPrompt(core.PromptTagSystem, body, []*core.Prompt{})
 }
 
-func (c *ct) SetUserPrompt(body string) {
+func (c *Context) SetUserPrompt(body string) {
 	c.userPrompt = core.NewPrompt(core.PromptTagUser, body, []*core.Prompt{})
 }
 
-func (c *ct) SetMessages(messages []core.Message) {
+func (c *Context) SetMessages(messages []core.Message) {
 	c.messages = messages
 }
 
-func (c *ct) Prompt() *core.Prompt {
+func (c *Context) Prompt() *core.Prompt {
 	return core.NewPrompt(
 		"",
 		"",

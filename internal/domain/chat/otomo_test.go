@@ -10,12 +10,12 @@ import (
 
 type dummyThinker struct{}
 
-func (d *dummyThinker) Think(ctx context.Context, c reasoning.Context) (*reasoning.Answer, error) {
+func (d *dummyThinker) Think(ctx context.Context, c *reasoning.Context) (*reasoning.Answer, error) {
 	return reasoning.NewAnswer("dummy reply"), nil
 }
 
 func TestOtomo_Think(t *testing.T) {
-	var brain reasoning.Brain = reasoning.NewBrain(&dummyThinker{})
+	brain := reasoning.NewBrain(&dummyThinker{})
 	o := chat.NewOtomo(brain)
 	
 	ctx := context.Background()
