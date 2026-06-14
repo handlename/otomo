@@ -1,6 +1,6 @@
-package entity
+package reasoning
 
-// Answer is the result of Otomo thinking based on the Instruction.
+// Answer is a value object representing the outcome of Brain reasoning.
 type Answer struct {
 	body string
 }
