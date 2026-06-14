@@ -68,23 +68,23 @@ func (s *Slack) AddReaction(ctx context.Context, channelID, messageID string, em
 }
 
 // FetchThread implements service.Messenger.
-func (s *Slack) FetchThread(ctx context.Context, channelID string, threadID string) (chat.Thread, error) {
+func (s *Slack) FetchThread(ctx context.Context, channelID string, threadID string) (*chat.Thread, error) {
 	t := chat.NewThread(chat.ThreadID(threadID))
 	more := true
 	next := ""
 
 	for more {
-		msgs := []slack.Message{}
+		var msgs []slack.Message
 		var err error
 		msgs, more, next, err = s.fetchThread(ctx, channelID, threadID, next)
 		if err != nil {
 			return nil, failure.Wrap(err)
 		}
 
-		t.AddMessages(lo.Map(msgs, func(m slack.Message, _ int) chat.ThreadMessage {
+		t.AddMessages(lo.Map(msgs, func(m slack.Message, _ int) *chat.ThreadMessage {
 			body := m.Text
-			body = strings.TrimSpace(body)
 			body = strings.TrimPrefix(body, fmt.Sprintf("<%s>", config.Config.Slack.BotUserID))
+			body = strings.TrimSpace(body)
 			return chat.NewThreadMessage(chat.ThreadMessageID(m.Timestamp), m.User, body)
 		})...)
 	}

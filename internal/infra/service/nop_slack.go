@@ -14,7 +14,7 @@ type NopSlack struct {
 }
 
 // FetchThread implements service.Messenger.
-func (n *NopSlack) FetchThread(ctx context.Context, channelID string, threadID string) (chat.Thread, error) {
+func (n *NopSlack) FetchThread(ctx context.Context, channelID string, threadID string) (*chat.Thread, error) {
 	panic("unimplemented")
 }
 

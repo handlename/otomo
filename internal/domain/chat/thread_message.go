@@ -5,39 +5,32 @@ import "fmt"
 type ThreadMessageID string
 
 // ThreadMessage is an entity representing a message within a Thread.
-type ThreadMessage interface {
-	ID() ThreadMessageID
-	User() string
-	Body() string
-	String() string
-}
-
-type threadMessage struct {
+type ThreadMessage struct {
 	id   ThreadMessageID
 	user string
 	body string
 }
 
-func NewThreadMessage(id ThreadMessageID, user, body string) ThreadMessage {
-	return &threadMessage{
+func NewThreadMessage(id ThreadMessageID, user, body string) *ThreadMessage {
+	return &ThreadMessage{
 		id:   id,
 		user: user,
 		body: body,
 	}
 }
 
-func (t *threadMessage) String() string {
+func (t *ThreadMessage) String() string {
 	return fmt.Sprintf("id=%s user=%s body=%q", t.ID(), t.User(), t.Body())
 }
 
-func (t *threadMessage) User() string {
+func (t *ThreadMessage) User() string {
 	return t.user
 }
 
-func (t *threadMessage) Body() string {
+func (t *ThreadMessage) Body() string {
 	return t.body
 }
 
-func (t *threadMessage) ID() ThreadMessageID {
+func (t *ThreadMessage) ID() ThreadMessageID {
 	return t.id
 }
