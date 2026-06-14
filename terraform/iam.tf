@@ -66,4 +66,16 @@ data "aws_iam_policy_document" "lambda" {
       "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.id}:parameter/${local.service}/*",
     ]
   }
+
+  statement {
+    actions = [
+      "aws-marketplace:ViewSubscriptions",
+      "aws-marketplace:Subscribe",
+      "aws-marketplace:Unsubscribe",
+    ]
+
+    effect = "Allow"
+
+    resources = ["*"]
+  }
 }
