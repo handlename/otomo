@@ -1,0 +1,243 @@
+# Otomo - Design Document
+
+## Overview
+
+Otomo is a Slack bot powered by generative AI that provides intelligent responses to user interactions. The bot can respond to mentions, summarize threads, and perform various AI-powered tasks within Slack channels.
+
+## Architecture
+
+The project follows Clean Architecture principles with clear separation of concerns across multiple layers:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     Infrastructure Layer                     │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌──────────────┐ │
+│  │  AWS Bedrock    │  │   Slack API     │  │   Storage    │ │
+│  │   (AI Brain)    │  │                 │  │              │ │
+│  └─────────────────┘  └─────────────────┘  └──────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+                                │
+┌─────────────────────────────────────────────────────────────┐
+│                        Presentation Layer                    │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌──────────────┐ │
+│  │   HTTP Router   │  │   CLI Commands  │  │   Lambda     │ │
+│  │   (Slack API)   │  │                 │  │   Handler    │ │
+│  └─────────────────┘  └─────────────────┘  └──────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+                                │
+┌─────────────────────────────────────────────────────────────┐
+│                       Application Layer                      │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌──────────────┐ │
+│  │    Use Cases    │  │    Services     │  │   Event      │ │
+│  │                 │  │                 │  │   Handlers   │ │
+│  └─────────────────┘  └─────────────────┘  └──────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+                                │
+┌─────────────────────────────────────────────────────────────┐
+│                        Domain Layer                          │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌──────────────┐ │
+│  │    Entities     │  │  Value Objects  │  │  Repositories│ │
+│  │                 │  │                 │  │  (Interfaces)│ │
+│  └─────────────────┘  └─────────────────┘  └──────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Technology Stack
+
+- **Language**: Go 1.24
+- **AI Provider**: AWS Bedrock (Claude models)
+- **Chat Platform**: Slack API
+- **Deployment**: AWS Lambda + Function URLs
+- **Infrastructure**: Terraform
+- **HTTP Framework**: chi router with Ridge (AWS Lambda HTTP adapter)
+- **Configuration**: TOML-based with environment variable templating
+- **Logging**: zerolog
+- **Testing**: Go standard testing + testify
+
+## Directory Structure
+
+```
+otomo/
+├── .github/                    # GitHub workflows and configuration
+│   └── workflows/
+├── cli/                        # Command-line interface
+│   ├── cli.go                 # Main CLI entry point
+│   └── command/               # CLI subcommands
+├── cmd/                        # Application entry points
+│   └── otomo/
+│       └── main.go            # Main application entry
+├── config/                     # Configuration management
+├── internal/                   # Internal application code
+│   ├── app/                   # Application layer
+│   │   ├── service/           # Application services
+│   │   └── usecase/           # Use case implementations
+│   ├── domain/                # Domain layer (business logic)
+│   │   ├── entity/            # Domain entities
+│   │   ├── event/             # Domain events
+│   │   ├── repository/        # Repository interfaces
+│   │   └── valueobject/       # Value objects
+│   ├── errorcode/             # Error code definitions
+│   ├── infra/                 # Infrastructure layer
+│   │   ├── brain/             # AI brain implementations
+│   │   ├── repository/        # Repository implementations
+│   │   ├── service/           # External service integrations
+│   │   └── ui/                # User interface (HTTP handlers)
+│   │       └── http/
+│   │           ├── middleware/
+│   │           └── slack/
+│   └── testutil/              # Testing utilities
+├── lambda/                     # AWS Lambda deployment files
+│   ├── function.jsonnet       # Lambda function configuration
+│   └── bootstrap              # Lambda bootstrap binary
+├── terraform/                  # Infrastructure as Code
+│   ├── main.tf               # Main Terraform configuration
+│   ├── lambda.tf             # Lambda-specific resources
+│   ├── iam.tf                # IAM roles and policies
+│   └── modules/              # Terraform modules
+├── app.go                     # Main application logic
+├── config.toml               # Configuration template
+├── go.mod                    # Go module dependencies
+├── logger.go                 # Logging configuration
+├── version.go                # Version information
+├── Makefile                  # Build and deployment automation
+└── README.md                 # Project documentation
+```
+
+## Core Components
+
+### Domain Layer
+
+#### Entities
+- **Brain**: Represents the AI brain capability
+- **Thread**: Slack thread representation
+- **ThreadMessage**: Individual messages in threads
+- **Reply**: Bot responses
+- **Answer**: AI-generated answers
+- **Tool**: Available tools/functions for AI
+- **Context**: Conversation context
+
+#### Value Objects
+- **Prompt**: AI prompt construction and management
+
+#### Events
+- **InstructionReceived**: Domain event for new user instructions
+- Event publishing and subscription infrastructure
+
+### Application Layer
+
+#### Use Cases
+- **ReplyToUser**: Handle user interactions and generate responses
+- **ClassifySlackEventAndPublish**: Process incoming Slack events
+- **AckInstruction**: Acknowledge received instructions
+
+#### Services
+- **Messenger**: Message sending abstraction
+
+### Infrastructure Layer
+
+#### Brain Implementations
+- **General**: Standard AI brain implementation
+- **Straw**: Lightweight brain for testing
+- **Mock**: Testing mock implementation
+
+#### External Services
+- **Bedrock**: AWS Bedrock integration for AI
+- **Slack**: Slack API integration
+- **EventPublisher**: Event publishing service
+
+#### HTTP Interface
+- **Router**: HTTP request routing
+- **Middleware**: Request processing middleware
+  - Access logging
+  - Slack event verification
+  - Error recovery
+  - Retry handling
+- **SlackEventHandler**: Slack webhook handling
+
+## Configuration
+
+The application uses TOML configuration with environment variable templating:
+
+```toml
+port = 8080
+
+[slack]
+signing_secret = "{{ must_env `SLACK_SIGNING_SECRET` }}"
+bot_user_id = "@U08K30DRHRP"
+bot_token = "{{ must_env `SLACK_BOT_TOKEN` }}"
+app_token = "{{ must_env `SLACK_APP_TOKEN` }}"
+
+[bedrock]
+model_type = "claude"
+model_id = "{{ must_env `BEDROCK_MODEL_ID` }}"
+```
+
+## Deployment Architecture
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│                 │    │                 │    │                 │
+│   Slack API     │───▶│  AWS Lambda     │───▶│  AWS Bedrock    │
+│                 │    │  (Function URL) │    │  (Claude AI)    │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                              │
+                              ▼
+                       ┌─────────────────┐
+                       │                 │
+                       │  Lambda Logs    │
+                       │  (CloudWatch)   │
+                       └─────────────────┘
+```
+
+### Lambda Deployment
+- Built as a single binary using Go's AWS Lambda runtime
+- Deployed via Terraform with Function URLs for HTTP access
+- Uses Ridge framework for HTTP request handling in Lambda environment
+
+### Infrastructure Management
+- Terraform for infrastructure provisioning
+- Automated builds with GoReleaser
+- GitHub Actions for CI/CD
+
+## Key Features
+
+1. **Slack Integration**
+   - Event-driven architecture for Slack webhooks
+   - Message processing and response generation
+   - Thread summarization capabilities
+
+2. **AI-Powered Responses**
+   - Integration with AWS Bedrock (Claude models)
+   - Context-aware conversation handling
+   - Customizable AI brain implementations
+
+3. **Event-Driven Architecture**
+   - Domain events for loose coupling
+   - Event publishing and subscription patterns
+   - Asynchronous processing capabilities
+
+4. **Clean Architecture**
+   - Clear separation of concerns
+   - Dependency inversion
+   - Testable components with mock implementations
+
+5. **Production Ready**
+   - Comprehensive error handling
+   - Structured logging
+   - Health checks and monitoring
+   - Retry mechanisms for external services
+
+## Testing Strategy
+
+- Unit tests for domain logic
+- Integration tests for external service interactions
+- Mock implementations for testing isolation
+- Test utilities for common testing patterns
+
+## Build and Development
+
+- **Build Tool**: Make-based build system
+- **Dependency Management**: Go modules
+- **Version Management**: mise for tool version management
+- **Release Management**: GoReleaser for automated releases
+- **Code Quality**: Static analysis and linting integration
