@@ -114,3 +114,15 @@ func (s *Slack) fetchThread(ctx context.Context, channelID, threadID, cursor str
 
 	return msgs, more, next, nil
 }
+
+// UploadFile implements service.Messenger.
+func (s *Slack) UploadFile(ctx context.Context, channelID, threadTS, filename, content string) error {
+	_, err := s.client.UploadFileV2Context(ctx, slack.UploadFileV2Parameters{
+		Channel:         channelID,
+		ThreadTimestamp: threadTS,
+		Filename:        filename,
+		Content:         content,
+	})
+	return err
+}
+

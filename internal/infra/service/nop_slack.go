@@ -28,3 +28,9 @@ func (n *NopSlack) PostMessage(ctx context.Context, channelID string, messageID 
 	n.Memory += msg
 	return nil
 }
+
+// UploadFile implements service.Messenger.
+func (n *NopSlack) UploadFile(ctx context.Context, channelID, threadTS, filename, content string) error {
+	return nil
+}
+
