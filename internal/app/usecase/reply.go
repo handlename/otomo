@@ -32,7 +32,7 @@ func NewReply(otomo *chat.Otomo, slack appservice.Messenger) *Reply {
 
 func (r *Reply) Run(ctx context.Context, input ReplyInput) (*ReplyOutput, error) {
 	c := reasoning.NewContext()
-	c.SetUserPrompt(input.EventData.RawInstruction())
+	c.SetUserPrompt(core.PromptBody(input.EventData.RawInstruction()))
 
 	if input.EventData.ThreadID() != "" {
 		thread, err := r.slack.FetchThread(ctx, input.EventData.ChannelID(), input.EventData.ThreadID())
@@ -73,11 +73,11 @@ func (r *Reply) Run(ctx context.Context, input ReplyInput) (*ReplyOutput, error)
 func (r *Reply) handleError(ctx context.Context, data *chat.InstructionReceivedData, targetErr error) {
 	cfg := config.Config.Slack.ErrorFeedback
 
-	var threadTS string
+	var threadTS chat.ThreadID
 	if data.ThreadID() != "" {
 		threadTS = data.ThreadID()
 	} else {
-		threadTS = data.MessageID()
+		threadTS = chat.ThreadID(data.MessageID())
 	}
 
 	if cfg.GetEnableReaction() {

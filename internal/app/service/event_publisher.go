@@ -8,7 +8,7 @@ import (
 
 // Publisher is an application service interface for publishing domain events.
 type Publisher interface {
-	Subscribe(core.Kind, Subscriber)
+	Subscribe(core.EventKind, Subscriber)
 	Publish(context.Context, core.Event) error
 }
 

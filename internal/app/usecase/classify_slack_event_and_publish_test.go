@@ -2,17 +2,23 @@ package usecase
 
 import (
 	"encoding/json"
+	"fmt"
 	"testing"
 	"time"
 
 	"github.com/handlename/otomo/internal/domain/chat"
-	"github.com/handlename/otomo/internal/infra/service"
-	"github.com/handlename/otomo/internal/testutil"
+	"github.com/handlename/otomo/internal/domain/core"
 	"github.com/samber/lo"
 	"github.com/slack-go/slack/slackevents"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func unixNanoToSlackID(nanos int64) string {
+	seconds := float64(nanos) / 1e9
+	truncated := float64(int64(seconds*1e6)) / 1e6
+	return fmt.Sprintf("%f", truncated)
+}
 
 func Test_ClassifySlackEventAndPublish_handleChallenge(t *testing.T) {
 	ctx := t.Context()
@@ -28,7 +34,7 @@ func Test_ClassifySlackEventAndPublish_handleChallenge(t *testing.T) {
 		})),
 	}
 
-	mockPublisher := testutil.NewMockEventPublisher()
+	mockPublisher := &mockEventPublisher{}
 	uc := NewClassifySlackEventAndPublish(mockPublisher)
 
 	// Act
@@ -52,6 +58,7 @@ func Test_ClassifySlackEventAndPublish_handleAppMention(t *testing.T) {
 	// Arrange
 
 	now := time.Now()
+	tsStr := unixNanoToSlackID(now.UnixNano())
 
 	sev := slackevents.EventsAPIEvent{
 		Type: slackevents.CallbackEvent,
@@ -59,9 +66,9 @@ func Test_ClassifySlackEventAndPublish_handleAppMention(t *testing.T) {
 			Data: &slackevents.AppMentionEvent{
 				Text:            "hello, otomo!",
 				Channel:         "C1234",
-				ThreadTimeStamp: service.Time.UnixNanoToSlackID(now.UnixNano()),
-				EventTimeStamp:  service.Time.UnixNanoToSlackID(now.UnixNano()),
-				TimeStamp:       service.Time.UnixNanoToSlackID(now.UnixNano()),
+				ThreadTimeStamp: tsStr,
+				EventTimeStamp:  tsStr,
+				TimeStamp:       tsStr,
 			},
 		},
 	}
@@ -71,7 +78,7 @@ func Test_ClassifySlackEventAndPublish_handleAppMention(t *testing.T) {
 		RawBody: body,
 	}
 
-	mockPublisher := testutil.NewMockEventPublisher()
+	mockPublisher := &mockEventPublisher{}
 	uc := NewClassifySlackEventAndPublish(mockPublisher)
 
 	// Act
@@ -91,8 +98,37 @@ func Test_ClassifySlackEventAndPublish_handleAppMention(t *testing.T) {
 	data, ok := mockPublisher.Published[0].Data().(*chat.InstructionReceivedData)
 	require.True(t, ok)
 
-	assert.Equal(t, service.Time.UnixNanoToSlackID(now.UnixNano()), data.MessageID())
-	assert.Equal(t, service.Time.UnixNanoToSlackID(now.UnixNano()), data.ThreadID())
-	assert.Equal(t, "hello, otomo!", data.RawInstruction())
+	assert.Equal(t, core.MessageID(tsStr), data.MessageID())
+	assert.Equal(t, chat.ThreadID(tsStr), data.ThreadID())
+	assert.Equal(t, chat.RawInstruction("hello, otomo!"), data.RawInstruction())
 	assert.Equal(t, now.Unix(), data.SentAt().Unix())
+}
+
+func Test_ClassifySlackEventAndPublish_handleAppMention_InvalidTimestamp(t *testing.T) {
+	ctx := t.Context()
+
+	sev := slackevents.EventsAPIEvent{
+		Type: slackevents.CallbackEvent,
+		InnerEvent: slackevents.EventsAPIInnerEvent{
+			Data: &slackevents.AppMentionEvent{
+				Text:            "hello, otomo!",
+				Channel:         "C1234",
+				ThreadTimeStamp: "invalid-timestamp",
+				EventTimeStamp:  "invalid-timestamp",
+				TimeStamp:       "invalid-timestamp",
+			},
+		},
+	}
+	body := lo.Must(json.Marshal(sev))
+	input := ClassifySlackEventAndPublishInput{
+		Event:   sev,
+		RawBody: body,
+	}
+
+	mockPublisher := &mockEventPublisher{}
+	uc := NewClassifySlackEventAndPublish(mockPublisher)
+
+	_, err := uc.Run(ctx, input)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "invalid timestamp format")
 }

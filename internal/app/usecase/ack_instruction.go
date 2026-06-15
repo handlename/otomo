@@ -6,26 +6,25 @@ import (
 	appservice "github.com/handlename/otomo/internal/app/service"
 	"github.com/handlename/otomo/internal/domain/chat"
 	"github.com/handlename/otomo/internal/domain/core"
-	"github.com/handlename/otomo/internal/infra/service"
 	"github.com/rs/zerolog/log"
 )
 
 const ackEmoji = "eyes"
 
 type AckInstructionInput struct {
-	ChannelID      string
-	MessageID      string
-	ThreadID       string
-	RawInstruction string
+	ChannelID      core.ChannelID
+	MessageID      core.MessageID
+	ThreadID       chat.ThreadID
+	RawInstruction chat.RawInstruction
 }
 
 type AckInstructionOutput struct{}
 
 type AckInstruction struct {
-	slack *service.Slack
+	slack appservice.Messenger
 }
 
-func NewAckInstruction(slack *service.Slack) *AckInstruction {
+func NewAckInstruction(slack appservice.Messenger) *AckInstruction {
 	return &AckInstruction{
 		slack: slack,
 	}
