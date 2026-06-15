@@ -168,6 +168,11 @@ bot_user_id = "@U08K30DRHRP"
 bot_token = "{{ must_env `SLACK_BOT_TOKEN` }}"
 app_token = "{{ must_env `SLACK_APP_TOKEN` }}"
 
+[slack.error_feedback]
+enable_reaction = true
+reaction_emoji = "warning"
+enable_post_snippet = false
+
 [bedrock]
 model_type = "claude"
 model_id = "{{ must_env `BEDROCK_MODEL_ID` }}"

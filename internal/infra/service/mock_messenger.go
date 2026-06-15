@@ -10,11 +10,19 @@ import (
 
 var _ aservice.Messenger = (*MockMessenger)(nil)
 
+type UploadFileCall struct {
+	ChannelID string
+	ThreadTS  string
+	Filename  string
+	Content   string
+}
+
 // MockMessenger is a mock implementation of service.Messenger
 type MockMessenger struct {
 	PostMessageFunc func(ctx context.Context, channelID, messageID, message string) error
 	AddReactionFunc func(ctx context.Context, channelID, messageID string, emoji string) error
 	FetchThreadFunc func(ctx context.Context, channelID string, threadID string) (*chat.Thread, error)
+	UploadFileFunc  func(ctx context.Context, channelID, threadTS, filename, content string) error
 
 	History []struct {
 		ChannelID string
@@ -26,6 +34,7 @@ type MockMessenger struct {
 		MessageID string
 		Emoji     string
 	}
+	UploadFileHistory []UploadFileCall
 }
 
 // FetchThread implements service.Messenger.
@@ -77,3 +86,18 @@ func (m *MockMessenger) AddReaction(ctx context.Context, channelID, messageID st
 
 	return nil
 }
+
+// UploadFile implements service.Messenger.
+func (m *MockMessenger) UploadFile(ctx context.Context, channelID, threadTS, filename, content string) error {
+	m.UploadFileHistory = append(m.UploadFileHistory, UploadFileCall{
+		ChannelID: channelID,
+		ThreadTS:  threadTS,
+		Filename:  filename,
+		Content:   content,
+	})
+	if m.UploadFileFunc != nil {
+		return m.UploadFileFunc(ctx, channelID, threadTS, filename, content)
+	}
+	return nil
+}
+

@@ -15,10 +15,38 @@ type Root struct {
 }
 
 type Slack struct {
-	SigningSecret string `toml:"signing_secret" validate:"required"`
-	BotUserID     string `toml:"bot_user_id" validate:"required"`
-	BotToken      string `toml:"bot_token" validate:"required"`
-	AppToken      string `toml:"app_token" validate:"required"`
+	SigningSecret string        `toml:"signing_secret" validate:"required"`
+	BotUserID     string        `toml:"bot_user_id" validate:"required"`
+	BotToken      string        `toml:"bot_token" validate:"required"`
+	AppToken      string        `toml:"app_token" validate:"required"`
+	ErrorFeedback ErrorFeedback `toml:"error_feedback"`
+}
+
+type ErrorFeedback struct {
+	EnableReaction    *bool  `toml:"enable_reaction"`
+	ReactionEmoji     string `toml:"reaction_emoji"`
+	EnablePostSnippet *bool  `toml:"enable_post_snippet"`
+}
+
+func (e ErrorFeedback) GetEnableReaction() bool {
+	if e.EnableReaction == nil {
+		return true
+	}
+	return *e.EnableReaction
+}
+
+func (e ErrorFeedback) GetReactionEmoji() string {
+	if e.ReactionEmoji == "" {
+		return "warning"
+	}
+	return e.ReactionEmoji
+}
+
+func (e ErrorFeedback) GetEnablePostSnippet() bool {
+	if e.EnablePostSnippet == nil {
+		return false
+	}
+	return *e.EnablePostSnippet
 }
 
 type LLM struct {
