@@ -28,16 +28,18 @@ func (c *Context) GetUserPrompt() *core.Prompt {
 	return c.userPrompt
 }
 
-func (c *Context) SetSystemPrompt(body string) {
+func (c *Context) SetSystemPrompt(body core.PromptBody) {
 	c.systemPrompt, _ = core.NewPrompt(core.PromptTagSystem, body, []*core.Prompt{})
 }
 
-func (c *Context) SetUserPrompt(body string) {
+func (c *Context) SetUserPrompt(body core.PromptBody) {
 	c.userPrompt, _ = core.NewPrompt(core.PromptTagUser, body, []*core.Prompt{})
 }
 
 func (c *Context) SetMessages(messages []*core.Message) {
-	c.messages = messages
+	c.messages = lo.Filter(messages, func(msg *core.Message, _ int) bool {
+		return msg != nil
+	})
 }
 
 func (c *Context) Prompt() *core.Prompt {
@@ -46,14 +48,16 @@ func (c *Context) Prompt() *core.Prompt {
 		"",
 		[]*core.Prompt{
 			c.systemPrompt,
-			lo.Must(core.NewPrompt("thread", "", lo.Map(c.messages, func(msg *core.Message, _ int) *core.Prompt {
+			lo.Must(core.NewPrompt("thread", "", lo.Map(lo.Filter(c.messages, func(msg *core.Message, _ int) bool {
+				return msg != nil
+			}), func(msg *core.Message, _ int) *core.Prompt {
 				var tag core.PromptTag
 				if msg.User() != "" {
-					tag = core.PromptTag(fmt.Sprintf("message user=%s", msg.User()))
+					tag = core.PromptTag(fmt.Sprintf("message user=%s", string(msg.User())))
 				} else {
-					tag = core.PromptTag(fmt.Sprintf("message role=%s", msg.Role()))
+					tag = core.PromptTag(fmt.Sprintf("message role=%s", string(msg.Role())))
 				}
-				p, _ := core.NewPrompt(tag, msg.Body(), nil)
+				p, _ := core.NewPrompt(tag, core.PromptBody(msg.Body()), nil)
 				return p
 			}))),
 			c.userPrompt,
