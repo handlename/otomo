@@ -1,11 +1,8 @@
 ## Architecture
-- Adopt a Layered Architecture divided into 4 layers: Domain layer/Application layer/Presentation layer/Infrastructure layer
-- The Domain layer must not depend on any other layer
-- The Application layer depends only on the Domain layer
-- The Presentation layer depends on the Domain layer and Application layer
-- Other layers must not depend on the Infrastructure layer
-- Define interfaces when necessary to invert dependencies
-- Refer to DESIGN.md for specific configuration
+- Adopt a Layered Architecture divided into 4 layers: Domain layer/Application layer/Presentation layer/Infrastructure layer.
+- Enforce the **Always Valid Domain Model** principle for all domain layer designs (strict encapsulation, validation in constructors).
+- Refer to [ARCHITECTURE.md](./ARCHITECTURE.md) for core architectural principles and patterns.
+- Refer to [DESIGN.md](./DESIGN.md) for specific configuration.
 
 ## Coding
 - Follow general Go best practices
