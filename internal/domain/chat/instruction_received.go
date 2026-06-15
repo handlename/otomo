@@ -31,7 +31,12 @@ func NewInstructionReceived(data InstructionReceivedData) (*InstructionReceived,
 		return nil, failure.Wrap(err)
 	}
 
+	base, err := core.NewBaseEvent(KindInstructionReceived, data)
+	if err != nil {
+		return nil, failure.Wrap(err)
+	}
+
 	return &InstructionReceived{
-		BaseEvent: core.NewBaseEvent(KindInstructionReceived, data),
+		BaseEvent: base,
 	}, nil
 }

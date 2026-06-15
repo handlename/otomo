@@ -29,13 +29,16 @@ type BaseEvent struct {
 	payload any
 }
 
-func NewBaseEvent(kind Kind, payload any) BaseEvent {
+func NewBaseEvent(kind Kind, payload any) (BaseEvent, error) {
+	if kind == "" {
+		return BaseEvent{}, fmt.Errorf("event kind is required")
+	}
 	return BaseEvent{
 		id:      ID(uuid.New().String()),
 		kind:    kind,
 		ts:      time.Now(),
 		payload: payload,
-	}
+	}, nil
 }
 
 // Data implements Event.
