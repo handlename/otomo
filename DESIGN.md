@@ -6,41 +6,7 @@ Otomo is a Slack bot powered by generative AI that provides intelligent response
 
 ## Architecture
 
-The project follows Clean Architecture principles with clear separation of concerns across multiple layers:
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     Infrastructure Layer                     │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌──────────────┐ │
-│  │  AWS Bedrock    │  │   Slack API     │  │   Storage    │ │
-│  │   (AI Brain)    │  │                 │  │              │ │
-│  └─────────────────┘  └─────────────────┘  └──────────────┘ │
-└─────────────────────────────────────────────────────────────┘
-                                │
-┌─────────────────────────────────────────────────────────────┐
-│                        Presentation Layer                    │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌──────────────┐ │
-│  │   HTTP Router   │  │   CLI Commands  │  │   Lambda     │ │
-│  │   (Slack API)   │  │                 │  │   Handler    │ │
-│  └─────────────────┘  └─────────────────┘  └──────────────┘ │
-└─────────────────────────────────────────────────────────────┘
-                                │
-┌─────────────────────────────────────────────────────────────┐
-│                       Application Layer                      │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌──────────────┐ │
-│  │    Use Cases    │  │    Services     │  │   Event      │ │
-│  │                 │  │                 │  │   Handlers   │ │
-│  └─────────────────┘  └─────────────────┘  └──────────────┘ │
-└─────────────────────────────────────────────────────────────┘
-                                │
-┌─────────────────────────────────────────────────────────────┐
-│                        Domain Layer                          │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌──────────────┐ │
-│  │    Entities     │  │  Value Objects  │  │  Repositories│ │
-│  │                 │  │                 │  │  (Interfaces)│ │
-│  └─────────────────┘  └─────────────────┘  └──────────────┘ │
-└─────────────────────────────────────────────────────────────┘
-```
+For the core architectural principles, layer structure, and patterns, please refer to [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Technology Stack
 
@@ -104,56 +70,8 @@ otomo/
 
 ## Core Components
 
-### Domain Layer
+For the details of each layer, packages, and their responsibilities, please refer to [ARCHITECTURE.md#core-components--layer-responsibilities](./ARCHITECTURE.md#core-components--layer-responsibilities).
 
-#### Core Package (`core`)
-- **Prompt**: AI prompt construction and management (Value Object)
-- **Event**: Interface representing domain events (Entity)
-- **BaseEvent**: Helper for concrete events (Value Object)
-- **Message**: Generic chat message representation (Value Object)
-
-#### Reasoning Package (`reasoning`)
-- **Brain**: Represents the AI brain capability (Entity)
-- **Context**: Accumulates prompts and history for reasoning (Entity)
-- **Answer**: AI-generated answers (Value Object)
-
-#### Chat Package (`chat`)
-- **Otomo**: Core AI agent orchestrator (Entity)
-- **Thread**: Slack thread representation (Entity)
-- **ThreadMessage**: Individual messages in threads (Entity)
-- **Reply**: Bot responses (Value Object)
-- **InstructionReceived**: Event dispatched when instruction is received (Value Object)
-
-### Application Layer
-
-#### Use Cases
-- **ReplyToUser**: Handle user interactions and generate responses
-- **ClassifySlackEventAndPublish**: Process incoming Slack events
-- **AckInstruction**: Acknowledge received instructions
-
-#### Services
-- **Messenger**: Message sending abstraction
-
-### Infrastructure Layer
-
-#### Brain Implementations
-- **General**: Standard AI brain implementation
-- **Straw**: Lightweight brain for testing
-- **Mock**: Testing mock implementation
-
-#### External Services
-- **Bedrock**: AWS Bedrock integration for AI
-- **Slack**: Slack API integration
-- **EventPublisher**: Event publishing service
-
-#### HTTP Interface
-- **Router**: HTTP request routing
-- **Middleware**: Request processing middleware
-  - Access logging
-  - Slack event verification
-  - Error recovery
-  - Retry handling
-- **SlackEventHandler**: Slack webhook handling
 
 ## Configuration
 
