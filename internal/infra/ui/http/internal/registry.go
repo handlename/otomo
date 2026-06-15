@@ -21,8 +21,13 @@ func NewRegistry(ctx context.Context) (*registry, error) {
 		return nil, failure.Wrap(err)
 	}
 
+	b, err := reasoning.NewBrain(brainThinker)
+	if err != nil {
+		return nil, failure.Wrap(err)
+	}
+
 	return &registry{
 		Slack: service.NewSlack(config.Config.Slack.BotToken, config.Config.Slack.SigningSecret),
-		Brain: reasoning.NewBrain(brainThinker),
+		Brain: b,
 	}, nil
 }

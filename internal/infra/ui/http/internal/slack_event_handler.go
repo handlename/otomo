@@ -19,7 +19,10 @@ type slackEventResponse struct {
 }
 
 func slackEventHandler(ctx tanukirpc.Context[*registry], req *slackEventRequest) (*slackEventResponse, error)  {
-	otomo := chat.NewOtomo(ctx.Registry().Brain)
+	otomo, err := chat.NewOtomo(ctx.Registry().Brain)
+	if err != nil {
+		return nil, tanukirpc.WrapErrorWithStatus(http.StatusInternalServerError, err)
+	}
 	if p := config.Config.LLM.SystemPrompt; p != "" {
 		otomo.SetSystemPrompt(p)
 	}

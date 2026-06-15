@@ -41,7 +41,8 @@ type MockMessenger struct {
 func (m *MockMessenger) FetchThread(ctx context.Context, channelID string, threadID string) (*chat.Thread, error) {
 	if m.FetchThreadFunc == nil {
 		log.Warn().Msg("FetchThreadFunc is empty! you may set the func")
-		return chat.NewThread(""), nil
+		t, _ := chat.NewThread("dummy-thread-id")
+		return t, nil
 	}
 
 	return m.FetchThreadFunc(ctx, channelID, threadID)

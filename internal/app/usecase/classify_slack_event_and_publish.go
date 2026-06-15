@@ -91,13 +91,12 @@ func (u *ClassifySlackEventAndPublish) handleCallbackEvent(_ context.Context, in
 			)
 		}
 
-		ev, err := chat.NewInstructionReceived(chat.InstructionReceivedData{
-			ChannelID:      iev.Channel,
-			MessageID:      iev.EventTimeStamp,
-			ThreadID:       iev.ThreadTimeStamp,
-			RawInstruction: iev.Text,
-			SentAt:         *sentAt,
-		})
+		data, err := chat.NewInstructionReceivedData(iev.Channel, iev.EventTimeStamp, iev.ThreadTimeStamp, iev.Text, *sentAt)
+		if err != nil {
+			return nil, failure.Wrap(err)
+		}
+
+		ev, err := chat.NewInstructionReceived(data)
 		if err != nil {
 			return nil, failure.Wrap(err)
 		}

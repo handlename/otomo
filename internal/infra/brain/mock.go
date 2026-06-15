@@ -18,5 +18,9 @@ func (m *Mock) Think(ctx context.Context, c *reasoning.Context) (*reasoning.Answ
 		return m.ThinkFunc(ctx, c)
 	}
 
-	return reasoning.NewAnswer("mock response"), nil
+	ans, err := reasoning.NewAnswer("mock response")
+	if err != nil {
+		return nil, err
+	}
+	return ans, nil
 }

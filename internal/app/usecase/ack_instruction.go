@@ -44,12 +44,12 @@ func (u *AckInstruction) Subscribe(publisher appservice.Publisher) {
 			return nil
 		}
 
-		data := ev.Data().(chat.InstructionReceivedData)
+		data := ev.Data().(*chat.InstructionReceivedData)
 		input := AckInstructionInput{
-			ChannelID:      data.ChannelID,
-			MessageID:      data.MessageID,
-			ThreadID:       data.ThreadID,
-			RawInstruction: data.RawInstruction,
+			ChannelID:      data.ChannelID(),
+			MessageID:      data.MessageID(),
+			ThreadID:       data.ThreadID(),
+			RawInstruction: data.RawInstruction(),
 		}
 		_, err := u.Run(ctx, input)
 		return err
