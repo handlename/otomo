@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/handlename/otomo/internal/domain/chat"
+	"github.com/handlename/otomo/internal/domain/core"
 	"github.com/handlename/otomo/internal/domain/reasoning"
 	"github.com/stretchr/testify/require"
 )
@@ -12,7 +13,7 @@ import (
 type dummyThinker struct{}
 
 func (d *dummyThinker) Think(ctx context.Context, c *reasoning.Context) (*reasoning.Answer, error) {
-	return reasoning.NewAnswer("dummy reply")
+	return reasoning.NewAnswer(reasoning.AnswerBody("dummy reply"))
 }
 
 func TestOtomo_Think(t *testing.T) {
@@ -25,12 +26,12 @@ func TestOtomo_Think(t *testing.T) {
 	
 	ctx := context.Background()
 	c := reasoning.NewContext()
-	c.SetUserPrompt("hello")
+	c.SetUserPrompt(core.PromptBody("hello"))
 
 	reply, err := o.Think(ctx, c)
 	require.NoError(t, err)
 
-	if reply.Body() != "dummy reply" {
+	if reply.Body() != chat.ReplyBody("dummy reply") {
 		t.Errorf("expected 'dummy reply', got %q", reply.Body())
 	}
 }

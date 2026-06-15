@@ -1,16 +1,26 @@
 package chat
 
-import "fmt"
+import (
+	"fmt"
+	"slices"
+)
+
+type ReplyBody string
+type Attachment string
 
 // Reply is a value object sent to the User as a result of Otomo interpreting an Instruction.
 type Reply struct {
-	body        string
-	attachments []string
+	body        ReplyBody
+	attachments []Attachment
 }
 
-func (r *Reply) Body() string { return r.body }
+func (r *Reply) Body() ReplyBody { return r.body }
 
-func NewReply(body string, attachments []string) (*Reply, error) {
+func (r *Reply) Attachments() []Attachment {
+	return slices.Clone(r.attachments)
+}
+
+func NewReply(body ReplyBody, attachments []Attachment) (*Reply, error) {
 	if body == "" {
 		return nil, fmt.Errorf("reply body is required")
 	}
