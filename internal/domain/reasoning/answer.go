@@ -1,5 +1,7 @@
 package reasoning
 
+import "fmt"
+
 // Answer is a value object representing the outcome of Brain reasoning.
 type Answer struct {
 	body string
@@ -7,8 +9,11 @@ type Answer struct {
 
 func (ans *Answer) Body() string { return ans.body }
 
-func NewAnswer(instruction string) *Answer {
-	return &Answer{
-		body: instruction,
+func NewAnswer(body string) (*Answer, error) {
+	if body == "" {
+		return nil, fmt.Errorf("answer body is required")
 	}
+	return &Answer{
+		body: body,
+	}, nil
 }
