@@ -17,8 +17,11 @@ import (
 func New(ctx context.Context, prefix string) http.Handler {
 	slack := service.NewSlack(config.Config.Slack.BotToken, config.Config.Slack.SigningSecret)
 	brainThinker := lo.Must(brain.NewGeneral(ctx))
-	brain := reasoning.NewBrain(brainThinker)
-	otomo := chat.NewOtomo(brain)
+	brain := lo.Must(reasoning.NewBrain(brainThinker))
+	otomo, err := chat.NewOtomo(brain)
+	if err != nil {
+		panic(err)
+	}
 	if p := config.Config.LLM.SystemPrompt; p != "" {
 		otomo.SetSystemPrompt(p)
 	}

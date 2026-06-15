@@ -2,6 +2,7 @@ package chat
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/handlename/otomo/internal/domain/reasoning"
 	"github.com/pkg/errors"
@@ -24,12 +25,15 @@ type Otomo struct {
 	systemPrompt string
 }
 
-func NewOtomo(brain *reasoning.Brain) *Otomo {
+func NewOtomo(brain *reasoning.Brain) (*Otomo, error) {
+	if brain == nil {
+		return nil, fmt.Errorf("brain is required")
+	}
 	o := &Otomo{
 		brain: brain,
 	}
 	o.SetSystemPrompt(DefaultSystemPrompt)
-	return o
+	return o, nil
 }
 
 func (o *Otomo) Think(ctx context.Context, c *reasoning.Context) (*Reply, error) {
@@ -40,7 +44,10 @@ func (o *Otomo) Think(ctx context.Context, c *reasoning.Context) (*Reply, error)
 		return nil, errors.Wrap(err, "failed to think")
 	}
 
-	r := NewReply(ans.Body(), []string{})
+	r, err := NewReply(ans.Body(), []string{})
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to generate reply")
+	}
 	return r, nil
 }
 

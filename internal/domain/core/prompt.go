@@ -48,14 +48,14 @@ func (p *Prompt) String() string {
 	return buf.String()
 }
 
-func NewPlainPrompt(body string) *Prompt {
+func NewPlainPrompt(body string) (*Prompt, error) {
 	return NewPrompt("", body, nil)
 }
 
-func NewPrompt(tag PromptTag, body string, children []*Prompt) *Prompt {
+func NewPrompt(tag PromptTag, body string, children []*Prompt) (*Prompt, error) {
 	return &Prompt{
 		tag:      tag,
 		body:     body,
 		children: children,
-	}
+	}, nil
 }

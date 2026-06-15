@@ -35,6 +35,9 @@ func (g *General) Think(ctx context.Context, c *reasoning.Context) (*reasoning.A
 		return nil, failure.Wrap(err, failure.Message("failed to invoke bedrock"))
 	}
 
-	ans := reasoning.NewAnswer(res)
+	ans, err := reasoning.NewAnswer(res)
+	if err != nil {
+		return nil, failure.Wrap(err)
+	}
 	return ans, nil
 }

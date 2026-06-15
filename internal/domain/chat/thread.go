@@ -2,6 +2,7 @@ package chat
 
 import (
 	"cmp"
+	"fmt"
 	"slices"
 
 	"github.com/samber/lo"
@@ -15,11 +16,14 @@ type Thread struct {
 	messages []*ThreadMessage
 }
 
-func NewThread(id ThreadID) *Thread {
+func NewThread(id ThreadID) (*Thread, error) {
+	if id == "" {
+		return nil, fmt.Errorf("thread ID is required")
+	}
 	return &Thread{
 		id:       id,
 		messages: []*ThreadMessage{},
-	}
+	}, nil
 }
 
 func (t *Thread) AddMessage(msg *ThreadMessage) {
@@ -52,4 +56,3 @@ func (t *Thread) sortMessages() {
 		return cmp.Compare(a.id, b.id)
 	})
 }
-

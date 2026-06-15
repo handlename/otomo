@@ -88,11 +88,11 @@ func Test_ClassifySlackEventAndPublish_handleAppMention(t *testing.T) {
 	assert.Equal(t, expect, output)
 	require.Equal(t, 1, len(mockPublisher.Published))
 
-	data, ok := mockPublisher.Published[0].Data().(chat.InstructionReceivedData)
+	data, ok := mockPublisher.Published[0].Data().(*chat.InstructionReceivedData)
 	require.True(t, ok)
 
-	assert.Equal(t, service.Time.UnixNanoToSlackID(now.UnixNano()), data.MessageID)
-	assert.Equal(t, service.Time.UnixNanoToSlackID(now.UnixNano()), data.ThreadID)
-	assert.Equal(t, "hello, otomo!", data.RawInstruction)
-	assert.Equal(t, now.Unix(), data.SentAt.Unix())
+	assert.Equal(t, service.Time.UnixNanoToSlackID(now.UnixNano()), data.MessageID())
+	assert.Equal(t, service.Time.UnixNanoToSlackID(now.UnixNano()), data.ThreadID())
+	assert.Equal(t, "hello, otomo!", data.RawInstruction())
+	assert.Equal(t, now.Unix(), data.SentAt().Unix())
 }

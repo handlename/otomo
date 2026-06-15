@@ -11,12 +11,22 @@ type ThreadMessage struct {
 	body string
 }
 
-func NewThreadMessage(id ThreadMessageID, user, body string) *ThreadMessage {
+func NewThreadMessage(id ThreadMessageID, user, body string) (*ThreadMessage, error) {
+	if id == "" {
+		return nil, fmt.Errorf("thread message ID is required")
+	}
+	if user == "" {
+		return nil, fmt.Errorf("thread message user is required")
+	}
+	if body == "" {
+		return nil, fmt.Errorf("thread message body is required")
+	}
+
 	return &ThreadMessage{
 		id:   id,
 		user: user,
 		body: body,
-	}
+	}, nil
 }
 
 func (t *ThreadMessage) String() string {
