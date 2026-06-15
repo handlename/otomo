@@ -10,6 +10,7 @@ import (
 	"github.com/handlename/otomo/config"
 	"github.com/handlename/otomo/internal/app/service"
 	"github.com/handlename/otomo/internal/domain/chat"
+	"github.com/handlename/otomo/internal/domain/core"
 	"github.com/handlename/otomo/internal/errorcode"
 	"github.com/morikuni/failure/v2"
 	"github.com/rs/zerolog/log"
@@ -51,25 +52,25 @@ func (s *Slack) Verify(header http.Header, body []byte) error {
 	return nil
 }
 
-func (s *Slack) PostMessage(ctx context.Context, channelID, messageID, msg string) error {
+func (s *Slack) PostMessage(ctx context.Context, channelID core.ChannelID, messageID core.MessageID, msg chat.ReplyBody) error {
 	_, _, err := s.client.PostMessage(
-		channelID,
-		slack.MsgOptionTS(messageID),
-		slack.MsgOptionText(msg, false),
+		string(channelID),
+		slack.MsgOptionTS(string(messageID)),
+		slack.MsgOptionText(string(msg), false),
 	)
 	return err
 }
 
-func (s *Slack) AddReaction(ctx context.Context, channelID, messageID string, emoji string) error {
+func (s *Slack) AddReaction(ctx context.Context, channelID core.ChannelID, messageID core.MessageID, emoji string) error {
 	return s.client.AddReaction(emoji, slack.ItemRef{
-		Channel:   channelID,
-		Timestamp: messageID,
+		Channel:   string(channelID),
+		Timestamp: string(messageID),
 	})
 }
 
 // FetchThread implements service.Messenger.
-func (s *Slack) FetchThread(ctx context.Context, channelID string, threadID string) (*chat.Thread, error) {
-	t, err := chat.NewThread(chat.ThreadID(threadID))
+func (s *Slack) FetchThread(ctx context.Context, channelID core.ChannelID, threadID chat.ThreadID) (*chat.Thread, error) {
+	t, err := chat.NewThread(threadID)
 	if err != nil {
 		return nil, failure.Wrap(err)
 	}
@@ -79,7 +80,7 @@ func (s *Slack) FetchThread(ctx context.Context, channelID string, threadID stri
 	for more {
 		var msgs []slack.Message
 		var err error
-		msgs, more, next, err = s.fetchThread(ctx, channelID, threadID, next)
+		msgs, more, next, err = s.fetchThread(ctx, string(channelID), string(threadID), next)
 		if err != nil {
 			return nil, failure.Wrap(err)
 		}
@@ -98,7 +99,7 @@ func (s *Slack) FetchThread(ctx context.Context, channelID string, threadID stri
 				user = "unknown"
 			}
 
-			tm, err := chat.NewThreadMessage(chat.ThreadMessageID(m.Timestamp), user, body)
+			tm, err := chat.NewThreadMessage(chat.ThreadMessageID(m.Timestamp), core.UserID(user), core.MessageBody(body))
 			if err != nil {
 				log.Warn().Err(err).Msg("failed to create thread message from slack message")
 				continue
@@ -135,10 +136,10 @@ func (s *Slack) fetchThread(ctx context.Context, channelID, threadID, cursor str
 }
 
 // UploadFile implements service.Messenger.
-func (s *Slack) UploadFile(ctx context.Context, channelID, threadTS, filename, content string) error {
+func (s *Slack) UploadFile(ctx context.Context, channelID core.ChannelID, threadID chat.ThreadID, filename, content string) error {
 	_, err := s.client.UploadFileV2Context(ctx, slack.UploadFileV2Parameters{
-		Channel:         channelID,
-		ThreadTimestamp: threadTS,
+		Channel:         string(channelID),
+		ThreadTimestamp: string(threadID),
 		Filename:        filename,
 		Content:         content,
 		FileSize:        len(content),

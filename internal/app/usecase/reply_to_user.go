@@ -15,7 +15,7 @@ type ReplyToUser struct {
 	messenger appservice.Messenger
 }
 
-func (u *ReplyToUser) Run(ctx context.Context, otomo *chat.Otomo, userPrompt core.PromptBody) error {
+func (u *ReplyToUser) Run(ctx context.Context, otomo *chat.Otomo, channelID core.ChannelID, userPrompt core.PromptBody) error {
 	c := reasoning.NewContext()
 	c.SetUserPrompt(userPrompt)
 
@@ -27,7 +27,7 @@ func (u *ReplyToUser) Run(ctx context.Context, otomo *chat.Otomo, userPrompt cor
 		)
 	}
 
-	if err := u.messenger.PostMessage(ctx, core.ChannelID(""), core.MessageID(""), rep.Body()); err != nil {
+	if err := u.messenger.PostMessage(ctx, channelID, core.MessageID(""), rep.Body()); err != nil {
 		return failure.Wrap(err,
 			failure.WithCode(errorcode.ErrInternal),
 			failure.Message("failed to send reply"),

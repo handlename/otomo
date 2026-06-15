@@ -23,7 +23,7 @@ func New(ctx context.Context, prefix string) http.Handler {
 		panic(err)
 	}
 	if p := config.Config.LLM.SystemPrompt; p != "" {
-		otomo.SetSystemPrompt(p)
+		otomo.SetSystemPrompt(chat.SystemPrompt(p))
 	}
 
 	publisher := service.NewEventPublisher()
