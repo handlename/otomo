@@ -7,13 +7,13 @@ import (
 	"github.com/google/uuid"
 )
 
-type ID string
-type Kind string
+type EventID string
+type EventKind string
 
 // Event is an entity interface representing something that has occurred in the domain.
 type Event interface {
-	ID() ID
-	Kind() Kind
+	ID() EventID
+	Kind() EventKind
 	OccuredAt() time.Time
 	Data() any
 	String() string
@@ -23,18 +23,18 @@ var _ Event = (*BaseEvent)(nil)
 
 // BaseEvent is a value object helper that provides standard fields for Event implementations.
 type BaseEvent struct {
-	id      ID
-	kind    Kind
+	id      EventID
+	kind    EventKind
 	ts      time.Time
 	payload any
 }
 
-func NewBaseEvent(kind Kind, payload any) (BaseEvent, error) {
+func NewBaseEvent(kind EventKind, payload any) (BaseEvent, error) {
 	if kind == "" {
 		return BaseEvent{}, fmt.Errorf("event kind is required")
 	}
 	return BaseEvent{
-		id:      ID(uuid.New().String()),
+		id:      EventID(uuid.New().String()),
 		kind:    kind,
 		ts:      time.Now(),
 		payload: payload,
@@ -47,12 +47,12 @@ func (e *BaseEvent) Data() any {
 }
 
 // ID implements Event.
-func (e *BaseEvent) ID() ID {
+func (e *BaseEvent) ID() EventID {
 	return e.id
 }
 
 // Kind implements Event.
-func (e *BaseEvent) Kind() Kind {
+func (e *BaseEvent) Kind() EventKind {
 	return e.kind
 }
 
