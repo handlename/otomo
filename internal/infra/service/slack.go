@@ -122,6 +122,7 @@ func (s *Slack) UploadFile(ctx context.Context, channelID, threadTS, filename, c
 		ThreadTimestamp: threadTS,
 		Filename:        filename,
 		Content:         content,
+		FileSize:        len(content),
 	})
 	return err
 }
