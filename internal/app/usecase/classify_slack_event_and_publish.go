@@ -4,11 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
+	"strings"
+	"time"
 
 	appservice "github.com/handlename/otomo/internal/app/service"
 	"github.com/handlename/otomo/internal/domain/chat"
 	"github.com/handlename/otomo/internal/domain/core"
-	"github.com/handlename/otomo/internal/infra/service"
 	"github.com/morikuni/failure/v2"
 	"github.com/rs/zerolog/log"
 	"github.com/slack-go/slack/slackevents"
@@ -81,7 +83,7 @@ func (u *ClassifySlackEventAndPublish) handleURLVerification(_ context.Context, 
 func (u *ClassifySlackEventAndPublish) handleCallbackEvent(_ context.Context, input ClassifySlackEventAndPublishInput) (core.Event, error) {
 	switch iev := input.Event.InnerEvent.Data.(type) {
 	case *slackevents.AppMentionEvent:
-		sentAt, err := service.Time.ParseUnixTimestamp(iev.TimeStamp)
+		sentAt, err := parseUnixTimestamp(iev.TimeStamp)
 		if err != nil {
 			return nil, failure.Wrap(err,
 				failure.Message("failed to parse timestamp"),
@@ -91,7 +93,7 @@ func (u *ClassifySlackEventAndPublish) handleCallbackEvent(_ context.Context, in
 			)
 		}
 
-		data, err := chat.NewInstructionReceivedData(iev.Channel, iev.EventTimeStamp, iev.ThreadTimeStamp, iev.Text, *sentAt)
+		data, err := chat.NewInstructionReceivedData(core.ChannelID(iev.Channel), core.MessageID(iev.EventTimeStamp), chat.ThreadID(iev.ThreadTimeStamp), chat.RawInstruction(iev.Text), *sentAt)
 		if err != nil {
 			return nil, failure.Wrap(err)
 		}
@@ -109,4 +111,24 @@ func (u *ClassifySlackEventAndPublish) handleCallbackEvent(_ context.Context, in
 			},
 		)
 	}
+}
+
+func parseUnixTimestamp(s string) (*time.Time, error) {
+	parts := strings.Split(s, ".")
+	if len(parts) != 2 {
+		return nil, failure.New("invalid timestamp format: expected epoch.microseconds")
+	}
+
+	sec, err := strconv.ParseInt(parts[0], 10, 64)
+	if err != nil {
+		return nil, failure.Wrap(err)
+	}
+
+	msec, err := strconv.ParseInt(parts[1], 10, 64)
+	if err != nil {
+		return nil, failure.Wrap(err)
+	}
+
+	res := time.Unix(sec, msec*1000)
+	return &res, nil
 }

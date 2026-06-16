@@ -90,6 +90,19 @@ We enforce the **Always Valid Domain Model** pattern as our primary rule for dom
 5. **Mutator Validation**
    If an Entity has mutator methods that change its state (e.g., `AddMessage` on `Thread`), those methods must also enforce that the transition leads to a valid state.
 
+6. **Avoid Primitive Obsession (Domain-Specific Types)**
+   Do not use Go primitive types (like `string`, `int`, `bool`) directly for domain values or function signatures. Every business value MUST have its own defined type to make the domain model self-documenting and prevent bugs caused by accidentally swapping parameters of the same underlying type.
+
+   ```go
+   // Avoid:
+   func SendMessage(channelID string, userID string)
+
+   // Prefer:
+   type ChannelID string
+   type UserID string
+   func SendMessage(channelID ChannelID, userID UserID)
+   ```
+
 ### Code Examples
 
 #### Before (Invalid state allowed)

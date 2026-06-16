@@ -8,9 +8,8 @@ import (
 
 	"github.com/handlename/otomo/config"
 	"github.com/handlename/otomo/internal/domain/chat"
+	"github.com/handlename/otomo/internal/domain/core"
 	"github.com/handlename/otomo/internal/domain/reasoning"
-	"github.com/handlename/otomo/internal/infra/brain"
-	"github.com/handlename/otomo/internal/infra/service"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -20,9 +19,9 @@ func Test_Reply_Run(t *testing.T) {
 
 	// Arrange
 
-	mockBrain, err := reasoning.NewBrain(&brain.Mock{
+	mockBrain, err := reasoning.NewBrain(&mockBrain{
 		ThinkFunc: func(context.Context, *reasoning.Context) (*reasoning.Answer, error) {
-			return reasoning.NewAnswer("mock response")
+			return reasoning.NewAnswer(reasoning.AnswerBody("mock response"))
 		},
 	})
 	require.NoError(t, err)
@@ -30,14 +29,14 @@ func Test_Reply_Run(t *testing.T) {
 	mockOtomo, err := chat.NewOtomo(mockBrain)
 	require.NoError(t, err)
 
-	mockMessenger := &service.MockMessenger{
-		FetchThreadFunc: func(ctx context.Context, channelID string, threadID string) (*chat.Thread, error) {
-			return chat.NewThread("dummy-thread")
+	mockMessenger := &mockMessenger{
+		FetchThreadFunc: func(ctx context.Context, channelID core.ChannelID, threadID chat.ThreadID) (*chat.Thread, error) {
+			return chat.NewThread(threadID)
 		},
 	}
 	uc := NewReply(mockOtomo, mockMessenger)
 
-	eventData, err := chat.NewInstructionReceivedData("Ctest-channel", "1234567890.123456", "test-thread", "test instruction", time.Now())
+	eventData, err := chat.NewInstructionReceivedData(core.ChannelID("Ctest-channel"), core.MessageID("1234567890.123456"), chat.ThreadID("test-thread"), chat.RawInstruction("test instruction"), time.Now())
 	require.NoError(t, err)
 
 	// Act
@@ -66,10 +65,10 @@ func Test_Reply_Run_WithThread(t *testing.T) {
 
 	// Arrange
 	var receivedPrompt string
-	mockBrain, err := reasoning.NewBrain(&brain.Mock{
+	mockBrain, err := reasoning.NewBrain(&mockBrain{
 		ThinkFunc: func(ctx context.Context, c *reasoning.Context) (*reasoning.Answer, error) {
 			receivedPrompt = c.Prompt().String()
-			return reasoning.NewAnswer("mock response")
+			return reasoning.NewAnswer(reasoning.AnswerBody("mock response"))
 		},
 	})
 	require.NoError(t, err)
@@ -77,21 +76,21 @@ func Test_Reply_Run_WithThread(t *testing.T) {
 	mockOtomo, err := chat.NewOtomo(mockBrain)
 	require.NoError(t, err)
 
-	mockMessenger := &service.MockMessenger{
-		FetchThreadFunc: func(ctx context.Context, channelID string, threadID string) (*chat.Thread, error) {
-			tld, err := chat.NewThread(chat.ThreadID(threadID))
+	mockMessenger := &mockMessenger{
+		FetchThreadFunc: func(ctx context.Context, channelID core.ChannelID, threadID chat.ThreadID) (*chat.Thread, error) {
+			tld, err := chat.NewThread(threadID)
 			if err != nil {
 				return nil, err
 			}
-			msg1, _ := chat.NewThreadMessage("1", "alice", "hello")
-			msg2, _ := chat.NewThreadMessage("2", "bob", "world")
+			msg1, _ := chat.NewThreadMessage(chat.ThreadMessageID("1"), core.UserID("alice"), core.MessageBody("hello"))
+			msg2, _ := chat.NewThreadMessage(chat.ThreadMessageID("2"), core.UserID("bob"), core.MessageBody("world"))
 			tld.AddMessages(msg1, msg2)
 			return tld, nil
 		},
 	}
 	uc := NewReply(mockOtomo, mockMessenger)
 
-	eventData, err := chat.NewInstructionReceivedData("Ctest-channel", "1234567890.123456", "test-thread", "test instruction", time.Now())
+	eventData, err := chat.NewInstructionReceivedData(core.ChannelID("Ctest-channel"), core.MessageID("1234567890.123456"), chat.ThreadID("test-thread"), chat.RawInstruction("test instruction"), time.Now())
 	require.NoError(t, err)
 
 	// Act
@@ -119,7 +118,7 @@ func Test_Reply_Run_Error(t *testing.T) {
 
 	// Create mock brain with error
 	mockError := assert.AnError
-	mockBrain, err := reasoning.NewBrain(&brain.Mock{
+	mockBrain, err := reasoning.NewBrain(&mockBrain{
 		ThinkFunc: func(ctx context.Context, c *reasoning.Context) (*reasoning.Answer, error) {
 			return nil, mockError
 		},
@@ -129,10 +128,10 @@ func Test_Reply_Run_Error(t *testing.T) {
 	mockOtomo, err := chat.NewOtomo(mockBrain)
 	require.NoError(t, err)
 
-	mockMessenger := &service.MockMessenger{}
+	mockMessenger := &mockMessenger{}
 	uc := NewReply(mockOtomo, mockMessenger)
 
-	eventData, err := chat.NewInstructionReceivedData("Ctest-channel", "1234567890.123456", "test-thread", "test instruction", time.Now())
+	eventData, err := chat.NewInstructionReceivedData(core.ChannelID("Ctest-channel"), core.MessageID("1234567890.123456"), chat.ThreadID("test-thread"), chat.RawInstruction("test instruction"), time.Now())
 	require.NoError(t, err)
 
 	// Act
@@ -158,8 +157,8 @@ func TestReply_Run_ErrorFeedback(t *testing.T) {
 	t.Run("default error feedback (reaction only)", func(t *testing.T) {
 		config.Config.Slack.ErrorFeedback = config.ErrorFeedback{}
 
-		mockMessenger := &service.MockMessenger{}
-		mockBrain, err := reasoning.NewBrain(&brain.Mock{
+		mockMessenger := &mockMessenger{}
+		mockBrain, err := reasoning.NewBrain(&mockBrain{
 			ThinkFunc: func(ctx context.Context, c *reasoning.Context) (*reasoning.Answer, error) {
 				return nil, errors.New("thinking error")
 			},
@@ -170,7 +169,7 @@ func TestReply_Run_ErrorFeedback(t *testing.T) {
 		require.NoError(t, err)
 		uc := NewReply(mockOtomo, mockMessenger)
 
-		eventData, err := chat.NewInstructionReceivedData("C12345", "1234567890.123456", "", "hello", time.Now())
+		eventData, err := chat.NewInstructionReceivedData(core.ChannelID("C12345"), core.MessageID("1234567890.123456"), chat.ThreadID(""), chat.RawInstruction("hello"), time.Now())
 		require.NoError(t, err)
 
 		_, err = uc.Run(t.Context(), ReplyInput{
@@ -192,8 +191,8 @@ func TestReply_Run_ErrorFeedback(t *testing.T) {
 			EnablePostSnippet: &enableSnippet,
 		}
 
-		mockMessenger := &service.MockMessenger{}
-		mockBrain, err := reasoning.NewBrain(&brain.Mock{
+		mockMessenger := &mockMessenger{}
+		mockBrain, err := reasoning.NewBrain(&mockBrain{
 			ThinkFunc: func(ctx context.Context, c *reasoning.Context) (*reasoning.Answer, error) {
 				return nil, errors.New("thinking error detail")
 			},
@@ -204,7 +203,7 @@ func TestReply_Run_ErrorFeedback(t *testing.T) {
 		require.NoError(t, err)
 		uc := NewReply(mockOtomo, mockMessenger)
 
-		eventData, err := chat.NewInstructionReceivedData("C12345", "1234567890.123456", "", "hello", time.Now())
+		eventData, err := chat.NewInstructionReceivedData(core.ChannelID("C12345"), core.MessageID("1234567890.123456"), chat.ThreadID(""), chat.RawInstruction("hello"), time.Now())
 		require.NoError(t, err)
 
 		_, err = uc.Run(t.Context(), ReplyInput{

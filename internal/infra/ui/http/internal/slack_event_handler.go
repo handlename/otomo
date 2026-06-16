@@ -6,11 +6,12 @@ import (
 	"github.com/handlename/otomo/config"
 	"github.com/handlename/otomo/internal/app/usecase"
 	"github.com/handlename/otomo/internal/domain/chat"
+	"github.com/handlename/otomo/internal/domain/core"
 	"github.com/mackee/tanukirpc"
 )
 
 type slackEventRequest struct {
-	ChannelID string `json:"role"`
+	ChannelID string `json:"channel"`
 	Message   string `json:"message"`
 }
 
@@ -24,11 +25,11 @@ func slackEventHandler(ctx tanukirpc.Context[*registry], req *slackEventRequest)
 		return nil, tanukirpc.WrapErrorWithStatus(http.StatusInternalServerError, err)
 	}
 	if p := config.Config.LLM.SystemPrompt; p != "" {
-		otomo.SetSystemPrompt(p)
+		otomo.SetSystemPrompt(chat.SystemPrompt(p))
 	}
 
 	uc := usecase.NewReplyToUser(ctx.Registry().Slack)
-	if err := uc.Run(ctx, otomo, req.Message); err != nil {
+	if err := uc.Run(ctx, otomo, core.ChannelID(req.ChannelID), core.PromptBody(req.Message)); err != nil {
 		return nil, tanukirpc.WrapErrorWithStatus(http.StatusInternalServerError, err)
 	}
 

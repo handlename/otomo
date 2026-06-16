@@ -12,13 +12,13 @@ import (
 var _ appservice.Publisher = (*EventPublisher)(nil)
 
 type EventPublisher struct {
-	subscribers map[core.Kind][]appservice.Subscriber
+	subscribers map[core.EventKind][]appservice.Subscriber
 	mu          sync.RWMutex
 }
 
 func NewEventPublisher() *EventPublisher {
 	return &EventPublisher{
-		subscribers: make(map[core.Kind][]appservice.Subscriber),
+		subscribers: make(map[core.EventKind][]appservice.Subscriber),
 	}
 }
 
@@ -41,7 +41,7 @@ func (p *EventPublisher) Publish(ctx context.Context, ev core.Event) error {
 	return nil
 }
 
-func (p *EventPublisher) Subscribe(kind core.Kind, sub appservice.Subscriber) {
+func (p *EventPublisher) Subscribe(kind core.EventKind, sub appservice.Subscriber) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	p.subscribers[kind] = append(p.subscribers[kind], sub)

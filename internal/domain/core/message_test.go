@@ -11,8 +11,8 @@ func TestNewMessage(t *testing.T) {
 	tests := []struct {
 		name    string
 		role    core.MessageRole
-		user    string
-		body    string
+		user    core.UserID
+		body    core.MessageBody
 		wantErr bool
 	}{
 		{

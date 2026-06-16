@@ -5,6 +5,7 @@ import (
 
 	appservice "github.com/handlename/otomo/internal/app/service"
 	"github.com/handlename/otomo/internal/domain/chat"
+	"github.com/handlename/otomo/internal/domain/core"
 	"github.com/handlename/otomo/internal/domain/reasoning"
 	"github.com/handlename/otomo/internal/errorcode"
 	"github.com/morikuni/failure/v2"
@@ -14,7 +15,7 @@ type ReplyToUser struct {
 	messenger appservice.Messenger
 }
 
-func (u *ReplyToUser) Run(ctx context.Context, otomo *chat.Otomo, userPrompt string) error {
+func (u *ReplyToUser) Run(ctx context.Context, otomo *chat.Otomo, channelID core.ChannelID, userPrompt core.PromptBody) error {
 	c := reasoning.NewContext()
 	c.SetUserPrompt(userPrompt)
 
@@ -26,7 +27,7 @@ func (u *ReplyToUser) Run(ctx context.Context, otomo *chat.Otomo, userPrompt str
 		)
 	}
 
-	if err := u.messenger.PostMessage(ctx, "", "", rep.Body()); err != nil {
+	if err := u.messenger.PostMessage(ctx, channelID, core.MessageID(""), rep.Body()); err != nil {
 		return failure.Wrap(err,
 			failure.WithCode(errorcode.ErrInternal),
 			failure.Message("failed to send reply"),

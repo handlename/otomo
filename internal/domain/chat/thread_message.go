@@ -1,17 +1,21 @@
 package chat
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/handlename/otomo/internal/domain/core"
+)
 
 type ThreadMessageID string
 
 // ThreadMessage is an entity representing a message within a Thread.
 type ThreadMessage struct {
 	id   ThreadMessageID
-	user string
-	body string
+	user core.UserID
+	body core.MessageBody
 }
 
-func NewThreadMessage(id ThreadMessageID, user, body string) (*ThreadMessage, error) {
+func NewThreadMessage(id ThreadMessageID, user core.UserID, body core.MessageBody) (*ThreadMessage, error) {
 	if id == "" {
 		return nil, fmt.Errorf("thread message ID is required")
 	}
@@ -33,11 +37,11 @@ func (t *ThreadMessage) String() string {
 	return fmt.Sprintf("id=%s user=%s body=%q", t.ID(), t.User(), t.Body())
 }
 
-func (t *ThreadMessage) User() string {
+func (t *ThreadMessage) User() core.UserID {
 	return t.user
 }
 
-func (t *ThreadMessage) Body() string {
+func (t *ThreadMessage) Body() core.MessageBody {
 	return t.body
 }
 

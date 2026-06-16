@@ -15,7 +15,7 @@ const (
 // Prompt is a value object representing structured prompt tokens.
 type Prompt struct {
 	tag      PromptTag
-	body     string
+	body     PromptBody
 	children []*Prompt
 }
 
@@ -48,11 +48,11 @@ func (p *Prompt) String() string {
 	return buf.String()
 }
 
-func NewPlainPrompt(body string) (*Prompt, error) {
+func NewPlainPrompt(body PromptBody) (*Prompt, error) {
 	return NewPrompt("", body, nil)
 }
 
-func NewPrompt(tag PromptTag, body string, children []*Prompt) (*Prompt, error) {
+func NewPrompt(tag PromptTag, body PromptBody, children []*Prompt) (*Prompt, error) {
 	return &Prompt{
 		tag:      tag,
 		body:     body,
