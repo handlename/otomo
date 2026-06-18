@@ -77,7 +77,7 @@ func (r *Reply) handleError(ctx context.Context, data *chat.InstructionReceivedD
 	if data.ThreadID() != "" {
 		threadTS = data.ThreadID()
 	} else {
-		threadTS = chat.ThreadID(data.MessageID())
+		threadTS = chat.ThreadID(data.MessageID().Value())
 	}
 
 	if cfg.GetEnableReaction() {

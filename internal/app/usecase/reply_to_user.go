@@ -27,7 +27,7 @@ func (u *ReplyToUser) Run(ctx context.Context, otomo *chat.Otomo, channelID core
 		)
 	}
 
-	if err := u.messenger.PostMessage(ctx, channelID, core.MessageID(""), rep.Body()); err != nil {
+	if err := u.messenger.PostMessage(ctx, channelID, core.MessageID{}, rep.Body()); err != nil {
 		return failure.Wrap(err,
 			failure.WithCode(errorcode.ErrInternal),
 			failure.Message("failed to send reply"),

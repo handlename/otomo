@@ -6,6 +6,7 @@ import (
 
 	"github.com/handlename/otomo/internal/domain/chat"
 	"github.com/handlename/otomo/internal/domain/core"
+	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -22,8 +23,8 @@ func TestNewInstructionReceivedData_Validation(t *testing.T) {
 	}{
 		{
 			name:           "valid data",
-			channelID:      core.ChannelID("C123"),
-			messageID:      core.MessageID("123.456"),
+			channelID:      lo.Must(core.NewChannelID("C123")),
+			messageID:      lo.Must(core.NewMessageID("123.456")),
 			threadID:       chat.ThreadID("T123"),
 			rawInstruction: chat.RawInstruction("do something"),
 			sentAt:         validTime,
@@ -31,17 +32,8 @@ func TestNewInstructionReceivedData_Validation(t *testing.T) {
 		},
 		{
 			name:           "empty channel ID",
-			channelID:      core.ChannelID(""),
-			messageID:      core.MessageID("123.456"),
-			threadID:       chat.ThreadID("T123"),
-			rawInstruction: chat.RawInstruction("do something"),
-			sentAt:         validTime,
-			expectErr:      true,
-		},
-		{
-			name:           "channel ID without C prefix",
-			channelID:      core.ChannelID("D123"),
-			messageID:      core.MessageID("123.456"),
+			channelID:      core.ChannelID{},
+			messageID:      lo.Must(core.NewMessageID("123.456")),
 			threadID:       chat.ThreadID("T123"),
 			rawInstruction: chat.RawInstruction("do something"),
 			sentAt:         validTime,
@@ -49,17 +41,8 @@ func TestNewInstructionReceivedData_Validation(t *testing.T) {
 		},
 		{
 			name:           "empty message ID",
-			channelID:      core.ChannelID("C123"),
-			messageID:      core.MessageID(""),
-			threadID:       chat.ThreadID("T123"),
-			rawInstruction: chat.RawInstruction("do something"),
-			sentAt:         validTime,
-			expectErr:      true,
-		},
-		{
-			name:           "non-numeric message ID",
-			channelID:      core.ChannelID("C123"),
-			messageID:      core.MessageID("123a.456"),
+			channelID:      lo.Must(core.NewChannelID("C123")),
+			messageID:      core.MessageID{},
 			threadID:       chat.ThreadID("T123"),
 			rawInstruction: chat.RawInstruction("do something"),
 			sentAt:         validTime,
@@ -67,8 +50,8 @@ func TestNewInstructionReceivedData_Validation(t *testing.T) {
 		},
 		{
 			name:           "empty raw instruction",
-			channelID:      core.ChannelID("C123"),
-			messageID:      core.MessageID("123.456"),
+			channelID:      lo.Must(core.NewChannelID("C123")),
+			messageID:      lo.Must(core.NewMessageID("123.456")),
 			threadID:       chat.ThreadID("T123"),
 			rawInstruction: chat.RawInstruction(""),
 			sentAt:         validTime,
@@ -76,8 +59,8 @@ func TestNewInstructionReceivedData_Validation(t *testing.T) {
 		},
 		{
 			name:           "zero sent at time",
-			channelID:      core.ChannelID("C123"),
-			messageID:      core.MessageID("123.456"),
+			channelID:      lo.Must(core.NewChannelID("C123")),
+			messageID:      lo.Must(core.NewMessageID("123.456")),
 			threadID:       chat.ThreadID("T123"),
 			rawInstruction: chat.RawInstruction("do something"),
 			sentAt:         time.Time{},

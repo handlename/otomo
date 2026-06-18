@@ -2,7 +2,6 @@ package chat
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/handlename/otomo/internal/domain/core"
@@ -24,16 +23,11 @@ type InstructionReceivedData struct {
 
 // NewInstructionReceivedData creates and validates InstructionReceivedData using inline validation.
 func NewInstructionReceivedData(channelID core.ChannelID, messageID core.MessageID, threadID ThreadID, rawInstruction RawInstruction, sentAt time.Time) (*InstructionReceivedData, error) {
-	if channelID == "" || !strings.HasPrefix(string(channelID), "C") {
-		return nil, fmt.Errorf("channel ID is required and must start with 'C'")
+	if channelID.Value() == "" {
+		return nil, fmt.Errorf("channel ID is required")
 	}
-	if messageID == "" {
+	if messageID.Value() == "" {
 		return nil, fmt.Errorf("message ID is required")
-	}
-	for _, char := range string(messageID) {
-		if (char < '0' || char > '9') && char != '.' {
-			return nil, fmt.Errorf("message ID must be numeric")
-		}
 	}
 	if rawInstruction == "" {
 		return nil, fmt.Errorf("raw instruction is required")

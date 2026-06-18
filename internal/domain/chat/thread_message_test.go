@@ -5,6 +5,7 @@ import (
 
 	"github.com/handlename/otomo/internal/domain/chat"
 	"github.com/handlename/otomo/internal/domain/core"
+	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -19,28 +20,28 @@ func TestNewThreadMessage_Validation(t *testing.T) {
 		{
 			name:      "valid thread message",
 			id:        chat.ThreadMessageID("1"),
-			user:      core.UserID("alice"),
+			user:      lo.Must(core.NewUserID("alice")),
 			body:      core.MessageBody("hello"),
 			expectErr: false,
 		},
 		{
 			name:      "empty ID",
 			id:        chat.ThreadMessageID(""),
-			user:      core.UserID("alice"),
+			user:      lo.Must(core.NewUserID("alice")),
 			body:      core.MessageBody("hello"),
 			expectErr: true,
 		},
 		{
 			name:      "empty user",
 			id:        chat.ThreadMessageID("1"),
-			user:      core.UserID(""),
+			user:      core.UserID{},
 			body:      core.MessageBody("hello"),
 			expectErr: true,
 		},
 		{
 			name:      "empty body",
 			id:        chat.ThreadMessageID("1"),
-			user:      core.UserID("alice"),
+			user:      lo.Must(core.NewUserID("alice")),
 			body:      core.MessageBody(""),
 			expectErr: true,
 		},

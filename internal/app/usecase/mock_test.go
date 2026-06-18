@@ -67,8 +67,8 @@ func (m *mockMessenger) PostMessage(ctx context.Context, channelID core.ChannelI
 		MessageID string
 		Message   string
 	}{
-		ChannelID: string(channelID),
-		MessageID: string(messageID),
+		ChannelID: channelID.Value(),
+		MessageID: messageID.Value(),
 		Message:   string(msg),
 	})
 	return nil
@@ -80,8 +80,8 @@ func (m *mockMessenger) AddReaction(ctx context.Context, channelID core.ChannelI
 		MessageID string
 		Emoji     string
 	}{
-		ChannelID: string(channelID),
-		MessageID: string(messageID),
+		ChannelID: channelID.Value(),
+		MessageID: messageID.Value(),
 		Emoji:     emoji,
 	})
 	return nil
@@ -102,7 +102,7 @@ func (m *mockMessenger) UploadFile(ctx context.Context, channelID core.ChannelID
 		Filename  string
 		Content   string
 	}{
-		ChannelID: string(channelID),
+		ChannelID: channelID.Value(),
 		ThreadTS:  string(threadID),
 		Filename:  filename,
 		Content:   content,

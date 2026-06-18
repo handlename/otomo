@@ -19,7 +19,7 @@ func NewThreadMessage(id ThreadMessageID, user core.UserID, body core.MessageBod
 	if id == "" {
 		return nil, fmt.Errorf("thread message ID is required")
 	}
-	if user == "" {
+	if user.Value() == "" {
 		return nil, fmt.Errorf("thread message user is required")
 	}
 	if body == "" {

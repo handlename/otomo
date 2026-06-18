@@ -28,8 +28,13 @@ func slackEventHandler(ctx tanukirpc.Context[*registry], req *slackEventRequest)
 		otomo.SetSystemPrompt(chat.SystemPrompt(p))
 	}
 
+	cid, err := core.NewChannelID(req.ChannelID)
+	if err != nil {
+		return nil, tanukirpc.WrapErrorWithStatus(http.StatusBadRequest, err)
+	}
+
 	uc := usecase.NewReplyToUser(ctx.Registry().Slack)
-	if err := uc.Run(ctx, otomo, core.ChannelID(req.ChannelID), core.PromptBody(req.Message)); err != nil {
+	if err := uc.Run(ctx, otomo, cid, core.PromptBody(req.Message)); err != nil {
 		return nil, tanukirpc.WrapErrorWithStatus(http.StatusInternalServerError, err)
 	}
 

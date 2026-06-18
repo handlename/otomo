@@ -54,8 +54,8 @@ func (s *Slack) Verify(header http.Header, body []byte) error {
 
 func (s *Slack) PostMessage(ctx context.Context, channelID core.ChannelID, messageID core.MessageID, msg chat.ReplyBody) error {
 	_, _, err := s.client.PostMessage(
-		string(channelID),
-		slack.MsgOptionTS(string(messageID)),
+		channelID.Value(),
+		slack.MsgOptionTS(messageID.Value()),
 		slack.MsgOptionText(string(msg), false),
 	)
 	return err
@@ -63,8 +63,8 @@ func (s *Slack) PostMessage(ctx context.Context, channelID core.ChannelID, messa
 
 func (s *Slack) AddReaction(ctx context.Context, channelID core.ChannelID, messageID core.MessageID, emoji string) error {
 	return s.client.AddReaction(emoji, slack.ItemRef{
-		Channel:   string(channelID),
-		Timestamp: string(messageID),
+		Channel:   channelID.Value(),
+		Timestamp: messageID.Value(),
 	})
 }
 
@@ -80,7 +80,7 @@ func (s *Slack) FetchThread(ctx context.Context, channelID core.ChannelID, threa
 	for more {
 		var msgs []slack.Message
 		var err error
-		msgs, more, next, err = s.fetchThread(ctx, string(channelID), string(threadID), next)
+		msgs, more, next, err = s.fetchThread(ctx, channelID.Value(), string(threadID), next)
 		if err != nil {
 			return nil, failure.Wrap(err)
 		}
@@ -99,7 +99,13 @@ func (s *Slack) FetchThread(ctx context.Context, channelID core.ChannelID, threa
 				user = "unknown"
 			}
 
-			tm, err := chat.NewThreadMessage(chat.ThreadMessageID(m.Timestamp), core.UserID(user), core.MessageBody(body))
+			u, err := core.NewUserID(user)
+			if err != nil {
+				log.Warn().Err(err).Msg("failed to create UserID from slack user")
+				continue
+			}
+
+			tm, err := chat.NewThreadMessage(chat.ThreadMessageID(m.Timestamp), u, core.MessageBody(body))
 			if err != nil {
 				log.Warn().Err(err).Msg("failed to create thread message from slack message")
 				continue
@@ -138,7 +144,7 @@ func (s *Slack) fetchThread(ctx context.Context, channelID, threadID, cursor str
 // UploadFile implements service.Messenger.
 func (s *Slack) UploadFile(ctx context.Context, channelID core.ChannelID, threadID chat.ThreadID, filename, content string) error {
 	_, err := s.client.UploadFileV2Context(ctx, slack.UploadFileV2Parameters{
-		Channel:         string(channelID),
+		Channel:         channelID.Value(),
 		ThreadTimestamp: string(threadID),
 		Filename:        filename,
 		Content:         content,

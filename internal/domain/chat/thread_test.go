@@ -24,35 +24,35 @@ func Test_Thread_MessagesOrdered(t *testing.T) {
 		{
 			name: "ordered input",
 			input: []*chat.ThreadMessage{
-				lo.Must(chat.NewThreadMessage(chat.ThreadMessageID("1"), core.UserID("alice"), core.MessageBody("mes1"))),
-				lo.Must(chat.NewThreadMessage(chat.ThreadMessageID("2"), core.UserID("bob"), core.MessageBody("mes2"))),
+				lo.Must(chat.NewThreadMessage(chat.ThreadMessageID("1"), lo.Must(core.NewUserID("alice")), core.MessageBody("mes1"))),
+				lo.Must(chat.NewThreadMessage(chat.ThreadMessageID("2"), lo.Must(core.NewUserID("bob")), core.MessageBody("mes2"))),
 			},
 			expected: []*chat.ThreadMessage{
-				lo.Must(chat.NewThreadMessage(chat.ThreadMessageID("1"), core.UserID("alice"), core.MessageBody("mes1"))),
-				lo.Must(chat.NewThreadMessage(chat.ThreadMessageID("2"), core.UserID("bob"), core.MessageBody("mes2"))),
+				lo.Must(chat.NewThreadMessage(chat.ThreadMessageID("1"), lo.Must(core.NewUserID("alice")), core.MessageBody("mes1"))),
+				lo.Must(chat.NewThreadMessage(chat.ThreadMessageID("2"), lo.Must(core.NewUserID("bob")), core.MessageBody("mes2"))),
 			},
 		},
 		{
 			name: "unordered input",
 			input: []*chat.ThreadMessage{
-				lo.Must(chat.NewThreadMessage(chat.ThreadMessageID("2"), core.UserID("bob"), core.MessageBody("mes2"))),
-				lo.Must(chat.NewThreadMessage(chat.ThreadMessageID("1"), core.UserID("alice"), core.MessageBody("mes1"))),
+				lo.Must(chat.NewThreadMessage(chat.ThreadMessageID("2"), lo.Must(core.NewUserID("bob")), core.MessageBody("mes2"))),
+				lo.Must(chat.NewThreadMessage(chat.ThreadMessageID("1"), lo.Must(core.NewUserID("alice")), core.MessageBody("mes1"))),
 			},
 			expected: []*chat.ThreadMessage{
-				lo.Must(chat.NewThreadMessage(chat.ThreadMessageID("1"), core.UserID("alice"), core.MessageBody("mes1"))),
-				lo.Must(chat.NewThreadMessage(chat.ThreadMessageID("2"), core.UserID("bob"), core.MessageBody("mes2"))),
+				lo.Must(chat.NewThreadMessage(chat.ThreadMessageID("1"), lo.Must(core.NewUserID("alice")), core.MessageBody("mes1"))),
+				lo.Must(chat.NewThreadMessage(chat.ThreadMessageID("2"), lo.Must(core.NewUserID("bob")), core.MessageBody("mes2"))),
 			},
 		},
 		{
 			name: "duplicated input",
 			input: []*chat.ThreadMessage{
-				lo.Must(chat.NewThreadMessage(chat.ThreadMessageID("1"), core.UserID("alice"), core.MessageBody("mes1"))),
-				lo.Must(chat.NewThreadMessage(chat.ThreadMessageID("1"), core.UserID("alice"), core.MessageBody("mes1"))),
-				lo.Must(chat.NewThreadMessage(chat.ThreadMessageID("2"), core.UserID("bob"), core.MessageBody("mes2"))),
+				lo.Must(chat.NewThreadMessage(chat.ThreadMessageID("1"), lo.Must(core.NewUserID("alice")), core.MessageBody("mes1"))),
+				lo.Must(chat.NewThreadMessage(chat.ThreadMessageID("1"), lo.Must(core.NewUserID("alice")), core.MessageBody("mes1"))),
+				lo.Must(chat.NewThreadMessage(chat.ThreadMessageID("2"), lo.Must(core.NewUserID("bob")), core.MessageBody("mes2"))),
 			},
 			expected: []*chat.ThreadMessage{
-				lo.Must(chat.NewThreadMessage(chat.ThreadMessageID("1"), core.UserID("alice"), core.MessageBody("mes1"))),
-				lo.Must(chat.NewThreadMessage(chat.ThreadMessageID("2"), core.UserID("bob"), core.MessageBody("mes2"))),
+				lo.Must(chat.NewThreadMessage(chat.ThreadMessageID("1"), lo.Must(core.NewUserID("alice")), core.MessageBody("mes1"))),
+				lo.Must(chat.NewThreadMessage(chat.ThreadMessageID("2"), lo.Must(core.NewUserID("bob")), core.MessageBody("mes2"))),
 			},
 		},
 	}

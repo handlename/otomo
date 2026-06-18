@@ -24,12 +24,12 @@ func main() {
 	flag.Parse()
 
 	if *fileName == "" {
-		fmt.Println("Error: -file is required")
+		fmt.Fprintln(os.Stderr, "Error: -file is required")
 		os.Exit(1)
 	}
 
 	if err := runGenerator(*fileName); err != nil {
-		fmt.Printf("Generator error: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Generator error: %v\n", err)
 		os.Exit(1)
 	}
 }

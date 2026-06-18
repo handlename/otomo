@@ -3,15 +3,15 @@ package main
 import (
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGenerateVO(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "genvo-test")
-	if err != nil {
-		t.Fatalf("failed to create temp dir: %v", err)
-	}
+	require.NoError(t, err, "failed to create temp dir")
 	defer os.RemoveAll(tmpDir)
 
 	dummySrc := `package testpkg
@@ -33,21 +33,16 @@ type (
 )
 `
 	srcFile := filepath.Join(tmpDir, "dummy.go")
-	if err := os.WriteFile(srcFile, []byte(dummySrc), 0644); err != nil {
-		t.Fatalf("failed to write dummy source: %v", err)
-	}
+	err = os.WriteFile(srcFile, []byte(dummySrc), 0644)
+	require.NoError(t, err, "failed to write dummy source")
 
-	// Execute generate function (to be implemented)
 	err = runGenerator(srcFile)
-	if err != nil {
-		t.Fatalf("runGenerator returned error: %v", err)
-	}
+	require.NoError(t, err, "runGenerator returned error")
 
 	genFile := filepath.Join(tmpDir, "dummy_gen.go")
-	content, err := os.ReadFile(genFile)
-	if err != nil {
-		t.Fatalf("failed to read generated file: %v", err)
-	}
+	contentBytes, err := os.ReadFile(genFile)
+	require.NoError(t, err, "failed to read generated file")
+	content := string(contentBytes)
 
 	expectedMethods := []string{
 		"func (id DummyID) Value() string",
@@ -59,9 +54,7 @@ type (
 	}
 
 	for _, method := range expectedMethods {
-		if !strings.Contains(string(content), method) {
-			t.Errorf("missing generated method: %q", method)
-		}
+		assert.Contains(t, content, method, "missing generated method")
 	}
 
 	unexpectedMethods := []string{
@@ -70,8 +63,6 @@ type (
 	}
 
 	for _, method := range unexpectedMethods {
-		if strings.Contains(string(content), method) {
-			t.Errorf("unexpected method generated for non-string VO: %q", method)
-		}
+		assert.NotContains(t, content, method, "unexpected method generated for non-string VO")
 	}
 }
