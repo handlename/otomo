@@ -13,7 +13,7 @@ import (
 type dummyThinker struct{}
 
 func (d *dummyThinker) Think(ctx context.Context, c *reasoning.Context) (*reasoning.Answer, error) {
-	return reasoning.NewAnswer(reasoning.AnswerBody("dummy reply"))
+	return reasoning.NewAnswer(reasoning.AnswerBody("dummy reply"), nil)
 }
 
 func TestOtomo_Think(t *testing.T) {

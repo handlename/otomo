@@ -22,7 +22,7 @@ func (m *mockBrain) Think(ctx context.Context, c *reasoning.Context) (*reasoning
 	if m.ThinkFunc != nil {
 		return m.ThinkFunc(ctx, c)
 	}
-	return reasoning.NewAnswer(reasoning.AnswerBody("mock response"))
+	return reasoning.NewAnswer(reasoning.AnswerBody("mock response"), nil)
 }
 
 type mockEventPublisher struct {

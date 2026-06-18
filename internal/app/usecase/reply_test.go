@@ -22,7 +22,7 @@ func Test_Reply_Run(t *testing.T) {
 
 	mockBrain, err := reasoning.NewBrain(&mockBrain{
 		ThinkFunc: func(context.Context, *reasoning.Context) (*reasoning.Answer, error) {
-			return reasoning.NewAnswer(reasoning.AnswerBody("mock response"))
+			return reasoning.NewAnswer(reasoning.AnswerBody("mock response"), nil)
 		},
 	})
 	require.NoError(t, err)
@@ -69,7 +69,7 @@ func Test_Reply_Run_WithThread(t *testing.T) {
 	mockBrain, err := reasoning.NewBrain(&mockBrain{
 		ThinkFunc: func(ctx context.Context, c *reasoning.Context) (*reasoning.Answer, error) {
 			receivedPrompt = c.Prompt().String()
-			return reasoning.NewAnswer(reasoning.AnswerBody("mock response"))
+			return reasoning.NewAnswer(reasoning.AnswerBody("mock response"), nil)
 		},
 	})
 	require.NoError(t, err)
