@@ -99,6 +99,7 @@ func TestContext_ToolInteractions(t *testing.T) {
 
 	result, err := reasoning.NewToolResult(mustToolCallID("call-1"), `{"length":5}`, false)
 	require.NoError(t, err)
+	assert.Equal(t, mustToolCallID("call-1"), result.ToolUseID())
 	err = c.AddToolResults([]reasoning.ToolResult{result})
 	require.NoError(t, err)
 	require.Len(t, c.Messages(), 2)
@@ -116,6 +117,7 @@ func TestNewContextMessage(t *testing.T) {
 
 	tr, err := reasoning.NewToolResult(mustToolCallID("call-1"), `{"length":5}`, false)
 	require.NoError(t, err)
+	assert.Equal(t, mustToolCallID("call-1"), tr.ToolUseID())
 
 	// Validate role validation
 	_, err = reasoning.NewContextMessage("invalid", core.UserID{}, "content", nil, nil)
@@ -167,4 +169,19 @@ func TestContextMessage_Immutability(t *testing.T) {
 	retCalls := msg.ToolCalls()
 	retCalls[0] = tc2
 	assert.Equal(t, tc, msg.ToolCalls()[0])
+}
+
+func TestNewToolResult(t *testing.T) {
+	t.Run("valid tool result", func(t *testing.T) {
+		tr, err := reasoning.NewToolResult(mustToolCallID("call-1"), "output", false)
+		require.NoError(t, err)
+		assert.Equal(t, mustToolCallID("call-1"), tr.ToolUseID())
+		assert.Equal(t, "output", tr.Output())
+		assert.False(t, tr.IsError())
+	})
+
+	t.Run("empty tool call ID returns error", func(t *testing.T) {
+		_, err := reasoning.NewToolResult(reasoning.ToolCallID{}, "output", false)
+		assert.Error(t, err)
+	})
 }

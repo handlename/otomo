@@ -77,9 +77,9 @@ func NewContextMessage(
 
 // ToolResult represents the execution output of a tool call.
 type ToolResult struct {
-	toolCallID ToolCallID
-	output     string
-	isError    bool
+	toolUseID ToolCallID
+	output    string
+	isError   bool
 }
 
 func NewToolResult(toolUseID ToolCallID, output string, isError bool) (ToolResult, error) {
@@ -87,14 +87,14 @@ func NewToolResult(toolUseID ToolCallID, output string, isError bool) (ToolResul
 		return ToolResult{}, fmt.Errorf("tool use ID cannot be empty")
 	}
 	return ToolResult{
-		toolCallID: toolUseID,
-		output:     output,
-		isError:    isError,
+		toolUseID: toolUseID,
+		output:    output,
+		isError:   isError,
 	}, nil
 }
 
-func (tr ToolResult) ToolCallID() ToolCallID {
-	return tr.toolCallID
+func (tr ToolResult) ToolUseID() ToolCallID {
+	return tr.toolUseID
 }
 
 func (tr ToolResult) Output() string {
@@ -187,6 +187,8 @@ func (c *Context) AddToolResults(results []ToolResult) error {
 	return nil
 }
 
+// Prompt returns the prompt representation of the context.
+// Warning: This method does not serialize tool calls or tool results in the legacy XML string.
 func (c *Context) Prompt() *core.Prompt {
 	var prompts []*core.Prompt
 	for _, msg := range c.messages {
