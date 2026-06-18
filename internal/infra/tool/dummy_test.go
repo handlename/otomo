@@ -47,6 +47,15 @@ func TestDummyTool_Execute(t *testing.T) {
 			name:      "error invalid json syntax",
 			inputJSON: `{"invalid"`,
 			expectErr: true,
+			errCode:   errorcode.ErrInvalidArgument,
+			errMsg:    "failed to unmarshal inputs",
+		},
+		{
+			name:      "error invalid parameter type",
+			inputJSON: `{"text": 123}`,
+			expectErr: true,
+			errCode:   errorcode.ErrInvalidArgument,
+			errMsg:    "failed to unmarshal inputs",
 		},
 		{
 			name:      "error missing text parameter",

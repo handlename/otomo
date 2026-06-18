@@ -13,14 +13,18 @@ import (
 
 var _ reasoning.Tool = (*DummyTool)(nil)
 
-type DummyTool struct{}
+type DummyTool struct {
+	name reasoning.ToolName
+}
 
 func NewDummyTool() *DummyTool {
-	return &DummyTool{}
+	return &DummyTool{
+		name: lo.Must(reasoning.NewToolName("dummy_tool")),
+	}
 }
 
 func (t *DummyTool) Name() reasoning.ToolName {
-	return lo.Must(reasoning.NewToolName("dummy_tool"))
+	return t.name
 }
 
 func (t *DummyTool) Description() string {
@@ -45,7 +49,7 @@ func (t *DummyTool) Execute(ctx context.Context, inputJSON string) (string, erro
 		Text *string `json:"text"`
 	}
 	if err := json.Unmarshal([]byte(inputJSON), &input); err != nil {
-		return "", failure.Wrap(err, failure.Message("failed to unmarshal inputs"))
+		return "", failure.Wrap(err, failure.WithCode(errorcode.ErrInvalidArgument), failure.Message("failed to unmarshal inputs"))
 	}
 
 	if input.Text == nil {
