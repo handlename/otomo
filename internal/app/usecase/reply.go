@@ -34,7 +34,7 @@ func (r *Reply) Run(ctx context.Context, input ReplyInput) (*ReplyOutput, error)
 	c := reasoning.NewContext()
 	c.SetUserPrompt(core.PromptBody(input.EventData.RawInstruction()))
 
-	if input.EventData.ThreadID() != "" {
+	if input.EventData.ThreadID().Value() != input.EventData.MessageID().Value() {
 		thread, err := r.slack.FetchThread(ctx, input.EventData.ChannelID(), input.EventData.ThreadID())
 		if err != nil {
 			r.handleError(ctx, input.EventData, err)
@@ -73,12 +73,7 @@ func (r *Reply) Run(ctx context.Context, input ReplyInput) (*ReplyOutput, error)
 func (r *Reply) handleError(ctx context.Context, data *chat.InstructionReceivedData, targetErr error) {
 	cfg := config.Config.Slack.ErrorFeedback
 
-	var threadTS chat.ThreadID
-	if data.ThreadID() != "" {
-		threadTS = data.ThreadID()
-	} else {
-		threadTS = chat.ThreadID(data.MessageID())
-	}
+	threadTS := data.ThreadID()
 
 	if cfg.GetEnableReaction() {
 		emoji := cfg.GetReactionEmoji()

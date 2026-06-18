@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/handlename/otomo/internal/domain/core"
+	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -18,28 +19,28 @@ func TestNewMessage(t *testing.T) {
 		{
 			name:    "valid user message",
 			role:    core.RoleUser,
-			user:    "U1234",
+			user:    lo.Must(core.NewUserID("U1234")),
 			body:    "hello",
 			wantErr: false,
 		},
 		{
 			name:    "valid system message without user",
 			role:    core.RoleSystem,
-			user:    "",
+			user:    core.UserID{},
 			body:    "system init",
 			wantErr: false,
 		},
 		{
 			name:    "invalid role",
 			role:    core.MessageRole("invalid"),
-			user:    "U1234",
+			user:    lo.Must(core.NewUserID("U1234")),
 			body:    "hello",
 			wantErr: true,
 		},
 		{
 			name:    "empty body",
 			role:    core.RoleUser,
-			user:    "U1234",
+			user:    lo.Must(core.NewUserID("U1234")),
 			body:    "",
 			wantErr: true,
 		},
@@ -60,4 +61,37 @@ func TestNewMessage(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestNewUserID(t *testing.T) {
+	_, err := core.NewUserID("")
+	assert.Error(t, err)
+
+	uid, err := core.NewUserID("U12345")
+	assert.NoError(t, err)
+	assert.Equal(t, "U12345", uid.Value())
+}
+
+func TestNewChannelID(t *testing.T) {
+	_, err := core.NewChannelID("")
+	assert.Error(t, err)
+
+	_, err = core.NewChannelID("invalid")
+	assert.Error(t, err)
+
+	cid, err := core.NewChannelID("C12345")
+	assert.NoError(t, err)
+	assert.Equal(t, "C12345", cid.Value())
+}
+
+func TestNewMessageID(t *testing.T) {
+	_, err := core.NewMessageID("")
+	assert.Error(t, err)
+
+	_, err = core.NewMessageID("abc.123")
+	assert.Error(t, err)
+
+	mid, err := core.NewMessageID("123.456")
+	assert.NoError(t, err)
+	assert.Equal(t, "123.456", mid.Value())
 }

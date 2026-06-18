@@ -52,8 +52,8 @@ func (c *Context) Prompt() *core.Prompt {
 				return msg != nil
 			}), func(msg *core.Message, _ int) *core.Prompt {
 				var tag core.PromptTag
-				if msg.User() != "" {
-					tag = core.PromptTag(fmt.Sprintf("message user=%s", string(msg.User())))
+				if msg.User().Value() != "" {
+					tag = core.PromptTag(fmt.Sprintf("message user=%s", msg.User().Value()))
 				} else {
 					tag = core.PromptTag(fmt.Sprintf("message role=%s", string(msg.Role())))
 				}

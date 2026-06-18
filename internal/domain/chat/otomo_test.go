@@ -23,7 +23,7 @@ func TestOtomo_Think(t *testing.T) {
 
 	o, err := chat.NewOtomo(brain)
 	require.NoError(t, err)
-	
+
 	ctx := context.Background()
 	c := reasoning.NewContext()
 	c.SetUserPrompt(core.PromptBody("hello"))

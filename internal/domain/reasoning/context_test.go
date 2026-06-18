@@ -5,6 +5,7 @@ import (
 
 	"github.com/handlename/otomo/internal/domain/core"
 	"github.com/handlename/otomo/internal/domain/reasoning"
+	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -14,10 +15,10 @@ func TestContext_Prompt(t *testing.T) {
 	ctx.SetSystemPrompt("you are a helpful assistant")
 	ctx.SetUserPrompt("hello")
 
-	msg1, err := core.NewMessage(core.RoleUser, "user1", "hi")
+	msg1, err := core.NewMessage(core.RoleUser, lo.Must(core.NewUserID("user1")), "hi")
 	require.NoError(t, err)
 
-	msg2, err := core.NewMessage(core.RoleAssistant, "", "hello there")
+	msg2, err := core.NewMessage(core.RoleAssistant, core.UserID{}, "hello there")
 	require.NoError(t, err)
 
 	ctx.SetMessages([]*core.Message{msg1, msg2})
@@ -56,7 +57,7 @@ func TestContext_Prompt_EdgeCases(t *testing.T) {
 		ctx := reasoning.NewContext()
 		ctx.SetSystemPrompt("system instruction")
 
-		msg, err := core.NewMessage(core.RoleUser, "user1", "hello")
+		msg, err := core.NewMessage(core.RoleUser, lo.Must(core.NewUserID("user1")), "hello")
 		require.NoError(t, err)
 
 		// Set messages containing a nil pointer

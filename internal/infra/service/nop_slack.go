@@ -34,4 +34,3 @@ func (n *NopSlack) PostMessage(ctx context.Context, channelID core.ChannelID, me
 func (n *NopSlack) UploadFile(ctx context.Context, channelID core.ChannelID, threadID chat.ThreadID, filename, content string) error {
 	return nil
 }
-

@@ -43,7 +43,7 @@ func (m *mockEventPublisher) Subscribe(kind core.EventKind, sub appservice.Subsc
 
 type mockMessenger struct {
 	FetchThreadFunc func(ctx context.Context, channelID core.ChannelID, threadID chat.ThreadID) (*chat.Thread, error)
-	History []struct {
+	History         []struct {
 		ChannelID string
 		MessageID string
 		Message   string
@@ -67,8 +67,8 @@ func (m *mockMessenger) PostMessage(ctx context.Context, channelID core.ChannelI
 		MessageID string
 		Message   string
 	}{
-		ChannelID: string(channelID),
-		MessageID: string(messageID),
+		ChannelID: channelID.Value(),
+		MessageID: messageID.Value(),
 		Message:   string(msg),
 	})
 	return nil
@@ -80,8 +80,8 @@ func (m *mockMessenger) AddReaction(ctx context.Context, channelID core.ChannelI
 		MessageID string
 		Emoji     string
 	}{
-		ChannelID: string(channelID),
-		MessageID: string(messageID),
+		ChannelID: channelID.Value(),
+		MessageID: messageID.Value(),
 		Emoji:     emoji,
 	})
 	return nil
@@ -102,8 +102,8 @@ func (m *mockMessenger) UploadFile(ctx context.Context, channelID core.ChannelID
 		Filename  string
 		Content   string
 	}{
-		ChannelID: string(channelID),
-		ThreadTS:  string(threadID),
+		ChannelID: channelID.Value(),
+		ThreadTS:  threadID.Value(),
 		Filename:  filename,
 		Content:   content,
 	})
