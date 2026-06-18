@@ -103,7 +103,16 @@ func (u *ClassifySlackEventAndPublish) handleCallbackEvent(_ context.Context, in
 			return nil, failure.Wrap(err)
 		}
 
-		data, err := chat.NewInstructionReceivedData(cid, mid, chat.ThreadID(iev.ThreadTimeStamp), chat.RawInstruction(iev.Text), *sentAt)
+		threadTS := iev.ThreadTimeStamp
+		if threadTS == "" {
+			threadTS = iev.EventTimeStamp
+		}
+		tid, err := chat.NewThreadID(threadTS)
+		if err != nil {
+			return nil, failure.Wrap(err)
+		}
+
+		data, err := chat.NewInstructionReceivedData(cid, mid, tid, chat.RawInstruction(iev.Text), *sentAt)
 		if err != nil {
 			return nil, failure.Wrap(err)
 		}

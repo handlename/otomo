@@ -99,7 +99,7 @@ func Test_ClassifySlackEventAndPublish_handleAppMention(t *testing.T) {
 	require.True(t, ok)
 
 	assert.Equal(t, lo.Must(core.NewMessageID(tsStr)), data.MessageID())
-	assert.Equal(t, chat.ThreadID(tsStr), data.ThreadID())
+	assert.Equal(t, lo.Must(chat.NewThreadID(tsStr)), data.ThreadID())
 	assert.Equal(t, chat.RawInstruction("hello, otomo!"), data.RawInstruction())
 	assert.Equal(t, now.Unix(), data.SentAt().Unix())
 }

@@ -80,7 +80,7 @@ func (s *Slack) FetchThread(ctx context.Context, channelID core.ChannelID, threa
 	for more {
 		var msgs []slack.Message
 		var err error
-		msgs, more, next, err = s.fetchThread(ctx, channelID.Value(), string(threadID), next)
+		msgs, more, next, err = s.fetchThread(ctx, channelID.Value(), threadID.Value(), next)
 		if err != nil {
 			return nil, failure.Wrap(err)
 		}
@@ -105,7 +105,12 @@ func (s *Slack) FetchThread(ctx context.Context, channelID core.ChannelID, threa
 				continue
 			}
 
-			tm, err := chat.NewThreadMessage(chat.ThreadMessageID(m.Timestamp), u, core.MessageBody(body))
+			tmID, err := chat.NewThreadMessageID(m.Timestamp)
+			if err != nil {
+				log.Warn().Err(err).Msg("failed to create ThreadMessageID from slack message timestamp")
+				continue
+			}
+			tm, err := chat.NewThreadMessage(tmID, u, core.MessageBody(body))
 			if err != nil {
 				log.Warn().Err(err).Msg("failed to create thread message from slack message")
 				continue
@@ -145,7 +150,7 @@ func (s *Slack) fetchThread(ctx context.Context, channelID, threadID, cursor str
 func (s *Slack) UploadFile(ctx context.Context, channelID core.ChannelID, threadID chat.ThreadID, filename, content string) error {
 	_, err := s.client.UploadFileV2Context(ctx, slack.UploadFileV2Parameters{
 		Channel:         channelID.Value(),
-		ThreadTimestamp: string(threadID),
+		ThreadTimestamp: threadID.Value(),
 		Filename:        filename,
 		Content:         content,
 		FileSize:        len(content),

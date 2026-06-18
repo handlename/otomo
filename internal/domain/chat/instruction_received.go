@@ -29,6 +29,9 @@ func NewInstructionReceivedData(channelID core.ChannelID, messageID core.Message
 	if messageID.Value() == "" {
 		return nil, fmt.Errorf("message ID is required")
 	}
+	if threadID.Value() == "" {
+		return nil, fmt.Errorf("thread ID is required")
+	}
 	if rawInstruction == "" {
 		return nil, fmt.Errorf("raw instruction is required")
 	}

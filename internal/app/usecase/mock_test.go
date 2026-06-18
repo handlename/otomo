@@ -103,7 +103,7 @@ func (m *mockMessenger) UploadFile(ctx context.Context, channelID core.ChannelID
 		Content   string
 	}{
 		ChannelID: channelID.Value(),
-		ThreadTS:  string(threadID),
+		ThreadTS:  threadID.Value(),
 		Filename:  filename,
 		Content:   content,
 	})

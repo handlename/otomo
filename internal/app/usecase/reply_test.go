@@ -37,7 +37,7 @@ func Test_Reply_Run(t *testing.T) {
 	}
 	uc := NewReply(mockOtomo, mockMessenger)
 
-	eventData, err := chat.NewInstructionReceivedData(lo.Must(core.NewChannelID("Ctest-channel")), lo.Must(core.NewMessageID("1234567890.123456")), chat.ThreadID("test-thread"), chat.RawInstruction("test instruction"), time.Now())
+	eventData, err := chat.NewInstructionReceivedData(lo.Must(core.NewChannelID("Ctest-channel")), lo.Must(core.NewMessageID("1234567890.123456")), lo.Must(chat.NewThreadID("test-thread")), chat.RawInstruction("test instruction"), time.Now())
 	require.NoError(t, err)
 
 	// Act
@@ -83,15 +83,15 @@ func Test_Reply_Run_WithThread(t *testing.T) {
 			if err != nil {
 				return nil, err
 			}
-			msg1, _ := chat.NewThreadMessage(chat.ThreadMessageID("1"), lo.Must(core.NewUserID("alice")), core.MessageBody("hello"))
-			msg2, _ := chat.NewThreadMessage(chat.ThreadMessageID("2"), lo.Must(core.NewUserID("bob")), core.MessageBody("world"))
+			msg1, _ := chat.NewThreadMessage(lo.Must(chat.NewThreadMessageID("1")), lo.Must(core.NewUserID("alice")), core.MessageBody("hello"))
+			msg2, _ := chat.NewThreadMessage(lo.Must(chat.NewThreadMessageID("2")), lo.Must(core.NewUserID("bob")), core.MessageBody("world"))
 			tld.AddMessages(msg1, msg2)
 			return tld, nil
 		},
 	}
 	uc := NewReply(mockOtomo, mockMessenger)
 
-	eventData, err := chat.NewInstructionReceivedData(lo.Must(core.NewChannelID("Ctest-channel")), lo.Must(core.NewMessageID("1234567890.123456")), chat.ThreadID("test-thread"), chat.RawInstruction("test instruction"), time.Now())
+	eventData, err := chat.NewInstructionReceivedData(lo.Must(core.NewChannelID("Ctest-channel")), lo.Must(core.NewMessageID("1234567890.123456")), lo.Must(chat.NewThreadID("test-thread")), chat.RawInstruction("test instruction"), time.Now())
 	require.NoError(t, err)
 
 	// Act
@@ -132,7 +132,7 @@ func Test_Reply_Run_Error(t *testing.T) {
 	mockMessenger := &mockMessenger{}
 	uc := NewReply(mockOtomo, mockMessenger)
 
-	eventData, err := chat.NewInstructionReceivedData(lo.Must(core.NewChannelID("Ctest-channel")), lo.Must(core.NewMessageID("1234567890.123456")), chat.ThreadID("test-thread"), chat.RawInstruction("test instruction"), time.Now())
+	eventData, err := chat.NewInstructionReceivedData(lo.Must(core.NewChannelID("Ctest-channel")), lo.Must(core.NewMessageID("1234567890.123456")), lo.Must(chat.NewThreadID("test-thread")), chat.RawInstruction("test instruction"), time.Now())
 	require.NoError(t, err)
 
 	// Act
@@ -170,7 +170,7 @@ func TestReply_Run_ErrorFeedback(t *testing.T) {
 		require.NoError(t, err)
 		uc := NewReply(mockOtomo, mockMessenger)
 
-		eventData, err := chat.NewInstructionReceivedData(lo.Must(core.NewChannelID("C12345")), lo.Must(core.NewMessageID("1234567890.123456")), chat.ThreadID(""), chat.RawInstruction("hello"), time.Now())
+		eventData, err := chat.NewInstructionReceivedData(lo.Must(core.NewChannelID("C12345")), lo.Must(core.NewMessageID("1234567890.123456")), lo.Must(chat.NewThreadID("1234567890.123456")), chat.RawInstruction("hello"), time.Now())
 		require.NoError(t, err)
 
 		_, err = uc.Run(t.Context(), ReplyInput{
@@ -204,7 +204,7 @@ func TestReply_Run_ErrorFeedback(t *testing.T) {
 		require.NoError(t, err)
 		uc := NewReply(mockOtomo, mockMessenger)
 
-		eventData, err := chat.NewInstructionReceivedData(lo.Must(core.NewChannelID("C12345")), lo.Must(core.NewMessageID("1234567890.123456")), chat.ThreadID(""), chat.RawInstruction("hello"), time.Now())
+		eventData, err := chat.NewInstructionReceivedData(lo.Must(core.NewChannelID("C12345")), lo.Must(core.NewMessageID("1234567890.123456")), lo.Must(chat.NewThreadID("1234567890.123456")), chat.RawInstruction("hello"), time.Now())
 		require.NoError(t, err)
 
 		_, err = uc.Run(t.Context(), ReplyInput{

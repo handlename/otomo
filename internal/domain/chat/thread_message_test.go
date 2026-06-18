@@ -19,28 +19,28 @@ func TestNewThreadMessage_Validation(t *testing.T) {
 	}{
 		{
 			name:      "valid thread message",
-			id:        chat.ThreadMessageID("1"),
+			id:        lo.Must(chat.NewThreadMessageID("1")),
 			user:      lo.Must(core.NewUserID("alice")),
 			body:      core.MessageBody("hello"),
 			expectErr: false,
 		},
 		{
 			name:      "empty ID",
-			id:        chat.ThreadMessageID(""),
+			id:        chat.ThreadMessageID{},
 			user:      lo.Must(core.NewUserID("alice")),
 			body:      core.MessageBody("hello"),
 			expectErr: true,
 		},
 		{
 			name:      "empty user",
-			id:        chat.ThreadMessageID("1"),
+			id:        lo.Must(chat.NewThreadMessageID("1")),
 			user:      core.UserID{},
 			body:      core.MessageBody("hello"),
 			expectErr: true,
 		},
 		{
 			name:      "empty body",
-			id:        chat.ThreadMessageID("1"),
+			id:        lo.Must(chat.NewThreadMessageID("1")),
 			user:      lo.Must(core.NewUserID("alice")),
 			body:      core.MessageBody(""),
 			expectErr: true,
@@ -63,3 +63,9 @@ func TestNewThreadMessage_Validation(t *testing.T) {
 		})
 	}
 }
+
+func TestNewThreadMessageID(t *testing.T) {
+	_, err := chat.NewThreadMessageID("")
+	assert.Error(t, err)
+}
+

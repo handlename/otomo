@@ -15,7 +15,7 @@ func TestMockMessenger_UploadFile(t *testing.T) {
 	mock := &service.MockMessenger{}
 
 	ctx := context.Background()
-	err := mock.UploadFile(ctx, lo.Must(core.NewChannelID("Cchan-id")), chat.ThreadID("ts-1234"), "test.txt", "test content")
+	err := mock.UploadFile(ctx, lo.Must(core.NewChannelID("Cchan-id")), lo.Must(chat.NewThreadID("ts-1234")), "test.txt", "test content")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -28,7 +28,7 @@ func TestMockMessenger_UploadFile(t *testing.T) {
 	if call.ChannelID != lo.Must(core.NewChannelID("Cchan-id")) {
 		t.Errorf("expected ChannelID to be 'chan-id', got '%s'", call.ChannelID)
 	}
-	if call.ThreadID != chat.ThreadID("ts-1234") {
+	if call.ThreadID != lo.Must(chat.NewThreadID("ts-1234")) {
 		t.Errorf("expected ThreadID to be 'ts-1234', got '%s'", call.ThreadID)
 	}
 	if call.Filename != "test.txt" {
@@ -45,7 +45,7 @@ func TestMockMessenger_UploadFileFunc(t *testing.T) {
 	mock := &service.MockMessenger{
 		UploadFileFunc: func(ctx context.Context, channelID core.ChannelID, threadID chat.ThreadID, filename, content string) error {
 			called = true
-			if channelID != lo.Must(core.NewChannelID("Cchan-id")) || threadID != chat.ThreadID("ts-1234") || filename != "test.txt" || content != "test content" {
+			if channelID != lo.Must(core.NewChannelID("Cchan-id")) || threadID != lo.Must(chat.NewThreadID("ts-1234")) || filename != "test.txt" || content != "test content" {
 				t.Errorf("unexpected parameters in mock func")
 			}
 			return customErr
@@ -53,7 +53,7 @@ func TestMockMessenger_UploadFileFunc(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	err := mock.UploadFile(ctx, lo.Must(core.NewChannelID("Cchan-id")), chat.ThreadID("ts-1234"), "test.txt", "test content")
+	err := mock.UploadFile(ctx, lo.Must(core.NewChannelID("Cchan-id")), lo.Must(chat.NewThreadID("ts-1234")), "test.txt", "test content")
 	if !errors.Is(err, customErr) {
 		t.Fatalf("expected custom error, got %v", err)
 	}

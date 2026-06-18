@@ -1,3 +1,4 @@
+//go:generate go run ../../../tools/gen-vo -file=thread.go
 package chat
 
 import (
@@ -8,7 +9,18 @@ import (
 	"github.com/samber/lo"
 )
 
-type ThreadID string
+// @vo
+type ThreadID struct {
+	value string
+}
+
+// NewThreadID creates a new ThreadID with validation.
+func NewThreadID(value string) (ThreadID, error) {
+	if value == "" {
+		return ThreadID{}, fmt.Errorf("thread ID cannot be empty")
+	}
+	return ThreadID{value: value}, nil
+}
 
 // Thread is an entity representing a sequence of messages in a single conversation context.
 type Thread struct {
@@ -17,7 +29,7 @@ type Thread struct {
 }
 
 func NewThread(id ThreadID) (*Thread, error) {
-	if id == "" {
+	if id.Value() == "" {
 		return nil, fmt.Errorf("thread ID is required")
 	}
 	return &Thread{
@@ -53,6 +65,7 @@ func (t *Thread) sortMessages() {
 		return msg.ID()
 	})
 	slices.SortFunc(t.messages, func(a, b *ThreadMessage) int {
-		return cmp.Compare(a.id, b.id)
+		return cmp.Compare(a.id.Value(), b.id.Value())
 	})
 }
+
