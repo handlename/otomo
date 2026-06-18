@@ -65,7 +65,13 @@ func (r *Reply) Run(ctx context.Context, input ReplyInput) (*ReplyOutput, error)
 		return nil, failure.Wrap(err)
 	}
 
-	err = r.slack.PostMessage(ctx, input.EventData.ChannelID(), input.EventData.MessageID(), rep.Body())
+	reply, err := chat.NewReply(chat.ReplyBody(rep.Body()), []chat.Attachment{})
+	if err != nil {
+		r.handleError(ctx, input.EventData, err)
+		return nil, failure.Wrap(err)
+	}
+
+	err = r.slack.PostMessage(ctx, input.EventData.ChannelID(), input.EventData.MessageID(), reply.Body())
 	if err != nil {
 		r.handleError(ctx, input.EventData, err)
 		return nil, failure.Wrap(err)

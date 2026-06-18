@@ -7,6 +7,8 @@ import (
 	"github.com/handlename/otomo/internal/app/usecase"
 	"github.com/handlename/otomo/internal/domain/chat"
 	"github.com/handlename/otomo/internal/domain/core"
+	"github.com/handlename/otomo/internal/domain/reasoning"
+	"github.com/handlename/otomo/internal/infra/tool"
 	"github.com/mackee/tanukirpc"
 )
 
@@ -33,7 +35,7 @@ func slackEventHandler(ctx tanukirpc.Context[*registry], req *slackEventRequest)
 		return nil, tanukirpc.WrapErrorWithStatus(http.StatusBadRequest, err)
 	}
 
-	uc := usecase.NewReplyToUser(ctx.Registry().Slack)
+	uc := usecase.NewReplyToUser(ctx.Registry().Slack, []reasoning.Tool{tool.NewDummyTool()})
 	if err := uc.Run(ctx, otomo, cid, core.PromptBody(req.Message)); err != nil {
 		return nil, tanukirpc.WrapErrorWithStatus(http.StatusInternalServerError, err)
 	}
