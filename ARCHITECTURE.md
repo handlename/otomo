@@ -98,8 +98,8 @@ We enforce the **Always Valid Domain Model** pattern as our primary rule for dom
    func SendMessage(channelID string, userID string)
 
    // Prefer:
-   type ChannelID string
-   type UserID string
+   type ChannelID struct{ value string }
+   type UserID struct{ value string }
    func SendMessage(channelID ChannelID, userID UserID)
    ```
 
@@ -125,11 +125,11 @@ import "fmt"
 
 type Message struct {
 	role MessageRole
-	user string
-	body string
+	user UserID
+	body MessageBody
 }
 
-func NewMessage(role MessageRole, user string, body string) (*Message, error) {
+func NewMessage(role MessageRole, user UserID, body MessageBody) (*Message, error) {
 	if role != RoleSystem && role != RoleUser && role != RoleAssistant {
 		return nil, fmt.Errorf("invalid message role: %s", role)
 	}
@@ -144,10 +144,39 @@ func NewMessage(role MessageRole, user string, body string) (*Message, error) {
 }
 
 func (m *Message) Role() MessageRole { return m.role }
-func (m *Message) User() string      { return m.user }
-func (m *Message) Body() string      { return m.body }
+func (m *Message) User() UserID      { return m.user }
+func (m *Message) Body() MessageBody { return m.body }
 ```
 
 ### Testing Guidelines
 
 When writing tests, always use the factory functions. If you need helper fixtures for tests, create dedicated test helpers that return valid models, rather than exposing fields or bypassing constructors.
+
+---
+
+## 3. Code Generation for Value Objects
+
+To eliminate repetitive boilerplate methods on identifier structs (e.g. `UserID`, `ChannelID`), we use a custom generator utility located at `tools/gen-vo/`.
+
+### How to Use
+
+1. Define your identifier as a struct with a single unexported field named `value string` inside `types.go` or other domain files.
+2. Add the `//go:generate` directive at the top of the file pointing to `tools/gen-vo`.
+3. Annotate the struct with the `// @vo` comment.
+4. Implement the validated constructor (`NewXxx`).
+
+Example:
+```go
+//go:generate go run ../../../tools/gen-vo -file=types.go
+
+package core
+
+// @vo
+type UserID struct {
+	value string
+}
+
+func NewUserID(v string) (UserID, error) { ... }
+```
+
+5. Run `go generate ./...` in the root of the project to generate the `<filename>_gen.go` file containing `Value()`, `Equals()`, and `String()` methods.

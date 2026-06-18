@@ -59,6 +59,8 @@ otomo/
 │   ├── lambda.tf             # Lambda-specific resources
 │   ├── iam.tf                # IAM roles and policies
 │   └── modules/              # Terraform modules
+├── tools/                      # Development and code generation tools
+│   └── gen-vo/                # AST-based Value Object code generator
 ├── app.go                     # Main application logic
 ├── config.toml               # Configuration template
 ├── go.mod                    # Go module dependencies
@@ -162,6 +164,7 @@ model_id = "{{ must_env `BEDROCK_MODEL_ID` }}"
 
 - **Build Tool**: Make-based build system
 - **Dependency Management**: Go modules
+- **Code Generation**: AST-based code generator for value objects (`go generate ./...`)
 - **Version Management**: mise for tool version management
 - **Release Management**: GoReleaser for automated releases
 - **Code Quality**: Static analysis and linting integration
