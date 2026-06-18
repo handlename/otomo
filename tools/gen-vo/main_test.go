@@ -19,6 +19,18 @@ func TestGenerateVO(t *testing.T) {
 type DummyID struct {
 	value string
 }
+
+type (
+	// @vo
+	GroupedID struct {
+		value string
+	}
+
+	// @vo
+	InvalidID struct {
+		value int
+	}
+)
 `
 	srcFile := filepath.Join(tmpDir, "dummy.go")
 	if err := os.WriteFile(srcFile, []byte(dummySrc), 0644); err != nil {
@@ -41,11 +53,25 @@ type DummyID struct {
 		"func (id DummyID) Value() string",
 		"func (id DummyID) Equals(other DummyID) bool",
 		"func (id DummyID) String() string",
+		"func (id GroupedID) Value() string",
+		"func (id GroupedID) Equals(other GroupedID) bool",
+		"func (id GroupedID) String() string",
 	}
 
 	for _, method := range expectedMethods {
 		if !strings.Contains(string(content), method) {
 			t.Errorf("missing generated method: %q", method)
+		}
+	}
+
+	unexpectedMethods := []string{
+		"func (id InvalidID)",
+		"InvalidID",
+	}
+
+	for _, method := range unexpectedMethods {
+		if strings.Contains(string(content), method) {
+			t.Errorf("unexpected method generated for non-string VO: %q", method)
 		}
 	}
 }

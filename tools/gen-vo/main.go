@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/parser"
+	"go/printer"
 	"go/token"
 	"os"
 	"path/filepath"
@@ -33,6 +34,18 @@ func main() {
 	}
 }
 
+func hasVOCorrespondingComment(commentGroup *ast.CommentGroup) bool {
+	if commentGroup == nil {
+		return false
+	}
+	for _, comment := range commentGroup.List {
+		if strings.Contains(comment.Text, "@vo") {
+			return true
+		}
+	}
+	return false
+}
+
 func runGenerator(fileName string) error {
 	fset := token.NewFileSet()
 	node, err := parser.ParseFile(fset, fileName, nil, parser.ParseComments)
@@ -58,15 +71,9 @@ func runGenerator(fileName string) error {
 				continue
 			}
 
-			isVO := false
-			if genDecl.Doc != nil {
-				for _, comment := range genDecl.Doc.List {
-					if strings.Contains(comment.Text, "@vo") {
-						isVO = true
-						break
-					}
-				}
-			}
+			isVO := hasVOCorrespondingComment(genDecl.Doc) ||
+				hasVOCorrespondingComment(typeSpec.Doc) ||
+				hasVOCorrespondingComment(typeSpec.Comment)
 
 			if !isVO {
 				continue
@@ -75,13 +82,19 @@ func runGenerator(fileName string) error {
 			var fieldType string
 			for _, field := range structType.Fields.List {
 				if len(field.Names) == 1 && field.Names[0].Name == "value" {
-					if ident, ok := field.Type.(*ast.Ident); ok {
-						fieldType = ident.Name
+					var typeBuf bytes.Buffer
+					if err := printer.Fprint(&typeBuf, fset, field.Type); err == nil {
+						fieldType = typeBuf.String()
 					}
 				}
 			}
 
 			if fieldType == "" {
+				continue
+			}
+
+			if fieldType != "string" {
+				fmt.Fprintf(os.Stderr, "Warning: struct %s is marked as @vo but its 'value' field is of type %s (must be string)\n", typeSpec.Name.Name, fieldType)
 				continue
 			}
 
