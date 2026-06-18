@@ -2,6 +2,7 @@ package reasoning
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/handlename/otomo/internal/domain/core"
 )
@@ -28,11 +29,28 @@ func (m *ContextMessage) Content() string {
 }
 
 func (m *ContextMessage) ToolCalls() []ToolCall {
-	return m.toolCalls
+	return slices.Clone(m.toolCalls)
 }
 
 func (m *ContextMessage) ToolResults() []ToolResult {
-	return m.toolResults
+	return slices.Clone(m.toolResults)
+}
+
+// NewContextMessage creates a new ContextMessage after validating its arguments.
+func NewContextMessage(role string, content string, toolCalls []ToolCall, toolResults []ToolResult) (*ContextMessage, error) {
+	r := core.MessageRole(role)
+	if r != core.RoleSystem && r != core.RoleUser && r != core.RoleAssistant {
+		return nil, fmt.Errorf("invalid message role: %s", role)
+	}
+	if content == "" && len(toolCalls) == 0 && len(toolResults) == 0 {
+		return nil, fmt.Errorf("content cannot be empty unless tool calls or tool results are present")
+	}
+	return &ContextMessage{
+		role:        r,
+		content:     content,
+		toolCalls:   slices.Clone(toolCalls),
+		toolResults: slices.Clone(toolResults),
+	}, nil
 }
 
 // ToolResult represents the execution output of a tool call.
@@ -42,12 +60,15 @@ type ToolResult struct {
 	isError    bool
 }
 
-func NewToolResult(toolCallID ToolCallID, output string, isError bool) ToolResult {
+func NewToolResult(toolUseID ToolCallID, output string, isError bool) (ToolResult, error) {
+	if toolUseID.Value() == "" {
+		return ToolResult{}, fmt.Errorf("tool use ID cannot be empty")
+	}
 	return ToolResult{
-		toolCallID: toolCallID,
+		toolCallID: toolUseID,
 		output:     output,
 		isError:    isError,
-	}
+	}, nil
 }
 
 func (tr ToolResult) ToolCallID() ToolCallID {
@@ -99,45 +120,52 @@ func (c *Context) SetUserPrompt(body core.PromptBody) {
 	c.userPrompt, _ = core.NewPrompt(core.PromptTagUser, body, []*core.Prompt{})
 }
 
-func (c *Context) SetMessages(messages []*core.Message) {
+func (c *Context) SetMessages(messages []*core.Message) error {
 	var msgs []*ContextMessage
 	for _, msg := range messages {
 		if msg != nil {
-			msgs = append(msgs, &ContextMessage{
-				role:    msg.Role(),
-				user:    msg.User(),
-				content: string(msg.Body()),
-			})
+			cm, err := NewContextMessage(string(msg.Role()), string(msg.Body()), nil, nil)
+			if err != nil {
+				return err
+			}
+			cm.user = msg.User()
+			msgs = append(msgs, cm)
 		}
 	}
 	c.messages = msgs
+	return nil
 }
 
 func (c *Context) Messages() []*ContextMessage {
-	return c.messages
+	return slices.Clone(c.messages)
 }
 
 func (c *Context) Tools() []Tool {
-	return c.tools
+	return slices.Clone(c.tools)
 }
 
 func (c *Context) SetTools(tools []Tool) {
-	c.tools = tools
+	c.tools = slices.Clone(tools)
 }
 
-func (c *Context) AddToolUseResponse(content string, toolCalls []ToolCall) {
-	c.messages = append(c.messages, &ContextMessage{
-		role:      core.RoleAssistant,
-		content:   content,
-		toolCalls: toolCalls,
-	})
+func (c *Context) AddToolUseResponse(content string, toolCalls []ToolCall) error {
+	clonedCalls := slices.Clone(toolCalls)
+	msg, err := NewContextMessage(string(core.RoleAssistant), content, clonedCalls, nil)
+	if err != nil {
+		return err
+	}
+	c.messages = append(c.messages, msg)
+	return nil
 }
 
-func (c *Context) AddToolResults(results []ToolResult) {
-	c.messages = append(c.messages, &ContextMessage{
-		role:        core.RoleUser,
-		toolResults: results,
-	})
+func (c *Context) AddToolResults(results []ToolResult) error {
+	clonedResults := slices.Clone(results)
+	msg, err := NewContextMessage(string(core.RoleUser), "", nil, clonedResults)
+	if err != nil {
+		return err
+	}
+	c.messages = append(c.messages, msg)
+	return nil
 }
 
 func (c *Context) Prompt() *core.Prompt {
