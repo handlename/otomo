@@ -26,4 +26,3 @@ func NewAnswer(body AnswerBody, toolCalls []ToolCall) (*Answer, error) {
 		toolCalls: slices.Clone(toolCalls),
 	}, nil
 }
-

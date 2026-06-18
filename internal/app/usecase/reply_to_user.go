@@ -25,11 +25,23 @@ func NewReplyToUser(messenger appservice.Messenger, tools []reasoning.Tool) *Rep
 }
 
 func (u *ReplyToUser) Run(ctx context.Context, otomo *chat.Otomo, channelID core.ChannelID, userPrompt core.PromptBody) error {
+	const maxTurns = 5
+	turns := 0
+
 	c := reasoning.NewContext()
 	c.SetUserPrompt(userPrompt)
 	c.SetTools(u.tools)
 
 	for {
+		if err := ctx.Err(); err != nil {
+			return failure.Wrap(err)
+		}
+
+		if turns >= maxTurns {
+			return failure.New(errorcode.ErrInternal, failure.Message("too many tool execution turns"))
+		}
+		turns++
+
 		ans, err := otomo.Think(ctx, c)
 		if err != nil {
 			return failure.Wrap(err,
@@ -56,35 +68,48 @@ func (u *ReplyToUser) Run(ctx context.Context, otomo *chat.Otomo, channelID core
 		for _, tc := range ans.ToolCalls() {
 			tool, ok := u.findTool(tc.Name())
 			if !ok {
-				tr, _ := reasoning.NewToolResult(
+				tr, err := reasoning.NewToolResult(
 					tc.ID(),
 					fmt.Sprintf("error: tool '%s' not found", tc.Name().Value()),
 					true,
 				)
+				if err != nil {
+					return failure.Wrap(err, failure.WithCode(errorcode.ErrInternal), failure.Message("failed to create tool result"))
+				}
 				results = append(results, tr)
 				continue
 			}
 
 			out, err := tool.Execute(ctx, tc.InputJSON())
 			if err != nil {
-				tr, _ := reasoning.NewToolResult(
+				tr, err := reasoning.NewToolResult(
 					tc.ID(),
 					fmt.Sprintf("error executing tool: %v", err),
 					true,
 				)
+				if err != nil {
+					return failure.Wrap(err, failure.WithCode(errorcode.ErrInternal), failure.Message("failed to create tool result"))
+				}
 				results = append(results, tr)
 			} else {
-				tr, _ := reasoning.NewToolResult(
+				tr, err := reasoning.NewToolResult(
 					tc.ID(),
 					out,
 					false,
 				)
+				if err != nil {
+					return failure.Wrap(err, failure.WithCode(errorcode.ErrInternal), failure.Message("failed to create tool result"))
+				}
 				results = append(results, tr)
 			}
 		}
 
-		c.AddToolUseResponse(string(ans.Body()), ans.ToolCalls())
-		c.AddToolResults(results)
+		if err := c.AddToolUseResponse(string(ans.Body()), ans.ToolCalls()); err != nil {
+			return failure.Wrap(err, failure.WithCode(errorcode.ErrInternal), failure.Message("failed to update context with tool calls"))
+		}
+		if err := c.AddToolResults(results); err != nil {
+			return failure.Wrap(err, failure.WithCode(errorcode.ErrInternal), failure.Message("failed to update context with tool results"))
+		}
 	}
 }
 

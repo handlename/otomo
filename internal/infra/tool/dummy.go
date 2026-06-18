@@ -59,4 +59,3 @@ func (t *DummyTool) Execute(ctx context.Context, inputJSON string) (string, erro
 	length := len([]rune(*input.Text))
 	return fmt.Sprintf(`{"length": %d}`, length), nil
 }
-

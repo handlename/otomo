@@ -21,8 +21,8 @@ type mockTool struct {
 }
 
 func (m mockTool) Name() reasoning.ToolName { return m.name }
-func (m mockTool) Description() string     { return m.description }
-func (m mockTool) InputSchema() string     { return m.inputSchema }
+func (m mockTool) Description() string      { return m.description }
+func (m mockTool) InputSchema() string      { return m.inputSchema }
 func (m mockTool) Execute(ctx context.Context, inputJSON string) (string, error) {
 	if m.executeFunc != nil {
 		return m.executeFunc(ctx, inputJSON)
@@ -75,7 +75,7 @@ func TestReplyToUser_Run(t *testing.T) {
 				// Verify context has tool results
 				messages := c.Messages()
 				require.GreaterOrEqual(t, len(messages), 2)
-				
+
 				// Message 1 (assistant): thinking with tool call
 				assert.Equal(t, "assistant", messages[len(messages)-2].Role())
 				assert.Equal(t, "calling tool...", messages[len(messages)-2].Content())
@@ -207,5 +207,42 @@ func TestReplyToUser_Run(t *testing.T) {
 
 		require.Len(t, messenger.History, 1)
 		assert.Equal(t, "final response", messenger.History[0].Message)
+	})
+
+	t.Run("max turns exceeded error", func(t *testing.T) {
+		thinkCount := 0
+		mockBrain, err := reasoning.NewBrain(&mockBrain{
+			ThinkFunc: func(ctx context.Context, c *reasoning.Context) (*reasoning.Answer, error) {
+				thinkCount++
+				tc, err := reasoning.NewToolCall(
+					lo.Must(reasoning.NewToolCallID(fmt.Sprintf("call-%d", thinkCount))),
+					lo.Must(reasoning.NewToolName("mock_tool")),
+					`{"param": "val"}`,
+				)
+				if err != nil {
+					return nil, err
+				}
+				return reasoning.NewAnswer(reasoning.AnswerBody("calling tool..."), []reasoning.ToolCall{tc})
+			},
+		})
+		require.NoError(t, err)
+
+		mockOtomo, err := chat.NewOtomo(mockBrain)
+		require.NoError(t, err)
+
+		mTool := mockTool{
+			name: lo.Must(reasoning.NewToolName("mock_tool")),
+			executeFunc: func(ctx context.Context, inputJSON string) (string, error) {
+				return `{"result": "ok"}`, nil
+			},
+		}
+
+		messenger := &mockMessenger{}
+		uc := NewReplyToUser(messenger, []reasoning.Tool{mTool})
+
+		err = uc.Run(ctx, mockOtomo, lo.Must(core.NewChannelID("C1")), core.PromptBody("hello"))
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "too many tool execution turns")
+		assert.Equal(t, 5, thinkCount)
 	})
 }

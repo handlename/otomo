@@ -47,11 +47,11 @@ type bedrockRequestMessage struct {
 type bedrockRequestMessageContent struct {
 	Type      string          `json:"type"` // "text", "tool_use", "tool_result"
 	Text      string          `json:"text,omitempty"`
-	ID        string          `json:"id,omitempty"` // tool use id
-	Name      string          `json:"name,omitempty"` // tool name
-	Input     json.RawMessage `json:"input,omitempty"` // tool input arguments
+	ID        string          `json:"id,omitempty"`          // tool use id
+	Name      string          `json:"name,omitempty"`        // tool name
+	Input     json.RawMessage `json:"input,omitempty"`       // tool input arguments
 	ToolUseID string          `json:"tool_use_id,omitempty"` // tool result reference
-	Content   string          `json:"content,omitempty"` // tool result output
+	Content   string          `json:"content,omitempty"`     // tool result output
 	IsError   bool            `json:"is_error,omitempty"`
 }
 

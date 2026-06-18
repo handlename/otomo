@@ -152,8 +152,8 @@ type mockTool struct {
 }
 
 func (m mockTool) Name() reasoning.ToolName { return m.name }
-func (m mockTool) Description() string     { return m.description }
-func (m mockTool) InputSchema() string     { return m.schema }
+func (m mockTool) Description() string      { return m.description }
+func (m mockTool) InputSchema() string      { return m.schema }
 func (m mockTool) Execute(ctx context.Context, inputJSON string) (string, error) {
 	return "", nil
 }
