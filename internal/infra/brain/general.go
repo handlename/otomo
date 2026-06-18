@@ -30,14 +30,10 @@ func NewGeneral(ctx context.Context) (reasoning.BrainThinker, error) {
 
 // Think implements reasoning.BrainThinker.
 func (g *General) Think(ctx context.Context, c *reasoning.Context) (*reasoning.Answer, error) {
-	res, err := g.client.Invoke(ctx, c.Prompt().String())
+	ans, err := g.client.InvokeWithTools(ctx, c.SystemPromptBody(), c.Messages(), c.Tools())
 	if err != nil {
-		return nil, failure.Wrap(err, failure.Message("failed to invoke bedrock"))
+		return nil, failure.Wrap(err, failure.Message("failed to invoke bedrock with tools"))
 	}
 
-	ans, err := reasoning.NewAnswer(reasoning.AnswerBody(res), nil)
-	if err != nil {
-		return nil, failure.Wrap(err)
-	}
 	return ans, nil
 }
