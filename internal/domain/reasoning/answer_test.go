@@ -8,10 +8,26 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func mustToolCallID(v string) reasoning.ToolCallID {
+	id, err := reasoning.NewToolCallID(v)
+	if err != nil {
+		panic(err)
+	}
+	return id
+}
+
+func mustToolName(v string) reasoning.ToolName {
+	name, err := reasoning.NewToolName(v)
+	if err != nil {
+		panic(err)
+	}
+	return name
+}
+
 func TestNewAnswer(t *testing.T) {
 	tc, err := reasoning.NewToolCall(
-		reasoning.ToolCallID("call_123"),
-		reasoning.ToolName("dummy_tool"),
+		mustToolCallID("call_123"),
+		mustToolName("dummy_tool"),
 		`{"text":"hello"}`,
 	)
 	require.NoError(t, err)
@@ -60,15 +76,15 @@ func TestNewAnswer(t *testing.T) {
 
 func TestAnswer_Immutability(t *testing.T) {
 	tc1, err := reasoning.NewToolCall(
-		reasoning.ToolCallID("call_1"),
-		reasoning.ToolName("tool_1"),
+		mustToolCallID("call_1"),
+		mustToolName("tool_1"),
 		`{}`,
 	)
 	require.NoError(t, err)
 
 	tc2, err := reasoning.NewToolCall(
-		reasoning.ToolCallID("call_2"),
-		reasoning.ToolName("tool_2"),
+		mustToolCallID("call_2"),
+		mustToolName("tool_2"),
 		`{}`,
 	)
 	require.NoError(t, err)
@@ -90,4 +106,3 @@ func TestAnswer_Immutability(t *testing.T) {
 	// Verify that the internal slice of Answer was not affected.
 	assert.Equal(t, tc1, ans.ToolCalls()[0], "Answer.ToolCalls() getter should return a defensively copied slice")
 }
-

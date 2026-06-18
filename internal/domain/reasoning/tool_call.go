@@ -1,9 +1,31 @@
+//go:generate go run ../../../tools/gen-vo -file=tool_call.go
 package reasoning
 
 import "fmt"
 
-type ToolCallID string
-type ToolName string
+// @vo
+type ToolCallID struct {
+	value string
+}
+
+func NewToolCallID(value string) (ToolCallID, error) {
+	if value == "" {
+		return ToolCallID{}, fmt.Errorf("tool call ID cannot be empty")
+	}
+	return ToolCallID{value: value}, nil
+}
+
+// @vo
+type ToolName struct {
+	value string
+}
+
+func NewToolName(value string) (ToolName, error) {
+	if value == "" {
+		return ToolName{}, fmt.Errorf("tool name cannot be empty")
+	}
+	return ToolName{value: value}, nil
+}
 
 // ToolCall represents a single tool execution request from the LLM.
 type ToolCall struct {
@@ -14,10 +36,10 @@ type ToolCall struct {
 
 // NewToolCall creates a new ToolCall value object.
 func NewToolCall(id ToolCallID, name ToolName, inputJSON string) (ToolCall, error) {
-	if id == "" {
+	if id.Value() == "" {
 		return ToolCall{}, fmt.Errorf("tool call id is required")
 	}
-	if name == "" {
+	if name.Value() == "" {
 		return ToolCall{}, fmt.Errorf("tool call name is required")
 	}
 	return ToolCall{
