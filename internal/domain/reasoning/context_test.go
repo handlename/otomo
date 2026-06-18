@@ -118,18 +118,30 @@ func TestNewContextMessage(t *testing.T) {
 	require.NoError(t, err)
 
 	// Validate role validation
-	_, err = reasoning.NewContextMessage("invalid", "content", nil, nil)
+	_, err = reasoning.NewContextMessage("invalid", core.UserID{}, "content", nil, nil)
 	assert.Error(t, err)
 
 	// Content cannot be empty unless tool calls or results are present
-	_, err = reasoning.NewContextMessage("user", "", nil, nil)
+	_, err = reasoning.NewContextMessage("user", core.UserID{}, "", nil, nil)
 	assert.Error(t, err)
 
-	_, err = reasoning.NewContextMessage("user", "", []reasoning.ToolCall{tc}, nil)
+	// System message constraints
+	_, err = reasoning.NewContextMessage("system", core.UserID{}, "", []reasoning.ToolCall{tc}, nil)
+	assert.Error(t, err)
+	_, err = reasoning.NewContextMessage("system", core.UserID{}, "", nil, []reasoning.ToolResult{tr})
+	assert.Error(t, err)
+
+	// User message constraints
+	_, err = reasoning.NewContextMessage("user", core.UserID{}, "", []reasoning.ToolCall{tc}, nil)
+	assert.Error(t, err)
+	_, err = reasoning.NewContextMessage("user", core.UserID{}, "", nil, []reasoning.ToolResult{tr})
 	assert.NoError(t, err)
 
-	_, err = reasoning.NewContextMessage("user", "", nil, []reasoning.ToolResult{tr})
+	// Assistant message constraints
+	_, err = reasoning.NewContextMessage("assistant", core.UserID{}, "", []reasoning.ToolCall{tc}, nil)
 	assert.NoError(t, err)
+	_, err = reasoning.NewContextMessage("assistant", core.UserID{}, "", nil, []reasoning.ToolResult{tr})
+	assert.Error(t, err)
 }
 
 func TestContextMessage_Immutability(t *testing.T) {
@@ -141,7 +153,7 @@ func TestContextMessage_Immutability(t *testing.T) {
 	require.NoError(t, err)
 
 	toolCalls := []reasoning.ToolCall{tc}
-	msg, err := reasoning.NewContextMessage("user", "content", toolCalls, nil)
+	msg, err := reasoning.NewContextMessage("assistant", core.UserID{}, "content", toolCalls, nil)
 	require.NoError(t, err)
 
 	// Mutate input slice

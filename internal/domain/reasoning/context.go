@@ -37,16 +37,38 @@ func (m *ContextMessage) ToolResults() []ToolResult {
 }
 
 // NewContextMessage creates a new ContextMessage after validating its arguments.
-func NewContextMessage(role string, content string, toolCalls []ToolCall, toolResults []ToolResult) (*ContextMessage, error) {
+func NewContextMessage(
+	role string,
+	user core.UserID,
+	content string,
+	toolCalls []ToolCall,
+	toolResults []ToolResult,
+) (*ContextMessage, error) {
 	r := core.MessageRole(role)
-	if r != core.RoleSystem && r != core.RoleUser && r != core.RoleAssistant {
+	switch r {
+	case core.RoleSystem:
+		if len(toolCalls) > 0 || len(toolResults) > 0 {
+			return nil, fmt.Errorf("system message cannot contain tool calls or tool results")
+		}
+	case core.RoleUser:
+		if len(toolCalls) > 0 {
+			return nil, fmt.Errorf("user message cannot contain tool calls")
+		}
+	case core.RoleAssistant:
+		if len(toolResults) > 0 {
+			return nil, fmt.Errorf("assistant message cannot contain tool results")
+		}
+	default:
 		return nil, fmt.Errorf("invalid message role: %s", role)
 	}
+
 	if content == "" && len(toolCalls) == 0 && len(toolResults) == 0 {
 		return nil, fmt.Errorf("content cannot be empty unless tool calls or tool results are present")
 	}
+
 	return &ContextMessage{
 		role:        r,
+		user:        user,
 		content:     content,
 		toolCalls:   slices.Clone(toolCalls),
 		toolResults: slices.Clone(toolResults),
@@ -124,11 +146,10 @@ func (c *Context) SetMessages(messages []*core.Message) error {
 	var msgs []*ContextMessage
 	for _, msg := range messages {
 		if msg != nil {
-			cm, err := NewContextMessage(string(msg.Role()), string(msg.Body()), nil, nil)
+			cm, err := NewContextMessage(string(msg.Role()), msg.User(), string(msg.Body()), nil, nil)
 			if err != nil {
 				return err
 			}
-			cm.user = msg.User()
 			msgs = append(msgs, cm)
 		}
 	}
@@ -149,8 +170,7 @@ func (c *Context) SetTools(tools []Tool) {
 }
 
 func (c *Context) AddToolUseResponse(content string, toolCalls []ToolCall) error {
-	clonedCalls := slices.Clone(toolCalls)
-	msg, err := NewContextMessage(string(core.RoleAssistant), content, clonedCalls, nil)
+	msg, err := NewContextMessage(string(core.RoleAssistant), core.UserID{}, content, toolCalls, nil)
 	if err != nil {
 		return err
 	}
@@ -159,8 +179,7 @@ func (c *Context) AddToolUseResponse(content string, toolCalls []ToolCall) error
 }
 
 func (c *Context) AddToolResults(results []ToolResult) error {
-	clonedResults := slices.Clone(results)
-	msg, err := NewContextMessage(string(core.RoleUser), "", nil, clonedResults)
+	msg, err := NewContextMessage(string(core.RoleUser), core.UserID{}, "", nil, results)
 	if err != nil {
 		return err
 	}
