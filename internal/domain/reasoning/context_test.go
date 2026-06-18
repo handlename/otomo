@@ -76,3 +76,27 @@ hello
 		assert.Equal(t, expected, prompt.String())
 	})
 }
+
+func TestContext_ToolInteractions(t *testing.T) {
+	c := reasoning.NewContext()
+	c.SetUserPrompt("test user prompt")
+
+	tc, err := reasoning.NewToolCall(
+		mustToolCallID("call-1"),
+		mustToolName("dummy_tool"),
+		`{"text":"hello"}`,
+	)
+	require.NoError(t, err)
+
+	c.AddToolUseResponse("Thinking...", []reasoning.ToolCall{tc})
+	require.Len(t, c.Messages(), 1)
+	assert.Equal(t, "assistant", c.Messages()[0].Role())
+	assert.Equal(t, "Thinking...", c.Messages()[0].Content())
+	assert.Equal(t, tc, c.Messages()[0].ToolCalls()[0])
+
+	result := reasoning.NewToolResult(mustToolCallID("call-1"), `{"length":5}`, false)
+	c.AddToolResults([]reasoning.ToolResult{result})
+	require.Len(t, c.Messages(), 2)
+	assert.Equal(t, "user", c.Messages()[1].Role())
+	assert.Equal(t, result, c.Messages()[1].ToolResults()[0])
+}
