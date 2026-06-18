@@ -68,4 +68,3 @@ func TestNewThreadMessageID(t *testing.T) {
 	_, err := chat.NewThreadMessageID("")
 	assert.Error(t, err)
 }
-

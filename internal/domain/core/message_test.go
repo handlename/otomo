@@ -95,4 +95,3 @@ func TestNewMessageID(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "123.456", mid.Value())
 }
-

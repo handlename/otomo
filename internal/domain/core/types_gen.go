@@ -36,4 +36,3 @@ func (id MessageID) Equals(other MessageID) bool {
 func (id MessageID) String() string {
 	return id.value
 }
-

@@ -19,7 +19,7 @@ type slackEventResponse struct {
 	Status string `json:"status"`
 }
 
-func slackEventHandler(ctx tanukirpc.Context[*registry], req *slackEventRequest) (*slackEventResponse, error)  {
+func slackEventHandler(ctx tanukirpc.Context[*registry], req *slackEventRequest) (*slackEventResponse, error) {
 	otomo, err := chat.NewOtomo(ctx.Registry().Brain)
 	if err != nil {
 		return nil, tanukirpc.WrapErrorWithStatus(http.StatusInternalServerError, err)

@@ -55,4 +55,3 @@ func NewMessageID(value string) (MessageID, error) {
 	}
 	return MessageID{value: value}, nil
 }
-

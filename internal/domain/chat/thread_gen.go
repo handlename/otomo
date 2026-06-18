@@ -12,4 +12,3 @@ func (id ThreadID) Equals(other ThreadID) bool {
 func (id ThreadID) String() string {
 	return id.value
 }
-

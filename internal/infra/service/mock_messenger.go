@@ -102,4 +102,3 @@ func (m *MockMessenger) UploadFile(ctx context.Context, channelID core.ChannelID
 	}
 	return nil
 }
-

@@ -12,4 +12,3 @@ func (id ThreadMessageID) Equals(other ThreadMessageID) bool {
 func (id ThreadMessageID) String() string {
 	return id.value
 }
-

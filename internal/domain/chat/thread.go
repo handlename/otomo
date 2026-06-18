@@ -68,4 +68,3 @@ func (t *Thread) sortMessages() {
 		return cmp.Compare(a.id.Value(), b.id.Value())
 	})
 }
-

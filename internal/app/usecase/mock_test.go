@@ -43,7 +43,7 @@ func (m *mockEventPublisher) Subscribe(kind core.EventKind, sub appservice.Subsc
 
 type mockMessenger struct {
 	FetchThreadFunc func(ctx context.Context, channelID core.ChannelID, threadID chat.ThreadID) (*chat.Thread, error)
-	History []struct {
+	History         []struct {
 		ChannelID string
 		MessageID string
 		Message   string

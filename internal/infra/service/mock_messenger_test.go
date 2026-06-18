@@ -62,4 +62,3 @@ func TestMockMessenger_UploadFileFunc(t *testing.T) {
 		t.Error("expected UploadFileFunc to be called")
 	}
 }
-

@@ -60,4 +60,3 @@ func (t *ThreadMessage) Body() core.MessageBody {
 func (t *ThreadMessage) ID() ThreadMessageID {
 	return t.id
 }
-

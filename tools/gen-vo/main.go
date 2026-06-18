@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"go/ast"
+	"go/format"
 	"go/parser"
 	"go/printer"
 	"go/token"
@@ -131,9 +132,14 @@ func (id {{.Name}}) String() string {
 		return fmt.Errorf("executing template: %w", err)
 	}
 
+	formatted, err := format.Source(buf.Bytes())
+	if err != nil {
+		return fmt.Errorf("formatting generated code: %w", err)
+	}
+
 	ext := filepath.Ext(fileName)
 	base := strings.TrimSuffix(fileName, ext)
 	outFileName := base + "_gen.go"
 
-	return os.WriteFile(outFileName, buf.Bytes(), 0644)
+	return os.WriteFile(outFileName, formatted, 0644)
 }
