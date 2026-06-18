@@ -5,11 +5,16 @@ import (
 
 	"github.com/handlename/otomo/internal/domain/reasoning"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewAnswer(t *testing.T) {
-	tc, err := reasoning.NewToolCall("call_123", "dummy_tool", `{"text":"hello"}`)
-	assert.NoError(t, err)
+	tc, err := reasoning.NewToolCall(
+		reasoning.ToolCallID("call_123"),
+		reasoning.ToolName("dummy_tool"),
+		`{"text":"hello"}`,
+	)
+	require.NoError(t, err)
 
 	tests := []struct {
 		name        string
@@ -52,3 +57,37 @@ func TestNewAnswer(t *testing.T) {
 		})
 	}
 }
+
+func TestAnswer_Immutability(t *testing.T) {
+	tc1, err := reasoning.NewToolCall(
+		reasoning.ToolCallID("call_1"),
+		reasoning.ToolName("tool_1"),
+		`{}`,
+	)
+	require.NoError(t, err)
+
+	tc2, err := reasoning.NewToolCall(
+		reasoning.ToolCallID("call_2"),
+		reasoning.ToolName("tool_2"),
+		`{}`,
+	)
+	require.NoError(t, err)
+
+	toolCalls := []reasoning.ToolCall{tc1}
+	ans, err := reasoning.NewAnswer("body", toolCalls)
+	require.NoError(t, err)
+
+	// Mutate the original slice used to construct the Answer.
+	toolCalls[0] = tc2
+
+	// Verify that the internal slice of Answer was defensively copied.
+	assert.Equal(t, tc1, ans.ToolCalls()[0], "Answer constructor should defensively copy the input toolCalls slice")
+
+	// Mutate the slice returned by the ToolCalls() getter.
+	ret := ans.ToolCalls()
+	ret[0] = tc2
+
+	// Verify that the internal slice of Answer was not affected.
+	assert.Equal(t, tc1, ans.ToolCalls()[0], "Answer.ToolCalls() getter should return a defensively copied slice")
+}
+
