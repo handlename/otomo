@@ -6,6 +6,9 @@ import (
 	"fmt"
 
 	"github.com/handlename/otomo/internal/domain/reasoning"
+	"github.com/handlename/otomo/internal/errorcode"
+	"github.com/morikuni/failure/v2"
+	"github.com/samber/lo"
 )
 
 var _ reasoning.Tool = (*DummyTool)(nil)
@@ -17,8 +20,7 @@ func NewDummyTool() *DummyTool {
 }
 
 func (t *DummyTool) Name() reasoning.ToolName {
-	name, _ := reasoning.NewToolName("dummy_tool")
-	return name
+	return lo.Must(reasoning.NewToolName("dummy_tool"))
 }
 
 func (t *DummyTool) Description() string {
@@ -40,12 +42,17 @@ func (t *DummyTool) InputSchema() string {
 
 func (t *DummyTool) Execute(ctx context.Context, inputJSON string) (string, error) {
 	var input struct {
-		Text string `json:"text"`
+		Text *string `json:"text"`
 	}
 	if err := json.Unmarshal([]byte(inputJSON), &input); err != nil {
-		return "", fmt.Errorf("failed to unmarshal inputs: %w", err)
+		return "", failure.Wrap(err, failure.Message("failed to unmarshal inputs"))
 	}
 
-	length := len([]rune(input.Text))
+	if input.Text == nil {
+		return "", failure.New(errorcode.ErrInvalidArgument, failure.Message("text is required"))
+	}
+
+	length := len([]rune(*input.Text))
 	return fmt.Sprintf(`{"length": %d}`, length), nil
 }
+

@@ -5,34 +5,77 @@ import (
 	"testing"
 
 	"github.com/handlename/otomo/internal/domain/reasoning"
+	"github.com/handlename/otomo/internal/errorcode"
 	"github.com/handlename/otomo/internal/infra/tool"
+	"github.com/morikuni/failure/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestDummyTool(t *testing.T) {
+func TestDummyTool_Metadata(t *testing.T) {
 	dt := tool.NewDummyTool()
-	
-	// Test Name matching custom types
+
 	expectedName, err := reasoning.NewToolName("dummy_tool")
 	require.NoError(t, err)
 	assert.Equal(t, expectedName, dt.Name())
 	assert.Contains(t, dt.Description(), "verification")
 	assert.Contains(t, dt.InputSchema(), "properties")
-
-	ctx := context.Background()
-	
-	// Test success path (characters count)
-	out, err := dt.Execute(ctx, `{"text":"hello"}`)
-	require.NoError(t, err)
-	assert.Equal(t, `{"length": 5}`, out)
-
-	// Test multi-byte string character count
-	out, err = dt.Execute(ctx, `{"text":"おとも"}`)
-	require.NoError(t, err)
-	assert.Equal(t, `{"length": 3}`, out)
-
-	// Test invalid JSON syntax
-	_, err = dt.Execute(ctx, `{"invalid"`)
-	assert.Error(t, err)
 }
+
+func TestDummyTool_Execute(t *testing.T) {
+	tests := []struct {
+		name        string
+		inputJSON   string
+		expectedOut string
+		expectErr   bool
+		errCode     errorcode.ErrorCode
+		errMsg      string
+	}{
+		{
+			name:        "success english text",
+			inputJSON:   `{"text":"hello"}`,
+			expectedOut: `{"length": 5}`,
+			expectErr:   false,
+		},
+		{
+			name:        "success multi-byte text",
+			inputJSON:   `{"text":"おとも"}`,
+			expectedOut: `{"length": 3}`,
+			expectErr:   false,
+		},
+		{
+			name:      "error invalid json syntax",
+			inputJSON: `{"invalid"`,
+			expectErr: true,
+		},
+		{
+			name:      "error missing text parameter",
+			inputJSON: `{}`,
+			expectErr: true,
+			errCode:   errorcode.ErrInvalidArgument,
+			errMsg:    "text is required",
+		},
+	}
+
+	dt := tool.NewDummyTool()
+	ctx := context.Background()
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			out, err := dt.Execute(ctx, tt.inputJSON)
+			if tt.expectErr {
+				assert.Error(t, err)
+				if tt.errCode != "" {
+					assert.True(t, failure.Is(err, tt.errCode), "expected error code %v, got error %v", tt.errCode, err)
+				}
+				if tt.errMsg != "" {
+					assert.Contains(t, err.Error(), tt.errMsg)
+				}
+			} else {
+				require.NoError(t, err)
+				assert.Equal(t, tt.expectedOut, out)
+			}
+		})
+	}
+}
+
