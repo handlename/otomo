@@ -120,11 +120,13 @@ func (tr ToolResult) Status() ToolResultErrorOrSuccess {
 
 // Context is an entity that accumulates necessary information (prompts, history) for reasoning.
 type Context struct {
-	systemPrompt     *core.Prompt
-	systemPromptBody string
-	userPrompt       *core.Prompt
-	messages         []*ContextMessage
-	tools            []Tool
+	systemPrompt      *core.Prompt
+	systemPromptBody  string
+	userPrompt        *core.Prompt
+	userPromptBody    string
+	userPromptMessage *ContextMessage
+	messages          []*ContextMessage
+	tools             []Tool
 }
 
 func NewContext() *Context {
@@ -152,7 +154,12 @@ func (c *Context) SystemPromptBody() string {
 }
 
 func (c *Context) SetUserPrompt(body core.PromptBody) {
+	c.userPromptBody = string(body)
 	c.userPrompt, _ = core.NewPrompt(core.PromptTagUser, body, []*core.Prompt{})
+
+	msg, _ := NewContextMessage(string(core.RoleUser), core.UserID{}, core.MessageBody(body), nil, nil)
+	c.userPromptMessage = msg
+	c.appendUserPromptMessageIfNeeded()
 }
 
 func (c *Context) SetMessages(messages []*core.Message) error {
@@ -167,7 +174,20 @@ func (c *Context) SetMessages(messages []*core.Message) error {
 		}
 	}
 	c.messages = msgs
+	c.appendUserPromptMessageIfNeeded()
 	return nil
+}
+
+func (c *Context) appendUserPromptMessageIfNeeded() {
+	if c.userPromptMessage == nil {
+		return
+	}
+	for _, msg := range c.messages {
+		if msg == c.userPromptMessage {
+			return
+		}
+	}
+	c.messages = append(c.messages, c.userPromptMessage)
 }
 
 func (c *Context) Messages() []*ContextMessage {
@@ -205,7 +225,7 @@ func (c *Context) AddToolResults(results []ToolResult) error {
 func (c *Context) Prompt() *core.Prompt {
 	var prompts []*core.Prompt
 	for _, msg := range c.messages {
-		if msg == nil {
+		if msg == nil || msg == c.userPromptMessage {
 			continue
 		}
 		var tag core.PromptTag

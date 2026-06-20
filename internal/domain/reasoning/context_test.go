@@ -92,19 +92,22 @@ func TestContext_ToolInteractions(t *testing.T) {
 
 	err = c.AddToolUseResponse("Thinking...", []reasoning.ToolCall{tc})
 	require.NoError(t, err)
-	require.Len(t, c.Messages(), 1)
-	assert.Equal(t, "assistant", c.Messages()[0].Role())
-	assert.Equal(t, core.MessageBody("Thinking..."), c.Messages()[0].Content())
-	assert.Equal(t, tc, c.Messages()[0].ToolCalls()[0])
+	require.Len(t, c.Messages(), 2)
+	assert.Equal(t, "user", c.Messages()[0].Role())
+	assert.Equal(t, core.MessageBody("test user prompt"), c.Messages()[0].Content())
+
+	assert.Equal(t, "assistant", c.Messages()[1].Role())
+	assert.Equal(t, core.MessageBody("Thinking..."), c.Messages()[1].Content())
+	assert.Equal(t, tc, c.Messages()[1].ToolCalls()[0])
 
 	result, err := reasoning.NewToolResult(mustToolCallID("call-1"), `{"length":5}`, reasoning.ToolResultSuccess)
 	require.NoError(t, err)
 	assert.Equal(t, mustToolCallID("call-1"), result.ToolUseID())
 	err = c.AddToolResults([]reasoning.ToolResult{result})
 	require.NoError(t, err)
-	require.Len(t, c.Messages(), 2)
-	assert.Equal(t, "user", c.Messages()[1].Role())
-	assert.Equal(t, result, c.Messages()[1].ToolResults()[0])
+	require.Len(t, c.Messages(), 3)
+	assert.Equal(t, "user", c.Messages()[2].Role())
+	assert.Equal(t, result, c.Messages()[2].ToolResults()[0])
 }
 
 func TestNewContextMessage(t *testing.T) {
