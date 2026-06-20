@@ -39,19 +39,14 @@ func NewOtomo(brain *reasoning.Brain) (*Otomo, error) {
 	return o, nil
 }
 
-func (o *Otomo) Think(ctx context.Context, c *reasoning.Context) (*Reply, error) {
+func (o *Otomo) Think(ctx context.Context, c *reasoning.Context) (*reasoning.Answer, error) {
 	c.SetSystemPrompt(core.PromptBody(o.systemPrompt))
 
 	ans, err := o.brain.Think(ctx, c)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to think")
 	}
-
-	r, err := NewReply(ReplyBody(ans.Body()), []Attachment{})
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to generate reply")
-	}
-	return r, nil
+	return ans, nil
 }
 
 func (o *Otomo) SetSystemPrompt(prompt SystemPrompt) {

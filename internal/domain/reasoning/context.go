@@ -2,16 +2,131 @@ package reasoning
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/handlename/otomo/internal/domain/core"
-	"github.com/samber/lo"
 )
+
+const MaxToolTurns = 5
+
+func ShouldContinueToUseTool(turns int) bool {
+	return turns < MaxToolTurns
+}
+
+type ToolResultErrorOrSuccess bool
+
+const (
+	ToolResultError   ToolResultErrorOrSuccess = true
+	ToolResultSuccess ToolResultErrorOrSuccess = false
+)
+
+// ContextMessage represents a single message in the reasoning context.
+type ContextMessage struct {
+	role        core.MessageRole
+	user        core.UserID
+	content     core.MessageBody
+	toolCalls   []ToolCall
+	toolResults []ToolResult
+}
+
+func (m *ContextMessage) Role() string {
+	return string(m.role)
+}
+
+func (m *ContextMessage) User() core.UserID {
+	return m.user
+}
+
+func (m *ContextMessage) Content() core.MessageBody {
+	return m.content
+}
+
+func (m *ContextMessage) ToolCalls() []ToolCall {
+	return slices.Clone(m.toolCalls)
+}
+
+func (m *ContextMessage) ToolResults() []ToolResult {
+	return slices.Clone(m.toolResults)
+}
+
+// NewContextMessage creates a new ContextMessage after validating its arguments.
+func NewContextMessage(
+	role string,
+	user core.UserID,
+	content core.MessageBody,
+	toolCalls []ToolCall,
+	toolResults []ToolResult,
+) (*ContextMessage, error) {
+	r := core.MessageRole(role)
+	switch r {
+	case core.RoleSystem:
+		if len(toolCalls) > 0 || len(toolResults) > 0 {
+			return nil, fmt.Errorf("system message cannot contain tool calls or tool results")
+		}
+	case core.RoleUser:
+		if len(toolCalls) > 0 {
+			return nil, fmt.Errorf("user message cannot contain tool calls")
+		}
+	case core.RoleAssistant:
+		if len(toolResults) > 0 {
+			return nil, fmt.Errorf("assistant message cannot contain tool results")
+		}
+	default:
+		return nil, fmt.Errorf("invalid message role: %s", role)
+	}
+
+	if content == "" && len(toolCalls) == 0 && len(toolResults) == 0 {
+		return nil, fmt.Errorf("content cannot be empty unless tool calls or tool results are present")
+	}
+
+	return &ContextMessage{
+		role:        r,
+		user:        user,
+		content:     content,
+		toolCalls:   slices.Clone(toolCalls),
+		toolResults: slices.Clone(toolResults),
+	}, nil
+}
+
+// ToolResult represents the execution output of a tool call.
+type ToolResult struct {
+	toolUseID ToolCallID
+	output    string
+	status    ToolResultErrorOrSuccess
+}
+
+func NewToolResult(toolUseID ToolCallID, output string, status ToolResultErrorOrSuccess) (ToolResult, error) {
+	if toolUseID.Value() == "" {
+		return ToolResult{}, fmt.Errorf("tool use ID cannot be empty")
+	}
+	return ToolResult{
+		toolUseID: toolUseID,
+		output:    output,
+		status:    status,
+	}, nil
+}
+
+func (tr ToolResult) ToolUseID() ToolCallID {
+	return tr.toolUseID
+}
+
+func (tr ToolResult) Output() string {
+	return tr.output
+}
+
+func (tr ToolResult) Status() ToolResultErrorOrSuccess {
+	return tr.status
+}
 
 // Context is an entity that accumulates necessary information (prompts, history) for reasoning.
 type Context struct {
-	systemPrompt *core.Prompt
-	userPrompt   *core.Prompt
-	messages     []*core.Message
+	systemPrompt      *core.Prompt
+	systemPromptBody  string
+	userPrompt        *core.Prompt
+	userPromptBody    string
+	userPromptMessage *ContextMessage
+	messages          []*ContextMessage
+	tools             []Tool
 }
 
 func NewContext() *Context {
@@ -20,7 +135,8 @@ func NewContext() *Context {
 	return &Context{
 		systemPrompt: systemPrompt,
 		userPrompt:   userPrompt,
-		messages:     []*core.Message{},
+		messages:     []*ContextMessage{},
+		tools:        []Tool{},
 	}
 }
 
@@ -29,37 +145,107 @@ func (c *Context) GetUserPrompt() *core.Prompt {
 }
 
 func (c *Context) SetSystemPrompt(body core.PromptBody) {
+	c.systemPromptBody = string(body)
 	c.systemPrompt, _ = core.NewPrompt(core.PromptTagSystem, body, []*core.Prompt{})
 }
 
+func (c *Context) SystemPromptBody() string {
+	return c.systemPromptBody
+}
+
 func (c *Context) SetUserPrompt(body core.PromptBody) {
+	c.userPromptBody = string(body)
 	c.userPrompt, _ = core.NewPrompt(core.PromptTagUser, body, []*core.Prompt{})
+
+	msg, _ := NewContextMessage(string(core.RoleUser), core.UserID{}, core.MessageBody(body), nil, nil)
+	c.userPromptMessage = msg
+	c.appendUserPromptMessageIfNeeded()
 }
 
-func (c *Context) SetMessages(messages []*core.Message) {
-	c.messages = lo.Filter(messages, func(msg *core.Message, _ int) bool {
-		return msg != nil
-	})
+func (c *Context) SetMessages(messages []*core.Message) error {
+	var msgs []*ContextMessage
+	for _, msg := range messages {
+		if msg != nil {
+			cm, err := NewContextMessage(string(msg.Role()), msg.User(), msg.Body(), nil, nil)
+			if err != nil {
+				return err
+			}
+			msgs = append(msgs, cm)
+		}
+	}
+	c.messages = msgs
+	c.appendUserPromptMessageIfNeeded()
+	return nil
 }
 
+func (c *Context) appendUserPromptMessageIfNeeded() {
+	if c.userPromptMessage == nil {
+		return
+	}
+	for _, msg := range c.messages {
+		if msg == c.userPromptMessage {
+			return
+		}
+	}
+	c.messages = append(c.messages, c.userPromptMessage)
+}
+
+func (c *Context) Messages() []*ContextMessage {
+	return slices.Clone(c.messages)
+}
+
+func (c *Context) Tools() []Tool {
+	return slices.Clone(c.tools)
+}
+
+func (c *Context) SetTools(tools []Tool) {
+	c.tools = slices.Clone(tools)
+}
+
+func (c *Context) AddToolUseResponse(content string, toolCalls []ToolCall) error {
+	msg, err := NewContextMessage(string(core.RoleAssistant), core.UserID{}, core.MessageBody(content), toolCalls, nil)
+	if err != nil {
+		return err
+	}
+	c.messages = append(c.messages, msg)
+	return nil
+}
+
+func (c *Context) AddToolResults(results []ToolResult) error {
+	msg, err := NewContextMessage(string(core.RoleUser), core.UserID{}, "", nil, results)
+	if err != nil {
+		return err
+	}
+	c.messages = append(c.messages, msg)
+	return nil
+}
+
+// Prompt returns the prompt representation of the context.
+// Warning: This method does not serialize tool calls or tool results in the legacy XML string.
 func (c *Context) Prompt() *core.Prompt {
+	var prompts []*core.Prompt
+	for _, msg := range c.messages {
+		if msg == nil || msg == c.userPromptMessage {
+			continue
+		}
+		var tag core.PromptTag
+		if msg.User().Value() != "" {
+			tag = core.PromptTag(fmt.Sprintf("message user=%s", msg.User().Value()))
+		} else {
+			tag = core.PromptTag(fmt.Sprintf("message role=%s", string(msg.Role())))
+		}
+		p, _ := core.NewPrompt(tag, core.PromptBody(msg.Content()), nil)
+		prompts = append(prompts, p)
+	}
+
+	threadPrompt, _ := core.NewPrompt("thread", "", prompts)
+
 	prompt, _ := core.NewPrompt(
 		"",
 		"",
 		[]*core.Prompt{
 			c.systemPrompt,
-			lo.Must(core.NewPrompt("thread", "", lo.Map(lo.Filter(c.messages, func(msg *core.Message, _ int) bool {
-				return msg != nil
-			}), func(msg *core.Message, _ int) *core.Prompt {
-				var tag core.PromptTag
-				if msg.User().Value() != "" {
-					tag = core.PromptTag(fmt.Sprintf("message user=%s", msg.User().Value()))
-				} else {
-					tag = core.PromptTag(fmt.Sprintf("message role=%s", string(msg.Role())))
-				}
-				p, _ := core.NewPrompt(tag, core.PromptBody(msg.Body()), nil)
-				return p
-			}))),
+			threadPrompt,
 			c.userPrompt,
 		},
 	)

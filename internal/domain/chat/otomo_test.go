@@ -13,7 +13,7 @@ import (
 type dummyThinker struct{}
 
 func (d *dummyThinker) Think(ctx context.Context, c *reasoning.Context) (*reasoning.Answer, error) {
-	return reasoning.NewAnswer(reasoning.AnswerBody("dummy reply"))
+	return reasoning.NewAnswer(reasoning.AnswerBody("dummy reply"), nil)
 }
 
 func TestOtomo_Think(t *testing.T) {
@@ -31,7 +31,7 @@ func TestOtomo_Think(t *testing.T) {
 	reply, err := o.Think(ctx, c)
 	require.NoError(t, err)
 
-	if reply.Body() != chat.ReplyBody("dummy reply") {
+	if reply.Body() != reasoning.AnswerBody("dummy reply") {
 		t.Errorf("expected 'dummy reply', got %q", reply.Body())
 	}
 }
