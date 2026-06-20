@@ -35,6 +35,7 @@ func slackEventHandler(ctx tanukirpc.Context[*registry], req *slackEventRequest)
 		return nil, tanukirpc.WrapErrorWithStatus(http.StatusBadRequest, err)
 	}
 
+	// TODO: remove DummyTool once concrete tools are implemented
 	uc := usecase.NewReplyToUser(ctx.Registry().Slack, []reasoning.Tool{tool.NewDummyTool()})
 	if err := uc.Run(ctx, otomo, cid, core.PromptBody(req.Message)); err != nil {
 		return nil, tanukirpc.WrapErrorWithStatus(http.StatusInternalServerError, err)

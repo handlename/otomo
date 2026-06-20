@@ -7,11 +7,15 @@ import (
 	"github.com/handlename/otomo/internal/domain/core"
 )
 
+const MaxToolTurns = 5
+
+type IsError bool
+
 // ContextMessage represents a single message in the reasoning context.
 type ContextMessage struct {
 	role        core.MessageRole
 	user        core.UserID
-	content     string
+	content     core.MessageBody
 	toolCalls   []ToolCall
 	toolResults []ToolResult
 }
@@ -24,7 +28,7 @@ func (m *ContextMessage) User() core.UserID {
 	return m.user
 }
 
-func (m *ContextMessage) Content() string {
+func (m *ContextMessage) Content() core.MessageBody {
 	return m.content
 }
 
@@ -40,7 +44,7 @@ func (m *ContextMessage) ToolResults() []ToolResult {
 func NewContextMessage(
 	role string,
 	user core.UserID,
-	content string,
+	content core.MessageBody,
 	toolCalls []ToolCall,
 	toolResults []ToolResult,
 ) (*ContextMessage, error) {
@@ -79,10 +83,10 @@ func NewContextMessage(
 type ToolResult struct {
 	toolUseID ToolCallID
 	output    string
-	isError   bool
+	isError   IsError
 }
 
-func NewToolResult(toolUseID ToolCallID, output string, isError bool) (ToolResult, error) {
+func NewToolResult(toolUseID ToolCallID, output string, isError IsError) (ToolResult, error) {
 	if toolUseID.Value() == "" {
 		return ToolResult{}, fmt.Errorf("tool use ID cannot be empty")
 	}
@@ -101,7 +105,7 @@ func (tr ToolResult) Output() string {
 	return tr.output
 }
 
-func (tr ToolResult) IsError() bool {
+func (tr ToolResult) IsError() IsError {
 	return tr.isError
 }
 
@@ -146,7 +150,7 @@ func (c *Context) SetMessages(messages []*core.Message) error {
 	var msgs []*ContextMessage
 	for _, msg := range messages {
 		if msg != nil {
-			cm, err := NewContextMessage(string(msg.Role()), msg.User(), string(msg.Body()), nil, nil)
+			cm, err := NewContextMessage(string(msg.Role()), msg.User(), msg.Body(), nil, nil)
 			if err != nil {
 				return err
 			}
@@ -170,7 +174,7 @@ func (c *Context) SetTools(tools []Tool) {
 }
 
 func (c *Context) AddToolUseResponse(content string, toolCalls []ToolCall) error {
-	msg, err := NewContextMessage(string(core.RoleAssistant), core.UserID{}, content, toolCalls, nil)
+	msg, err := NewContextMessage(string(core.RoleAssistant), core.UserID{}, core.MessageBody(content), toolCalls, nil)
 	if err != nil {
 		return err
 	}

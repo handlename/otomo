@@ -33,11 +33,11 @@ func TestBedrock_InvokeWithTools(t *testing.T) {
 				return nil, err
 			}
 
-			resPayload := bedrockResponse{
+			resPayload := ClaudeResponse{
 				ID:   "msg_123",
 				Type: "message",
 				Role: "assistant",
-				Content: []bedrockResponseContent{
+				Content: []ClaudeResponseContent{
 					{
 						Type: "text",
 						Text: "Here is the tool output: ",
@@ -85,19 +85,19 @@ func TestBedrock_InvokeWithTools(t *testing.T) {
 		schema:      `{"type":"object"}`,
 	}
 
-	msgUser, err := reasoning.NewContextMessage("user", core.UserID{}, "Hello", nil, nil)
+	msgUser, err := reasoning.NewContextMessage("user", core.UserID{}, core.MessageBody("Hello"), nil, nil)
 	require.NoError(t, err)
 
 	tcID, err := reasoning.NewToolCallID("toolu_test_123")
 	require.NoError(t, err)
 	tc, err := reasoning.NewToolCall(tcID, tName, `{"text":"hello"}`)
 	require.NoError(t, err)
-	msgAssistant, err := reasoning.NewContextMessage("assistant", core.UserID{}, "", []reasoning.ToolCall{tc}, nil)
+	msgAssistant, err := reasoning.NewContextMessage("assistant", core.UserID{}, core.MessageBody(""), []reasoning.ToolCall{tc}, nil)
 	require.NoError(t, err)
 
-	tr, err := reasoning.NewToolResult(tcID, `{"length": 5}`, false)
+	tr, err := reasoning.NewToolResult(tcID, `{"length": 5}`, reasoning.IsError(false))
 	require.NoError(t, err)
-	msgResult, err := reasoning.NewContextMessage("user", core.UserID{}, "", nil, []reasoning.ToolResult{tr})
+	msgResult, err := reasoning.NewContextMessage("user", core.UserID{}, core.MessageBody(""), nil, []reasoning.ToolResult{tr})
 	require.NoError(t, err)
 
 	messages := []*reasoning.ContextMessage{msgUser, msgAssistant, msgResult}
@@ -112,7 +112,7 @@ func TestBedrock_InvokeWithTools(t *testing.T) {
 	assert.Equal(t, "dummy_tool", ans.ToolCalls()[0].Name().Value())
 	assert.JSONEq(t, `{"text":"hello"}`, ans.ToolCalls()[0].InputJSON())
 
-	var reqPayload bedrockRequest
+	var reqPayload ClaudeRequest
 	err = json.Unmarshal(capturedRequestBody, &reqPayload)
 	require.NoError(t, err)
 
@@ -168,11 +168,11 @@ func TestBedrock_Invoke(t *testing.T) {
 				return nil, err
 			}
 
-			resPayload := bedrockResponse{
+			resPayload := ClaudeResponse{
 				ID:   "msg_abc",
 				Type: "message",
 				Role: "assistant",
-				Content: []bedrockResponseContent{
+				Content: []ClaudeResponseContent{
 					{
 						Type: "text",
 						Text: "Hello there!",
@@ -211,7 +211,7 @@ func TestBedrock_Invoke(t *testing.T) {
 
 	assert.Equal(t, "Hello there!", ans)
 
-	var reqPayload bedrockRequest
+	var reqPayload ClaudeRequest
 	err = json.Unmarshal(capturedRequestBody, &reqPayload)
 	require.NoError(t, err)
 

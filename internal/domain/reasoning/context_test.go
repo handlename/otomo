@@ -94,10 +94,10 @@ func TestContext_ToolInteractions(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, c.Messages(), 1)
 	assert.Equal(t, "assistant", c.Messages()[0].Role())
-	assert.Equal(t, "Thinking...", c.Messages()[0].Content())
+	assert.Equal(t, core.MessageBody("Thinking..."), c.Messages()[0].Content())
 	assert.Equal(t, tc, c.Messages()[0].ToolCalls()[0])
 
-	result, err := reasoning.NewToolResult(mustToolCallID("call-1"), `{"length":5}`, false)
+	result, err := reasoning.NewToolResult(mustToolCallID("call-1"), `{"length":5}`, reasoning.IsError(false))
 	require.NoError(t, err)
 	assert.Equal(t, mustToolCallID("call-1"), result.ToolUseID())
 	err = c.AddToolResults([]reasoning.ToolResult{result})
@@ -115,34 +115,34 @@ func TestNewContextMessage(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	tr, err := reasoning.NewToolResult(mustToolCallID("call-1"), `{"length":5}`, false)
+	tr, err := reasoning.NewToolResult(mustToolCallID("call-1"), `{"length":5}`, reasoning.IsError(false))
 	require.NoError(t, err)
 	assert.Equal(t, mustToolCallID("call-1"), tr.ToolUseID())
 
 	// Validate role validation
-	_, err = reasoning.NewContextMessage("invalid", core.UserID{}, "content", nil, nil)
+	_, err = reasoning.NewContextMessage("invalid", core.UserID{}, core.MessageBody("content"), nil, nil)
 	assert.Error(t, err)
 
 	// Content cannot be empty unless tool calls or results are present
-	_, err = reasoning.NewContextMessage("user", core.UserID{}, "", nil, nil)
+	_, err = reasoning.NewContextMessage("user", core.UserID{}, core.MessageBody(""), nil, nil)
 	assert.Error(t, err)
 
 	// System message constraints
-	_, err = reasoning.NewContextMessage("system", core.UserID{}, "", []reasoning.ToolCall{tc}, nil)
+	_, err = reasoning.NewContextMessage("system", core.UserID{}, core.MessageBody(""), []reasoning.ToolCall{tc}, nil)
 	assert.Error(t, err)
-	_, err = reasoning.NewContextMessage("system", core.UserID{}, "", nil, []reasoning.ToolResult{tr})
+	_, err = reasoning.NewContextMessage("system", core.UserID{}, core.MessageBody(""), nil, []reasoning.ToolResult{tr})
 	assert.Error(t, err)
 
 	// User message constraints
-	_, err = reasoning.NewContextMessage("user", core.UserID{}, "", []reasoning.ToolCall{tc}, nil)
+	_, err = reasoning.NewContextMessage("user", core.UserID{}, core.MessageBody(""), []reasoning.ToolCall{tc}, nil)
 	assert.Error(t, err)
-	_, err = reasoning.NewContextMessage("user", core.UserID{}, "", nil, []reasoning.ToolResult{tr})
+	_, err = reasoning.NewContextMessage("user", core.UserID{}, core.MessageBody(""), nil, []reasoning.ToolResult{tr})
 	assert.NoError(t, err)
 
 	// Assistant message constraints
-	_, err = reasoning.NewContextMessage("assistant", core.UserID{}, "", []reasoning.ToolCall{tc}, nil)
+	_, err = reasoning.NewContextMessage("assistant", core.UserID{}, core.MessageBody(""), []reasoning.ToolCall{tc}, nil)
 	assert.NoError(t, err)
-	_, err = reasoning.NewContextMessage("assistant", core.UserID{}, "", nil, []reasoning.ToolResult{tr})
+	_, err = reasoning.NewContextMessage("assistant", core.UserID{}, core.MessageBody(""), nil, []reasoning.ToolResult{tr})
 	assert.Error(t, err)
 }
 
@@ -155,7 +155,7 @@ func TestContextMessage_Immutability(t *testing.T) {
 	require.NoError(t, err)
 
 	toolCalls := []reasoning.ToolCall{tc}
-	msg, err := reasoning.NewContextMessage("assistant", core.UserID{}, "content", toolCalls, nil)
+	msg, err := reasoning.NewContextMessage("assistant", core.UserID{}, core.MessageBody("content"), toolCalls, nil)
 	require.NoError(t, err)
 
 	// Mutate input slice
@@ -173,15 +173,15 @@ func TestContextMessage_Immutability(t *testing.T) {
 
 func TestNewToolResult(t *testing.T) {
 	t.Run("valid tool result", func(t *testing.T) {
-		tr, err := reasoning.NewToolResult(mustToolCallID("call-1"), "output", false)
+		tr, err := reasoning.NewToolResult(mustToolCallID("call-1"), "output", reasoning.IsError(false))
 		require.NoError(t, err)
 		assert.Equal(t, mustToolCallID("call-1"), tr.ToolUseID())
 		assert.Equal(t, "output", tr.Output())
-		assert.False(t, tr.IsError())
+		assert.False(t, bool(tr.IsError()))
 	})
 
 	t.Run("empty tool call ID returns error", func(t *testing.T) {
-		_, err := reasoning.NewToolResult(reasoning.ToolCallID{}, "output", false)
+		_, err := reasoning.NewToolResult(reasoning.ToolCallID{}, "output", reasoning.IsError(false))
 		assert.Error(t, err)
 	})
 }

@@ -25,7 +25,6 @@ func NewReplyToUser(messenger appservice.Messenger, tools []reasoning.Tool) *Rep
 }
 
 func (u *ReplyToUser) Run(ctx context.Context, otomo *chat.Otomo, channelID core.ChannelID, userPrompt core.PromptBody) error {
-	const maxTurns = 5
 	turns := 0
 
 	c := reasoning.NewContext()
@@ -37,7 +36,7 @@ func (u *ReplyToUser) Run(ctx context.Context, otomo *chat.Otomo, channelID core
 			return failure.Wrap(err)
 		}
 
-		if turns >= maxTurns {
+		if turns >= reasoning.MaxToolTurns {
 			return failure.New(errorcode.ErrInternal, failure.Message("too many tool execution turns"))
 		}
 		turns++
@@ -71,7 +70,7 @@ func (u *ReplyToUser) Run(ctx context.Context, otomo *chat.Otomo, channelID core
 				tr, err := reasoning.NewToolResult(
 					tc.ID(),
 					fmt.Sprintf("error: tool '%s' not found", tc.Name().Value()),
-					true,
+					reasoning.IsError(true),
 				)
 				if err != nil {
 					return failure.Wrap(err, failure.WithCode(errorcode.ErrInternal), failure.Message("failed to create tool result"))
@@ -85,7 +84,7 @@ func (u *ReplyToUser) Run(ctx context.Context, otomo *chat.Otomo, channelID core
 				tr, err := reasoning.NewToolResult(
 					tc.ID(),
 					fmt.Sprintf("error executing tool: %v", err),
-					true,
+					reasoning.IsError(true),
 				)
 				if err != nil {
 					return failure.Wrap(err, failure.WithCode(errorcode.ErrInternal), failure.Message("failed to create tool result"))
@@ -95,7 +94,7 @@ func (u *ReplyToUser) Run(ctx context.Context, otomo *chat.Otomo, channelID core
 				tr, err := reasoning.NewToolResult(
 					tc.ID(),
 					out,
-					false,
+					reasoning.IsError(false),
 				)
 				if err != nil {
 					return failure.Wrap(err, failure.WithCode(errorcode.ErrInternal), failure.Message("failed to create tool result"))

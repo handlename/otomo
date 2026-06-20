@@ -23,28 +23,28 @@ const (
 // https://docs.anthropic.com/en/api/messages
 // https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-anthropic-claude-messages.html#model-parameters-anthropic-claude-messages-request-response
 
-type bedrockRequest struct {
+type ClaudeRequest struct {
 	AnthropicVersion string                  `json:"anthropic_version"`
 	MaxTokens        int                     `json:"max_tokens"`
 	Temperature      float64                 `json:"temperature"`
 	StopSequences    []string                `json:"stop_sequences"`
 	System           string                  `json:"system,omitempty"` // system prompt
-	Messages         []bedrockRequestMessage `json:"messages"`
-	Tools            []bedrockRequestTool    `json:"tools,omitempty"` // tools list
+	Messages         []ClaudeRequestMessage  `json:"messages"`
+	Tools            []ClaudeRequestTool     `json:"tools,omitempty"` // tools list
 }
 
-type bedrockRequestTool struct {
+type ClaudeRequestTool struct {
 	Name        string          `json:"name"`
 	Description string          `json:"description"`
 	InputSchema json.RawMessage `json:"input_schema"`
 }
 
-type bedrockRequestMessage struct {
+type ClaudeRequestMessage struct {
 	Role    string                         `json:"role"`
-	Content []bedrockRequestMessageContent `json:"content"`
+	Content []ClaudeRequestMessageContent `json:"content"`
 }
 
-type bedrockRequestMessageContent struct {
+type ClaudeRequestMessageContent struct {
 	Type      string          `json:"type"` // "text", "tool_use", "tool_result"
 	Text      string          `json:"text,omitempty"`
 	ID        string          `json:"id,omitempty"`          // tool use id
@@ -55,15 +55,15 @@ type bedrockRequestMessageContent struct {
 	IsError   bool            `json:"is_error,omitempty"`
 }
 
-type bedrockResponse struct {
-	ID         string                   `json:"id"`
-	Type       string                   `json:"type"`
-	Role       string                   `json:"role"`
-	Content    []bedrockResponseContent `json:"content"`
-	StopReason string                   `json:"stop_reason"`
+type ClaudeResponse struct {
+	ID         string                  `json:"id"`
+	Type       string                  `json:"type"`
+	Role       string                  `json:"role"`
+	Content    []ClaudeResponseContent `json:"content"`
+	StopReason string                  `json:"stop_reason"`
 }
 
-type bedrockResponseContent struct {
+type ClaudeResponseContent struct {
 	Type  string          `json:"type"`
 	Text  string          `json:"text,omitempty"`
 	ID    string          `json:"id,omitempty"`
@@ -91,14 +91,14 @@ func NewBedrock(ctx context.Context, modelID string) (*Bedrock, error) {
 }
 
 func (b *Bedrock) Invoke(ctx context.Context, prompt string) (string, error) {
-	body, err := json.Marshal(bedrockRequest{
+	body, err := json.Marshal(ClaudeRequest{
 		AnthropicVersion: ANTHROPIC_VERSION,
 		MaxTokens:        BEDROCK_MAX_TOKENS,
 		Temperature:      BEDROCK_TEMPERATURE,
-		Messages: []bedrockRequestMessage{
+		Messages: []ClaudeRequestMessage{
 			{
 				Role: "user",
-				Content: []bedrockRequestMessageContent{
+				Content: []ClaudeRequestMessageContent{
 					{
 						Type: "text",
 						Text: prompt,
@@ -121,7 +121,7 @@ func (b *Bedrock) Invoke(ctx context.Context, prompt string) (string, error) {
 		return "", b.wrapBedrockError(err)
 	}
 
-	var res bedrockResponse
+	var res ClaudeResponse
 	if err := json.Unmarshal(out.Body, &res); err != nil {
 		log.Debug().Bytes("out.Body", out.Body).Msg("failed to unmarshal response from bedrock")
 		return "", failure.Wrap(err, failure.Message("failed to unmarshal response from bedrock"))
@@ -140,26 +140,26 @@ func (b *Bedrock) InvokeWithTools(
 	messages []*reasoning.ContextMessage,
 	tools []reasoning.Tool,
 ) (*reasoning.Answer, error) {
-	reqTools := make([]bedrockRequestTool, 0, len(tools))
+	reqTools := make([]ClaudeRequestTool, 0, len(tools))
 	for _, t := range tools {
-		reqTools = append(reqTools, bedrockRequestTool{
+		reqTools = append(reqTools, ClaudeRequestTool{
 			Name:        t.Name().Value(),
 			Description: t.Description(),
 			InputSchema: json.RawMessage(t.InputSchema()),
 		})
 	}
 
-	reqMessages := make([]bedrockRequestMessage, 0, len(messages))
+	reqMessages := make([]ClaudeRequestMessage, 0, len(messages))
 	for _, m := range messages {
 		if m.Role() == "system" {
 			continue
 		}
-		var contents []bedrockRequestMessageContent
+		var contents []ClaudeRequestMessageContent
 
 		if m.Content() != "" {
-			contents = append(contents, bedrockRequestMessageContent{
+			contents = append(contents, ClaudeRequestMessageContent{
 				Type: "text",
-				Text: m.Content(),
+				Text: string(m.Content()),
 			})
 		}
 
@@ -168,7 +168,7 @@ func (b *Bedrock) InvokeWithTools(
 			if inputJSON == "" {
 				inputJSON = "{}"
 			}
-			contents = append(contents, bedrockRequestMessageContent{
+			contents = append(contents, ClaudeRequestMessageContent{
 				Type:  "tool_use",
 				ID:    tc.ID().Value(),
 				Name:  tc.Name().Value(),
@@ -177,21 +177,21 @@ func (b *Bedrock) InvokeWithTools(
 		}
 
 		for _, tr := range m.ToolResults() {
-			contents = append(contents, bedrockRequestMessageContent{
+			contents = append(contents, ClaudeRequestMessageContent{
 				Type:      "tool_result",
 				ToolUseID: tr.ToolUseID().Value(),
 				Content:   tr.Output(),
-				IsError:   tr.IsError(),
+				IsError:   bool(tr.IsError()),
 			})
 		}
 
-		reqMessages = append(reqMessages, bedrockRequestMessage{
+		reqMessages = append(reqMessages, ClaudeRequestMessage{
 			Role:    m.Role(),
 			Content: contents,
 		})
 	}
 
-	body, err := json.Marshal(bedrockRequest{
+	body, err := json.Marshal(ClaudeRequest{
 		AnthropicVersion: ANTHROPIC_VERSION,
 		MaxTokens:        BEDROCK_MAX_TOKENS,
 		Temperature:      BEDROCK_TEMPERATURE,
@@ -213,7 +213,7 @@ func (b *Bedrock) InvokeWithTools(
 		return nil, b.wrapBedrockError(err)
 	}
 
-	var res bedrockResponse
+	var res ClaudeResponse
 	if err := json.Unmarshal(out.Body, &res); err != nil {
 		log.Debug().Bytes("out.Body", out.Body).Msg("failed to unmarshal response from bedrock")
 		return nil, failure.Wrap(err, failure.Message("failed to unmarshal response from bedrock"))
