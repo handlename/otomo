@@ -12,7 +12,22 @@ type Root struct {
 	Port  int   `validate:"required"`
 	Slack Slack `toml:"slack" validate:"required"`
 	LLM   LLM   `toml:"llm" validate:"required"`
+	Tool  Tool  `toml:"tool"`
 }
+
+type Tool struct {
+	WebSearch WebSearch `toml:"web_search"`
+	WebFetch  WebFetch  `toml:"web_fetch"`
+}
+
+type WebSearch struct {
+	TavilyAPIKey string `toml:"tavily_api_key"`
+}
+
+type WebFetch struct {
+	WhitelistPatterns []string `toml:"whitelist_patterns"`
+}
+
 
 type Slack struct {
 	SigningSecret string        `toml:"signing_secret" validate:"required"`

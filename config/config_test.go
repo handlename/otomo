@@ -4,6 +4,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/BurntSushi/toml"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -71,3 +72,29 @@ model_id = "anthropic"
 	assert.Equal(t, "boom", Config.Slack.ErrorFeedback.GetReactionEmoji())
 	assert.True(t, Config.Slack.ErrorFeedback.GetEnablePostSnippet())
 }
+
+func TestConfig_Tool(t *testing.T) {
+	// Test mapping from a mock TOML representation to the config structure
+	tomlData := `
+port = 9000
+[slack]
+signing_secret = "secret"
+bot_user_id = "bot"
+bot_token = "token"
+app_token = "app"
+[llm]
+model_type = "claude"
+model_id = "model"
+[tool]
+[tool.web_search]
+tavily_api_key = "tavily-key"
+[tool.web_fetch]
+whitelist_patterns = ["^https://example\\.com/.*"]
+`
+	var cfg Root
+	err := toml.Unmarshal([]byte(tomlData), &cfg)
+	require.NoError(t, err)
+	assert.Equal(t, "tavily-key", cfg.Tool.WebSearch.TavilyAPIKey)
+	assert.Equal(t, []string{"^https://example\\.com/.*"}, cfg.Tool.WebFetch.WhitelistPatterns)
+}
+
