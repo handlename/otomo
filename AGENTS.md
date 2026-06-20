@@ -12,6 +12,7 @@
 ## Comments
 - Write comments in English
 - Write comments only when structures or operations are complex
+- Write git commit messages, GitHub issue descriptions, and Pull Request summaries in English
 
 ## Testing
 - Use the command `go test -v {package path} {test function name}` when running tests
