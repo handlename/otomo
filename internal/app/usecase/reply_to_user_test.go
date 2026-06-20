@@ -140,7 +140,7 @@ func TestReplyToUser_Run(t *testing.T) {
 				lastMsg := messages[len(messages)-1]
 				require.Len(t, lastMsg.ToolResults(), 1)
 				assert.Contains(t, lastMsg.ToolResults()[0].Output(), "error: tool 'missing_tool' not found")
-				assert.True(t, bool(lastMsg.ToolResults()[0].IsError()))
+				assert.Equal(t, reasoning.ToolResultError, lastMsg.ToolResults()[0].Status())
 
 				return reasoning.NewAnswer(reasoning.AnswerBody("final response"), nil)
 			},
@@ -182,7 +182,7 @@ func TestReplyToUser_Run(t *testing.T) {
 				lastMsg := messages[len(messages)-1]
 				require.Len(t, lastMsg.ToolResults(), 1)
 				assert.Contains(t, lastMsg.ToolResults()[0].Output(), "error executing tool: execute error")
-				assert.True(t, bool(lastMsg.ToolResults()[0].IsError()))
+				assert.Equal(t, reasoning.ToolResultError, lastMsg.ToolResults()[0].Status())
 
 				return reasoning.NewAnswer(reasoning.AnswerBody("final response"), nil)
 			},

@@ -97,7 +97,7 @@ func TestContext_ToolInteractions(t *testing.T) {
 	assert.Equal(t, core.MessageBody("Thinking..."), c.Messages()[0].Content())
 	assert.Equal(t, tc, c.Messages()[0].ToolCalls()[0])
 
-	result, err := reasoning.NewToolResult(mustToolCallID("call-1"), `{"length":5}`, reasoning.IsError(false))
+	result, err := reasoning.NewToolResult(mustToolCallID("call-1"), `{"length":5}`, reasoning.ToolResultSuccess)
 	require.NoError(t, err)
 	assert.Equal(t, mustToolCallID("call-1"), result.ToolUseID())
 	err = c.AddToolResults([]reasoning.ToolResult{result})
@@ -115,7 +115,7 @@ func TestNewContextMessage(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	tr, err := reasoning.NewToolResult(mustToolCallID("call-1"), `{"length":5}`, reasoning.IsError(false))
+	tr, err := reasoning.NewToolResult(mustToolCallID("call-1"), `{"length":5}`, reasoning.ToolResultSuccess)
 	require.NoError(t, err)
 	assert.Equal(t, mustToolCallID("call-1"), tr.ToolUseID())
 
@@ -173,15 +173,15 @@ func TestContextMessage_Immutability(t *testing.T) {
 
 func TestNewToolResult(t *testing.T) {
 	t.Run("valid tool result", func(t *testing.T) {
-		tr, err := reasoning.NewToolResult(mustToolCallID("call-1"), "output", reasoning.IsError(false))
+		tr, err := reasoning.NewToolResult(mustToolCallID("call-1"), "output", reasoning.ToolResultSuccess)
 		require.NoError(t, err)
 		assert.Equal(t, mustToolCallID("call-1"), tr.ToolUseID())
 		assert.Equal(t, "output", tr.Output())
-		assert.False(t, bool(tr.IsError()))
+		assert.Equal(t, reasoning.ToolResultSuccess, tr.Status())
 	})
 
 	t.Run("empty tool call ID returns error", func(t *testing.T) {
-		_, err := reasoning.NewToolResult(reasoning.ToolCallID{}, "output", reasoning.IsError(false))
+		_, err := reasoning.NewToolResult(reasoning.ToolCallID{}, "output", reasoning.ToolResultSuccess)
 		assert.Error(t, err)
 	})
 }

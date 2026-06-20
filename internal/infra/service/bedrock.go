@@ -181,7 +181,7 @@ func (b *Bedrock) InvokeWithTools(
 				Type:      "tool_result",
 				ToolUseID: tr.ToolUseID().Value(),
 				Content:   tr.Output(),
-				IsError:   bool(tr.IsError()),
+				IsError:   bool(tr.Status() == reasoning.ToolResultError),
 			})
 		}
 

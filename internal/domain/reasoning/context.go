@@ -9,7 +9,16 @@ import (
 
 const MaxToolTurns = 5
 
-type IsError bool
+func ShouldContinueToUseTool(turns int) bool {
+	return turns < MaxToolTurns
+}
+
+type ToolResultErrorOrSuccess bool
+
+const (
+	ToolResultError   ToolResultErrorOrSuccess = true
+	ToolResultSuccess ToolResultErrorOrSuccess = false
+)
 
 // ContextMessage represents a single message in the reasoning context.
 type ContextMessage struct {
@@ -83,17 +92,17 @@ func NewContextMessage(
 type ToolResult struct {
 	toolUseID ToolCallID
 	output    string
-	isError   IsError
+	status    ToolResultErrorOrSuccess
 }
 
-func NewToolResult(toolUseID ToolCallID, output string, isError IsError) (ToolResult, error) {
+func NewToolResult(toolUseID ToolCallID, output string, status ToolResultErrorOrSuccess) (ToolResult, error) {
 	if toolUseID.Value() == "" {
 		return ToolResult{}, fmt.Errorf("tool use ID cannot be empty")
 	}
 	return ToolResult{
 		toolUseID: toolUseID,
 		output:    output,
-		isError:   isError,
+		status:    status,
 	}, nil
 }
 
@@ -105,8 +114,8 @@ func (tr ToolResult) Output() string {
 	return tr.output
 }
 
-func (tr ToolResult) IsError() IsError {
-	return tr.isError
+func (tr ToolResult) Status() ToolResultErrorOrSuccess {
+	return tr.status
 }
 
 // Context is an entity that accumulates necessary information (prompts, history) for reasoning.

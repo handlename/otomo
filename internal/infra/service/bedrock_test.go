@@ -95,7 +95,7 @@ func TestBedrock_InvokeWithTools(t *testing.T) {
 	msgAssistant, err := reasoning.NewContextMessage("assistant", core.UserID{}, core.MessageBody(""), []reasoning.ToolCall{tc}, nil)
 	require.NoError(t, err)
 
-	tr, err := reasoning.NewToolResult(tcID, `{"length": 5}`, reasoning.IsError(false))
+	tr, err := reasoning.NewToolResult(tcID, `{"length": 5}`, reasoning.ToolResultSuccess)
 	require.NoError(t, err)
 	msgResult, err := reasoning.NewContextMessage("user", core.UserID{}, core.MessageBody(""), nil, []reasoning.ToolResult{tr})
 	require.NoError(t, err)
