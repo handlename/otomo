@@ -65,7 +65,7 @@ func (r *Reply) Run(ctx context.Context, input ReplyInput) (*ReplyOutput, error)
 	ans, err := executeToolLoop(ctx, r.otomo, c, r.tools)
 	if err != nil {
 		r.handleError(ctx, input.EventData, err)
-		return nil, failure.Wrap(err)
+		return nil, err
 	}
 
 	reply, err := chat.NewReply(chat.ReplyBody(ans.Body()), []chat.Attachment{})
