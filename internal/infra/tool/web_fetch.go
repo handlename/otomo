@@ -78,8 +78,12 @@ func (t *WebFetchTool) Execute(ctx context.Context, inputJSON string) (string, e
 	}
 
 	parsedURL, err := url.Parse(input.URL)
-	if err != nil || (parsedURL.Scheme != "http" && parsedURL.Scheme != "https") {
-		return "", failure.New(errorcode.ErrInvalidArgument, failure.Message("invalid URL format or scheme (http/https only)"))
+	if err != nil {
+		return "", failure.Wrap(err, failure.WithCode(errorcode.ErrInvalidArgument), failure.Message("invalid URL format"))
+	}
+	scheme := strings.ToLower(parsedURL.Scheme)
+	if scheme != "http" && scheme != "https" {
+		return "", failure.New(errorcode.ErrInvalidArgument, failure.Message("invalid URL scheme (http/https only)"))
 	}
 
 	// Whitelist check
@@ -123,14 +127,14 @@ func (t *WebFetchTool) Execute(ctx context.Context, inputJSON string) (string, e
 		mediaType = "text/plain" // fallback
 	}
 
-	switch {
-	case mediaType == "text/html":
+	switch mediaType {
+	case "text/html":
 		mdBytes, err := t.compiler.ConvertReader(resp.Body)
 		if err != nil {
 			return "", failure.Wrap(err, failure.WithCode(errorcode.ErrInternal), failure.Message("failed to convert HTML content to markdown"))
 		}
 		return string(mdBytes), nil
-	case mediaType == "text/plain" || strings.HasPrefix(mediaType, "text/"):
+	case "text/plain":
 		// Read text body directly
 		bodyBytes, err := io.ReadAll(resp.Body)
 		if err != nil {

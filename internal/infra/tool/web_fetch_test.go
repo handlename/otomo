@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/handlename/otomo/config"
@@ -77,6 +78,24 @@ func TestWebFetchTool_Execute(t *testing.T) {
 			expectErr:       true,
 			errCode:         errorcode.ErrInvalidArgument,
 		},
+		{
+			name:            "error invalid Content-Type CSS",
+			inputJSON:       `{"url":"https://allowed.com/page"}`,
+			mockStatus:      http.StatusOK,
+			mockContentType: "text/css",
+			mockResp:        "body { color: red; }",
+			expectErr:       true,
+			errCode:         errorcode.ErrInvalidArgument,
+		},
+		{
+			name:            "success case-insensitive HTTP scheme",
+			inputJSON:       `{"url":"HTTP://allowed.com/page"}`,
+			mockStatus:      http.StatusOK,
+			mockContentType: "text/plain",
+			mockResp:        "Raw text file contents.",
+			expectedOut:     "Raw text file contents.",
+			expectErr:       false,
+		},
 	}
 
 	for _, tt := range tests {
@@ -91,8 +110,11 @@ func TestWebFetchTool_Execute(t *testing.T) {
 
 			// If input is using dummy URL, map it to server URL for HTTP call
 			actualInput := tt.inputJSON
-			if !tt.expectErr || tt.name == "success HTML convert to Markdown" || tt.name == "success plain text returns directly" || tt.name == "error invalid Content-Type" {
+			if !tt.expectErr || tt.name == "success HTML convert to Markdown" || tt.name == "success plain text returns directly" || tt.name == "error invalid Content-Type" || tt.name == "error invalid Content-Type CSS" || tt.name == "success case-insensitive HTTP scheme" {
 				actualInput = `{"url":"` + server.URL + `"}`
+				if tt.name == "success case-insensitive HTTP scheme" {
+					actualInput = `{"url":"` + strings.Replace(server.URL, "http://", "HTTP://", 1) + `"}`
+				}
 			}
 
 			// Rewrite whitelist to include mock server URL if necessary
