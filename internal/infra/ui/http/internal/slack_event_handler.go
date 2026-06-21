@@ -35,9 +35,8 @@ func slackEventHandler(ctx tanukirpc.Context[*registry], req *slackEventRequest)
 		return nil, tanukirpc.WrapErrorWithStatus(http.StatusBadRequest, err)
 	}
 
-	// Register WebSearchTool and WebFetchTool alongside DummyTool
+	// Register WebSearchTool and WebFetchTool
 	tools := []reasoning.Tool{
-		tool.NewDummyTool(),
 		tool.NewWebSearchTool(config.Config.Tool.WebSearch),
 		tool.NewWebFetchTool(config.Config.Tool.WebFetch),
 	}
