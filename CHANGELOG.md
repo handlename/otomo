@@ -1,5 +1,26 @@
 # Changelog
 
+## [v0.2.0](https://github.com/handlename/otomo/compare/v0.1.0...v0.2.0) - 2026-06-21
+- feat: error feedback for chat processing failures by @handlename in https://github.com/handlename/otomo/pull/86
+- chore(deps): bump github.com/go-playground/validator/v10 from 10.28.0 to 10.30.2 by @dependabot[bot] in https://github.com/handlename/otomo/pull/67
+- chore(deps): bump github.com/samber/lo from 1.52.0 to 1.53.0 by @dependabot[bot] in https://github.com/handlename/otomo/pull/69
+- chore(deps): bump github.com/aws/aws-sdk-go-v2 from 1.41.1 to 1.41.7 by @dependabot[bot] in https://github.com/handlename/otomo/pull/76
+- docs: add ARCHITECTURE.md and update architectural principles by @handlename in https://github.com/handlename/otomo/pull/88
+- refactor: enforce Always Valid Domain Model by @handlename in https://github.com/handlename/otomo/pull/89
+- refactor: avoid primitive obsession in domain layer by @handlename in https://github.com/handlename/otomo/pull/90
+- refactor: redefine domain IDs as struct value objects with code generation by @handlename in https://github.com/handlename/otomo/pull/91
+- feat: introduce Tool interface, AWS Bedrock tool use support, and multi-turn execution loop by @handlename in https://github.com/handlename/otomo/pull/92
+- docs: require English for git commits, GitHub issues, and PR summaries in AGENTS.md by @handlename in https://github.com/handlename/otomo/pull/94
+- feat: add web search and fetch reasoning tools by @handlename in https://github.com/handlename/otomo/pull/95
+- chore(deps): bump github.com/alecthomas/kong from 1.13.0 to 1.15.0 by @dependabot[bot] in https://github.com/handlename/otomo/pull/79
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/service/bedrockruntime from 1.45.0 to 1.54.0 by @dependabot[bot] in https://github.com/handlename/otomo/pull/78
+- chore(deps): bump github.com/aws/aws-sdk-go-v2/config from 1.30.2 to 1.32.25 by @dependabot[bot] in https://github.com/handlename/otomo/pull/75
+- chore: go 1.26 by @handlename in https://github.com/handlename/otomo/pull/96
+- chore(deps): migrate from dependabot to renovate by @handlename in https://github.com/handlename/otomo/pull/97
+- docs: add documentation update rule to AGENTS.md by @handlename in https://github.com/handlename/otomo/pull/98
+- docs: document web fetch and web search tools by @handlename in https://github.com/handlename/otomo/pull/99
+- chore(deps): bump github.com/rs/zerolog from 1.34.0 to 1.35.1 by @dependabot[bot] in https://github.com/handlename/otomo/pull/74
+
 ## [v0.1.0](https://github.com/handlename/otomo/compare/v0.0.2...v0.1.0) - 2026-06-14
 - Use format github-actions on Actions by @handlename in https://github.com/handlename/otomo/pull/18
 - Release only for linux by @handlename in https://github.com/handlename/otomo/pull/20
