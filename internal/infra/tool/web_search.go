@@ -20,6 +20,7 @@ type WebSearchTool struct {
 	name     reasoning.ToolName
 	cfg      config.WebSearch
 	endpoint string
+	client   *http.Client
 }
 
 func NewWebSearchTool(cfg config.WebSearch) *WebSearchTool {
@@ -31,6 +32,7 @@ func NewWebSearchToolWithEndpoint(cfg config.WebSearch, endpoint string) *WebSea
 		name:     lo.Must(reasoning.NewToolName("web_search")),
 		cfg:      cfg,
 		endpoint: endpoint,
+		client:   &http.Client{Timeout: 10 * time.Second},
 	}
 }
 
@@ -86,8 +88,7 @@ func (t *WebSearchTool) Execute(ctx context.Context, inputJSON string) (string, 
 	}
 	req.Header.Set("Content-Type", "application/json")
 
-	client := &http.Client{Timeout: 10 * time.Second}
-	resp, err := client.Do(req)
+	resp, err := t.client.Do(req)
 	if err != nil {
 		return "", failure.Wrap(err, failure.WithCode(errorcode.ErrInternal), failure.Message("failed to call tavily search api"))
 	}
