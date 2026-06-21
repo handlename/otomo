@@ -104,7 +104,7 @@ func TestWebFetchTool_Execute(t *testing.T) {
 				assert.Equal(t, http.MethodGet, r.Method)
 				w.Header().Set("Content-Type", tt.mockContentType)
 				w.WriteHeader(tt.mockStatus)
-				w.Write([]byte(tt.mockResp))
+				_, _ = w.Write([]byte(tt.mockResp))
 			}))
 			defer server.Close()
 

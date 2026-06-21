@@ -115,7 +115,7 @@ func (t *WebFetchTool) Execute(ctx context.Context, inputJSON string) (string, e
 	if err != nil {
 		return "", failure.Wrap(err, failure.WithCode(errorcode.ErrInternal), failure.Message("failed to fetch URL content"))
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return "", failure.New(errorcode.ErrInternal, failure.Messagef("failed to fetch URL, server returned status: %d", resp.StatusCode))
