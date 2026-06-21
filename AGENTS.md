@@ -23,3 +23,5 @@
 ## Glossary
 - Refer to [GLOSSARY.md](GLOSSARY.md) for definitions of key terms, domain concepts, and technical terminology used in this project
 
+## Documentation
+- Update or modify related documentation (e.g., [ARCHITECTURE.md](./ARCHITECTURE.md), [DESIGN.md](./DESIGN.md), [GLOSSARY.md](./GLOSSARY.md)) whenever features in `otomo` are added or changed.
