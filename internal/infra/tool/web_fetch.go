@@ -109,7 +109,7 @@ func (t *WebFetchTool) Execute(ctx context.Context, inputJSON string) (string, e
 	if err != nil {
 		return "", failure.Wrap(err, failure.WithCode(errorcode.ErrInternal), failure.Message("failed to create http request"))
 	}
-	req.Header.Set("User-Agent", "otomo-bot/1.0")
+	req.Header.Set("User-Agent", UserAgent())
 
 	resp, err := t.client.Do(req)
 	if err != nil {

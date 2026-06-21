@@ -1,4 +1,4 @@
-package otomo
+package app
 
 import (
 	"context"

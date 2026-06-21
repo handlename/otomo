@@ -3,10 +3,10 @@ package command
 import (
 	"context"
 
-	otomo "github.com/handlename/otomo"
+	"github.com/handlename/otomo/internal/infra/app"
 )
 
 type Context struct {
 	Ctx context.Context
-	App *otomo.App
+	App *app.App
 }
