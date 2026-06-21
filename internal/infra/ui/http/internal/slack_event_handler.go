@@ -35,8 +35,13 @@ func slackEventHandler(ctx tanukirpc.Context[*registry], req *slackEventRequest)
 		return nil, tanukirpc.WrapErrorWithStatus(http.StatusBadRequest, err)
 	}
 
-	// TODO: remove DummyTool once concrete tools are implemented
-	uc := usecase.NewReplyToUser(ctx.Registry().Slack, []reasoning.Tool{tool.NewDummyTool()})
+	// Register WebSearchTool and WebFetchTool alongside DummyTool
+	tools := []reasoning.Tool{
+		tool.NewDummyTool(),
+		tool.NewWebSearchTool(config.Config.Tool.WebSearch),
+		tool.NewWebFetchTool(config.Config.Tool.WebFetch),
+	}
+	uc := usecase.NewReplyToUser(ctx.Registry().Slack, tools)
 	if err := uc.Run(ctx, otomo, cid, core.PromptBody(req.Message)); err != nil {
 		return nil, tanukirpc.WrapErrorWithStatus(http.StatusInternalServerError, err)
 	}
