@@ -28,8 +28,8 @@ func TestWebFetchTool_Metadata(t *testing.T) {
 func TestWebFetchTool_Execute(t *testing.T) {
 	tests := []struct {
 		name              string
-		inputJSON         string
-		whitelistPatterns []string
+		inputJSON         func(*httptest.Server) string
+		whitelistPatterns func(*httptest.Server) []string
 		mockStatus        int
 		mockContentType   string
 		mockResp          string
@@ -38,31 +38,43 @@ func TestWebFetchTool_Execute(t *testing.T) {
 		errCode           errorcode.ErrorCode
 	}{
 		{
-			name:      "error invalid empty URL",
-			inputJSON: `{"url":""}`,
+			name: "error invalid empty URL",
+			inputJSON: func(s *httptest.Server) string {
+				return `{"url":""}`
+			},
 			expectErr: true,
 			errCode:   errorcode.ErrInvalidArgument,
 		},
 		{
-			name:              "error not matching whitelist",
-			inputJSON:         `{"url":"https://forbidden.com/page"}`,
-			whitelistPatterns: []string{`^https://allowed\.com/.*`},
-			expectErr:         true,
-			errCode:           errorcode.ErrInvalidArgument,
+			name: "error not matching whitelist",
+			inputJSON: func(s *httptest.Server) string {
+				return `{"url":"https://forbidden.com/page"}`
+			},
+			whitelistPatterns: func(s *httptest.Server) []string {
+				return []string{`^https://allowed\.com/.*`}
+			},
+			expectErr: true,
+			errCode:   errorcode.ErrInvalidArgument,
 		},
 		{
-			name:              "success HTML convert to Markdown",
-			inputJSON:         `{"url":"https://allowed.com/page"}`,
-			whitelistPatterns: []string{`^https://allowed\.com/.*`},
-			mockStatus:        http.StatusOK,
-			mockContentType:   "text/html; charset=utf-8",
-			mockResp:          `<html><body><h1>Hello World</h1><p>Test description.</p></body></html>`,
-			expectedOut:       "# Hello World\n\nTest description.",
-			expectErr:         false,
+			name: "success HTML convert to Markdown",
+			inputJSON: func(s *httptest.Server) string {
+				return `{"url":"` + s.URL + `"}`
+			},
+			whitelistPatterns: func(s *httptest.Server) []string {
+				return []string{"^" + s.URL + ".*"}
+			},
+			mockStatus:      http.StatusOK,
+			mockContentType: "text/html; charset=utf-8",
+			mockResp:        `<html><body><h1>Hello World</h1><p>Test description.</p></body></html>`,
+			expectedOut:     "# Hello World\n\nTest description.",
+			expectErr:       false,
 		},
 		{
-			name:            "success plain text returns directly",
-			inputJSON:       `{"url":"https://allowed.com/page"}`,
+			name: "success plain text returns directly",
+			inputJSON: func(s *httptest.Server) string {
+				return `{"url":"` + s.URL + `"}`
+			},
 			mockStatus:      http.StatusOK,
 			mockContentType: "text/plain",
 			mockResp:        "Raw text file contents.",
@@ -70,8 +82,21 @@ func TestWebFetchTool_Execute(t *testing.T) {
 			expectErr:       false,
 		},
 		{
-			name:            "error invalid Content-Type",
-			inputJSON:       `{"url":"https://allowed.com/page"}`,
+			name: "success JSON returns directly",
+			inputJSON: func(s *httptest.Server) string {
+				return `{"url":"` + s.URL + `"}`
+			},
+			mockStatus:      http.StatusOK,
+			mockContentType: "application/json",
+			mockResp:        `{"status":"success","data":{"id":123}}`,
+			expectedOut:     `{"status":"success","data":{"id":123}}`,
+			expectErr:       false,
+		},
+		{
+			name: "error invalid Content-Type",
+			inputJSON: func(s *httptest.Server) string {
+				return `{"url":"` + s.URL + `"}`
+			},
 			mockStatus:      http.StatusOK,
 			mockContentType: "application/pdf",
 			mockResp:        "%PDF-1.4 ...",
@@ -79,8 +104,10 @@ func TestWebFetchTool_Execute(t *testing.T) {
 			errCode:         errorcode.ErrInvalidArgument,
 		},
 		{
-			name:            "error invalid Content-Type CSS",
-			inputJSON:       `{"url":"https://allowed.com/page"}`,
+			name: "error invalid Content-Type CSS",
+			inputJSON: func(s *httptest.Server) string {
+				return `{"url":"` + s.URL + `"}`
+			},
 			mockStatus:      http.StatusOK,
 			mockContentType: "text/css",
 			mockResp:        "body { color: red; }",
@@ -88,8 +115,10 @@ func TestWebFetchTool_Execute(t *testing.T) {
 			errCode:         errorcode.ErrInvalidArgument,
 		},
 		{
-			name:            "success case-insensitive HTTP scheme",
-			inputJSON:       `{"url":"HTTP://allowed.com/page"}`,
+			name: "success case-insensitive HTTP scheme",
+			inputJSON: func(s *httptest.Server) string {
+				return `{"url":"` + strings.Replace(s.URL, "http://", "HTTP://", 1) + `"}`
+			},
 			mockStatus:      http.StatusOK,
 			mockContentType: "text/plain",
 			mockResp:        "Raw text file contents.",
@@ -108,19 +137,14 @@ func TestWebFetchTool_Execute(t *testing.T) {
 			}))
 			defer server.Close()
 
-			// If input is using dummy URL, map it to server URL for HTTP call
-			actualInput := tt.inputJSON
-			if !tt.expectErr || tt.name == "success HTML convert to Markdown" || tt.name == "success plain text returns directly" || tt.name == "error invalid Content-Type" || tt.name == "error invalid Content-Type CSS" || tt.name == "success case-insensitive HTTP scheme" {
-				actualInput = `{"url":"` + server.URL + `"}`
-				if tt.name == "success case-insensitive HTTP scheme" {
-					actualInput = `{"url":"` + strings.Replace(server.URL, "http://", "HTTP://", 1) + `"}`
-				}
+			var actualInput string
+			if tt.inputJSON != nil {
+				actualInput = tt.inputJSON(server)
 			}
 
-			// Rewrite whitelist to include mock server URL if necessary
-			whitelist := tt.whitelistPatterns
-			if len(whitelist) > 0 && tt.name != "error not matching whitelist" {
-				whitelist = []string{"^" + server.URL + ".*"}
+			var whitelist []string
+			if tt.whitelistPatterns != nil {
+				whitelist = tt.whitelistPatterns(server)
 			}
 
 			cfg := config.WebFetch{WhitelistPatterns: whitelist}

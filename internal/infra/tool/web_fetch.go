@@ -134,11 +134,11 @@ func (t *WebFetchTool) Execute(ctx context.Context, inputJSON string) (string, e
 			return "", failure.Wrap(err, failure.WithCode(errorcode.ErrInternal), failure.Message("failed to convert HTML content to markdown"))
 		}
 		return string(mdBytes), nil
-	case "text/plain":
-		// Read text body directly
+	case "text/plain", "application/json":
+		// Read body directly
 		bodyBytes, err := io.ReadAll(resp.Body)
 		if err != nil {
-			return "", failure.Wrap(err, failure.WithCode(errorcode.ErrInternal), failure.Message("failed to read plain text response body"))
+			return "", failure.Wrap(err, failure.WithCode(errorcode.ErrInternal), failure.Message("failed to read response body"))
 		}
 		return string(bodyBytes), nil
 	default:
