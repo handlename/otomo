@@ -21,18 +21,21 @@ type ReplyOutput struct{}
 type Reply struct {
 	otomo *chat.Otomo
 	slack appservice.Messenger
+	tools []reasoning.Tool
 }
 
-func NewReply(otomo *chat.Otomo, slack appservice.Messenger) *Reply {
+func NewReply(otomo *chat.Otomo, slack appservice.Messenger, tools []reasoning.Tool) *Reply {
 	return &Reply{
 		otomo: otomo,
 		slack: slack,
+		tools: tools,
 	}
 }
 
 func (r *Reply) Run(ctx context.Context, input ReplyInput) (*ReplyOutput, error) {
 	c := reasoning.NewContext()
 	c.SetUserPrompt(core.PromptBody(input.EventData.RawInstruction()))
+	c.SetTools(r.tools)
 
 	if input.EventData.ThreadID().Value() != input.EventData.MessageID().Value() {
 		thread, err := r.slack.FetchThread(ctx, input.EventData.ChannelID(), input.EventData.ThreadID())
@@ -59,13 +62,13 @@ func (r *Reply) Run(ctx context.Context, input ReplyInput) (*ReplyOutput, error)
 		}
 	}
 
-	rep, err := r.otomo.Think(ctx, c)
+	ans, err := executeToolLoop(ctx, r.otomo, c, r.tools)
 	if err != nil {
 		r.handleError(ctx, input.EventData, err)
-		return nil, failure.Wrap(err)
+		return nil, err
 	}
 
-	reply, err := chat.NewReply(chat.ReplyBody(rep.Body()), []chat.Attachment{})
+	reply, err := chat.NewReply(chat.ReplyBody(ans.Body()), []chat.Attachment{})
 	if err != nil {
 		r.handleError(ctx, input.EventData, err)
 		return nil, failure.Wrap(err)

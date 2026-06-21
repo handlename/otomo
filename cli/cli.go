@@ -11,6 +11,7 @@ import (
 	"github.com/handlename/otomo"
 	"github.com/handlename/otomo/cli/command"
 	"github.com/handlename/otomo/config"
+	"github.com/handlename/otomo/internal/infra/app"
 	"github.com/morikuni/failure/v2"
 	"github.com/rs/zerolog/log"
 )
@@ -36,7 +37,7 @@ func Run() ExitCode {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 
-	if err := ktx.Run(&command.Context{Ctx: ctx, App: &otomo.App{}}); err != nil {
+	if err := ktx.Run(&command.Context{Ctx: ctx, App: &app.App{}}); err != nil {
 		if errors.Is(err, context.Canceled) {
 			log.Error().Msg("canceled")
 		} else {
