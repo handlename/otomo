@@ -44,6 +44,14 @@ An individual message within a [Thread](#thread).
 
 A function or capability registered and provided to the AI [Brain](#brain) to perform specific actions.
 
+### web_fetch
+
+A [Tool](#tool) that allows the AI [Brain](#brain) to retrieve contents of a web page (HTTP/HTTPS) and convert it to Markdown or plain text.
+
+### web_search
+
+A [Tool](#tool) that allows the AI [Brain](#brain) to search the web using the Tavily Search API.
+
 ## Architecture & Technology
 
 ### Application Layer

@@ -36,16 +36,18 @@ otomo/
 ├── internal/                   # Internal application code
 │   ├── app/                   # Application layer
 │   │   ├── service/           # Application services (event_publisher.go, messenger.go)
-│   │   └── usecase/           # Use case implementations
+│   │   └── usecase/           # Use case implementations (tool_loop.go)
 │   ├── domain/                # Domain layer (business logic)
 │   │   ├── core/              # System-wide core concepts (Prompt, Event, Message)
 │   │   ├── reasoning/         # Reasoning and AI model context (Brain, Context, Answer)
 │   │   └── chat/              # Chat conversation context (Otomo, Thread, Reply)
 │   ├── errorcode/             # Error code definitions
 │   ├── infra/                 # Infrastructure layer
+│   │   ├── app/               # Main application container logic
 │   │   ├── brain/             # AI brain implementations
 │   │   ├── repository/        # Repository implementations
 │   │   ├── service/           # External service integrations
+│   │   ├── tool/              # AI-powered tools (web_fetch.go, web_search.go)
 │   │   └── ui/                # User interface (HTTP handlers)
 │   │       └── http/
 │   │           ├── middleware/
@@ -61,7 +63,6 @@ otomo/
 │   └── modules/              # Terraform modules
 ├── tools/                      # Development and code generation tools
 │   └── gen-vo/                # AST-based Value Object code generator
-├── app.go                     # Main application logic
 ├── config.toml               # Configuration template
 ├── go.mod                    # Go module dependencies
 ├── logger.go                 # Logging configuration
@@ -93,10 +94,26 @@ enable_reaction = true
 reaction_emoji = "warning"
 enable_post_snippet = false
 
-[bedrock]
+[llm]
 model_type = "claude"
 model_id = "{{ must_env `BEDROCK_MODEL_ID` }}"
+
+[tool]
+[tool.web_search]
+tavily_api_key = "{{ env `TAVILY_API_KEY` }}"
+
+[tool.web_fetch]
+whitelist_patterns = [
+  '^https://.*'
+]
 ```
+
+### Configuration Details
+
+- **`[tool.web_search]`**:
+  - `tavily_api_key`: API key for Tavily Search API.
+- **`[tool.web_fetch]`**:
+  - `whitelist_patterns`: Regular expression patterns specifying allowed URLs to fetch.
 
 ## Deployment Architecture
 
@@ -152,6 +169,10 @@ model_id = "{{ must_env `BEDROCK_MODEL_ID` }}"
    - Structured logging
    - Health checks and monitoring
    - Retry mechanisms for external services
+
+6. **External Tool Integrations**
+   - Web search capability via Tavily Search API
+   - Secure web page fetching with URL whitelist validation patterns
 
 ## Testing Strategy
 

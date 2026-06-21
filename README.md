@@ -6,7 +6,8 @@ otomo is a Slack bot powered by gen-AI.
 
 - Respond to mentions
 - Summarize thread
-- ...
+- Search the web for information using Tavily Search API
+- Fetch and read web page content as Markdown or plain text
 
 ## Documentation
 
@@ -19,7 +20,7 @@ otomo is a Slack bot powered by gen-AI.
 TBD
 
 
-## Lisence
+## License
 
 MIT
 
