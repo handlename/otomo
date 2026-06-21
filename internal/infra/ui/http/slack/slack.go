@@ -10,6 +10,7 @@ import (
 	"github.com/handlename/otomo/internal/domain/reasoning"
 	"github.com/handlename/otomo/internal/infra/brain"
 	"github.com/handlename/otomo/internal/infra/service"
+	"github.com/handlename/otomo/internal/infra/tool"
 	"github.com/handlename/otomo/internal/infra/ui/http/middleware"
 	"github.com/samber/lo"
 )
@@ -26,9 +27,14 @@ func New(ctx context.Context, prefix string) http.Handler {
 		otomo.SetSystemPrompt(chat.SystemPrompt(p))
 	}
 
+	tools := []reasoning.Tool{
+		tool.NewWebSearchTool(config.Config.Tool.WebSearch),
+		tool.NewWebFetchTool(config.Config.Tool.WebFetch),
+	}
+
 	publisher := service.NewEventPublisher()
 	usecase.NewAckInstruction(slack).Subscribe(publisher)
-	usecase.NewReply(otomo, slack).Subscribe(publisher)
+	usecase.NewReply(otomo, slack, tools).Subscribe(publisher)
 
 	reg := NewRegistry(ctx, publisher, slack)
 	mids := []middleware.Middleware{
