@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"fmt"
 
 	appservice "github.com/handlename/otomo/internal/app/service"
 	"github.com/handlename/otomo/internal/domain/chat"
@@ -25,98 +24,24 @@ func NewReplyToUser(messenger appservice.Messenger, tools []reasoning.Tool) *Rep
 }
 
 func (u *ReplyToUser) Run(ctx context.Context, otomo *chat.Otomo, channelID core.ChannelID, userPrompt core.PromptBody) error {
-	turns := 0
-
 	c := reasoning.NewContext()
 	c.SetUserPrompt(userPrompt)
 	c.SetTools(u.tools)
 
-	for {
-		if err := ctx.Err(); err != nil {
-			return failure.Wrap(err)
-		}
-
-		if !reasoning.ShouldContinueToUseTool(turns) {
-			return failure.New(errorcode.ErrInternal, failure.Message("too many tool execution turns"))
-		}
-		turns++
-
-		ans, err := otomo.Think(ctx, c)
-		if err != nil {
-			return failure.Wrap(err,
-				failure.WithCode(errorcode.ErrInternal),
-				failure.Message("failed to think"),
-			)
-		}
-
-		if !ans.HasToolCalls() {
-			reply, err := chat.NewReply(chat.ReplyBody(ans.Body()), []chat.Attachment{})
-			if err != nil {
-				return failure.Wrap(err, failure.WithCode(errorcode.ErrInternal))
-			}
-			if err := u.messenger.PostMessage(ctx, channelID, core.MessageID{}, reply.Body()); err != nil {
-				return failure.Wrap(err,
-					failure.WithCode(errorcode.ErrInternal),
-					failure.Message("failed to send reply"),
-				)
-			}
-			return nil
-		}
-
-		var results []reasoning.ToolResult
-		for _, tc := range ans.ToolCalls() {
-			tool, ok := u.findTool(tc.Name())
-			if !ok {
-				tr, err := reasoning.NewToolResult(
-					tc.ID(),
-					fmt.Sprintf("error: tool '%s' not found", tc.Name().Value()),
-					reasoning.ToolResultError,
-				)
-				if err != nil {
-					return failure.Wrap(err, failure.WithCode(errorcode.ErrInternal), failure.Message("failed to create tool result"))
-				}
-				results = append(results, tr)
-				continue
-			}
-
-			out, err := tool.Execute(ctx, tc.InputJSON())
-			if err != nil {
-				tr, err := reasoning.NewToolResult(
-					tc.ID(),
-					fmt.Sprintf("error executing tool: %v", err),
-					reasoning.ToolResultError,
-				)
-				if err != nil {
-					return failure.Wrap(err, failure.WithCode(errorcode.ErrInternal), failure.Message("failed to create tool result"))
-				}
-				results = append(results, tr)
-			} else {
-				tr, err := reasoning.NewToolResult(
-					tc.ID(),
-					out,
-					reasoning.ToolResultSuccess,
-				)
-				if err != nil {
-					return failure.Wrap(err, failure.WithCode(errorcode.ErrInternal), failure.Message("failed to create tool result"))
-				}
-				results = append(results, tr)
-			}
-		}
-
-		if err := c.AddToolUseResponse(string(ans.Body()), ans.ToolCalls()); err != nil {
-			return failure.Wrap(err, failure.WithCode(errorcode.ErrInternal), failure.Message("failed to update context with tool calls"))
-		}
-		if err := c.AddToolResults(results); err != nil {
-			return failure.Wrap(err, failure.WithCode(errorcode.ErrInternal), failure.Message("failed to update context with tool results"))
-		}
+	ans, err := executeToolLoop(ctx, otomo, c, u.tools)
+	if err != nil {
+		return err
 	}
-}
 
-func (u *ReplyToUser) findTool(name reasoning.ToolName) (reasoning.Tool, bool) {
-	for _, t := range u.tools {
-		if t.Name().Equals(name) {
-			return t, true
-		}
+	reply, err := chat.NewReply(chat.ReplyBody(ans.Body()), []chat.Attachment{})
+	if err != nil {
+		return failure.Wrap(err, failure.WithCode(errorcode.ErrInternal))
 	}
-	return nil, false
+	if err := u.messenger.PostMessage(ctx, channelID, core.MessageID{}, reply.Body()); err != nil {
+		return failure.Wrap(err,
+			failure.WithCode(errorcode.ErrInternal),
+			failure.Message("failed to send reply"),
+		)
+	}
+	return nil
 }
