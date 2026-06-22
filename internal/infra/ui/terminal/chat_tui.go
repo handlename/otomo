@@ -32,7 +32,6 @@ type model struct {
 	spinner      spinner.Model
 	thinking     bool
 	userInputVal string
-	err          error
 }
 
 func StartChatTUI(ctx context.Context, otomo *chat.Otomo, tools []reasoning.Tool) error {
@@ -65,7 +64,7 @@ func StartChatTUI(ctx context.Context, otomo *chat.Otomo, tools []reasoning.Tool
 	return err
 }
 
-func (m model) Init() tea.Cmd {
+func (m *model) Init() tea.Cmd {
 	return textinput.Blink
 }
 
