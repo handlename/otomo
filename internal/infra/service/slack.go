@@ -53,10 +53,12 @@ func (s *Slack) Verify(header http.Header, body []byte) error {
 }
 
 func (s *Slack) PostMessage(ctx context.Context, channelID core.ChannelID, messageID core.MessageID, msg chat.ReplyBody) error {
+	block := slack.NewMarkdownBlock("", string(msg))
 	_, _, err := s.client.PostMessage(
 		channelID.Value(),
 		slack.MsgOptionTS(messageID.Value()),
-		slack.MsgOptionText(string(msg), false),
+		slack.MsgOptionText(string(msg), false), // fallback text
+		slack.MsgOptionBlocks(block),
 	)
 	return err
 }
