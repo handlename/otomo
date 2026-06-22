@@ -53,12 +53,18 @@ func (s *Slack) Verify(header http.Header, body []byte) error {
 }
 
 func (s *Slack) PostMessage(ctx context.Context, channelID core.ChannelID, messageID core.MessageID, msg chat.ReplyBody) error {
-	_, _, err := s.client.PostMessage(
+	block := slack.NewMarkdownBlock("", string(msg))
+	_, _, err := s.client.PostMessageContext(
+		ctx,
 		channelID.Value(),
 		slack.MsgOptionTS(messageID.Value()),
-		slack.MsgOptionText(string(msg), false),
+		slack.MsgOptionText(string(msg), false), // fallback text
+		slack.MsgOptionBlocks(block),
 	)
-	return err
+	if err != nil {
+		return failure.Wrap(err)
+	}
+	return nil
 }
 
 func (s *Slack) AddReaction(ctx context.Context, channelID core.ChannelID, messageID core.MessageID, emoji string) error {
