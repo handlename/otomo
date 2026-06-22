@@ -3,6 +3,8 @@ package app
 import (
 	"context"
 	"fmt"
+	"io"
+	"os"
 
 	"github.com/fujiwara/ridge"
 	"github.com/handlename/otomo/config"
@@ -14,6 +16,7 @@ import (
 	ihttp "github.com/handlename/otomo/internal/infra/ui/http"
 	"github.com/handlename/otomo/internal/infra/ui/terminal"
 	"github.com/morikuni/failure/v2"
+	"github.com/rs/zerolog/log"
 )
 
 type App struct{}
@@ -41,6 +44,15 @@ func (a *App) Run(ctx context.Context) error {
 }
 
 func (a *App) RunChat(ctx context.Context) error {
+	// Redirect console logs to otomo.log to avoid breaking the TUI display
+	logFile, err := os.OpenFile("otomo.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err == nil {
+		log.Logger = log.Output(logFile).With().Caller().Logger()
+		defer logFile.Close()
+	} else {
+		log.Logger = log.Output(io.Discard)
+	}
+
 	brainThinker, err := brain.NewGeneral(ctx)
 	if err != nil {
 		return failure.Wrap(err, failure.Message("failed to create brain thinker"))
@@ -62,5 +74,5 @@ func (a *App) RunChat(ctx context.Context) error {
 		tool.NewWebFetchTool(config.Config.Tool.WebFetch),
 	}
 
-	return terminal.StartChatLoop(ctx, otomo, tools)
+	return terminal.StartChatTUI(ctx, otomo, tools)
 }
