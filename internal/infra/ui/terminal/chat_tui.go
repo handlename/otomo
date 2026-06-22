@@ -25,6 +25,7 @@ type model struct {
 	otomo        *chat.Otomo
 	tools        []reasoning.Tool
 	history      []*core.Message
+	historyLines []string
 	viewport     viewport.Model
 	textInput    textinput.Model
 	spinner      spinner.Model
@@ -44,16 +45,18 @@ func StartChatTUI(ctx context.Context, otomo *chat.Otomo, tools []reasoning.Tool
 	s.Spinner = spinner.Dot
 	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
 
+	welcomeMsg := "Welcome to Otomo Terminal Chat!\nPress Enter to send. Ctrl+C to quit.\n"
 	vp := viewport.New(80, 20)
-	vp.SetContent("Welcome to Otomo Terminal Chat!\nPress Enter to send. Ctrl+C to quit.\n")
+	vp.SetContent(welcomeMsg)
 
 	m := model{
-		ctx:       ctx,
-		otomo:     otomo,
-		tools:     tools,
-		viewport:  vp,
-		textInput: ti,
-		spinner:   s,
+		ctx:          ctx,
+		otomo:        otomo,
+		tools:        tools,
+		historyLines: strings.Split(welcomeMsg, "\n"),
+		viewport:     vp,
+		textInput:    ti,
+		spinner:      s,
 	}
 
 	p := tea.NewProgram(m, tea.WithAltScreen())
@@ -119,10 +122,20 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.appendToHistory(core.RoleAssistant, fmt.Sprintf("Error: %v", msg.err))
 		} else {
 			m.appendToHistory(core.RoleAssistant, string(msg.ans.Body()))
-			// Add to structural history
-			uMsg, _ := core.NewMessage(core.RoleUser, core.UserID{}, core.MessageBody(m.userInputVal))
-			aiMsg, _ := core.NewMessage(core.RoleAssistant, core.UserID{}, core.MessageBody(msg.ans.Body()))
-			m.history = append(m.history, uMsg, aiMsg)
+			// Add to structural history, verifying messages validation to avoid nil values.
+			uMsg, err := core.NewMessage(core.RoleUser, core.UserID{}, core.MessageBody(m.userInputVal))
+			if err != nil {
+				m.appendToHistory(core.RoleAssistant, fmt.Sprintf("System Error: failed to create user message: %v", err))
+			} else {
+				m.history = append(m.history, uMsg)
+			}
+
+			aiMsg, err := core.NewMessage(core.RoleAssistant, core.UserID{}, core.MessageBody(msg.ans.Body()))
+			if err != nil {
+				m.appendToHistory(core.RoleAssistant, fmt.Sprintf("System Error: failed to create assistant message: %v", err))
+			} else {
+				m.history = append(m.history, aiMsg)
+			}
 		}
 	}
 
@@ -148,10 +161,9 @@ func (m *model) appendToHistory(role core.MessageRole, content string) {
 		prefix = "Otomo: "
 	}
 
-	current := m.viewport.View()
-	lines := strings.Split(current, "\n")
-	lines = append(lines, style.Render(prefix)+content, "")
-	m.viewport.SetContent(strings.Join(lines, "\n"))
+	// Maintain full history in memory to avoid content loss when viewport scrolls.
+	m.historyLines = append(m.historyLines, style.Render(prefix)+content, "")
+	m.viewport.SetContent(strings.Join(m.historyLines, "\n"))
 	m.viewport.GotoBottom()
 }
 
