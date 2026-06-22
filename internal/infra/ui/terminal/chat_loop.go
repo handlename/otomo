@@ -2,6 +2,7 @@ package terminal
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/charmbracelet/huh"
@@ -66,6 +67,9 @@ func StartChatLoop(ctx context.Context, otomo *chat.Otomo, tools []reasoning.Too
 		fmt.Print("\r\033[K")
 
 		if err != nil {
+			if failure.Is(err, context.Canceled) || errors.Is(err, context.Canceled) {
+				return err
+			}
 			fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("9")).Render(fmt.Sprintf("Error: %v", err)))
 			continue
 		}
@@ -76,8 +80,14 @@ func StartChatLoop(ctx context.Context, otomo *chat.Otomo, tools []reasoning.Too
 		fmt.Println()
 
 		// Record to memory history
-		userMsg, _ := core.NewMessage(core.RoleUser, core.UserID{}, core.MessageBody(userInput))
-		aiMsg, _ := core.NewMessage(core.RoleAssistant, core.UserID{}, core.MessageBody(ans.Body()))
+		userMsg, err := core.NewMessage(core.RoleUser, core.UserID{}, core.MessageBody(userInput))
+		if err != nil {
+			return failure.Wrap(err)
+		}
+		aiMsg, err := core.NewMessage(core.RoleAssistant, core.UserID{}, core.MessageBody(ans.Body()))
+		if err != nil {
+			return failure.Wrap(err)
+		}
 		history = append(history, userMsg, aiMsg)
 	}
 }
@@ -107,22 +117,35 @@ func executeToolLoop(ctx context.Context, otomo *chat.Otomo, c *reasoning.Contex
 		for _, tc := range ans.ToolCalls() {
 			tool, ok := findTool(tools, tc.Name())
 			if !ok {
-				tr, _ := reasoning.NewToolResult(tc.ID(), "tool not found", reasoning.ToolResultError)
+				tr, err := reasoning.NewToolResult(tc.ID(), "tool not found", reasoning.ToolResultError)
+				if err != nil {
+					return nil, failure.Wrap(err)
+				}
 				results = append(results, tr)
 				continue
 			}
 			out, err := tool.Execute(ctx, tc.InputJSON())
 			if err != nil {
-				tr, _ := reasoning.NewToolResult(tc.ID(), err.Error(), reasoning.ToolResultError)
+				tr, err := reasoning.NewToolResult(tc.ID(), err.Error(), reasoning.ToolResultError)
+				if err != nil {
+					return nil, failure.Wrap(err)
+				}
 				results = append(results, tr)
 			} else {
-				tr, _ := reasoning.NewToolResult(tc.ID(), out, reasoning.ToolResultSuccess)
+				tr, err := reasoning.NewToolResult(tc.ID(), out, reasoning.ToolResultSuccess)
+				if err != nil {
+					return nil, failure.Wrap(err)
+				}
 				results = append(results, tr)
 			}
 		}
 
-		_ = c.AddToolUseResponse(string(ans.Body()), ans.ToolCalls())
-		_ = c.AddToolResults(results)
+		if err := c.AddToolUseResponse(string(ans.Body()), ans.ToolCalls()); err != nil {
+			return nil, failure.Wrap(err)
+		}
+		if err := c.AddToolResults(results); err != nil {
+			return nil, failure.Wrap(err)
+		}
 	}
 }
 
