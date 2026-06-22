@@ -24,13 +24,13 @@ const (
 // https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-anthropic-claude-messages.html#model-parameters-anthropic-claude-messages-request-response
 
 type ClaudeRequest struct {
-	AnthropicVersion string                  `json:"anthropic_version"`
-	MaxTokens        int                     `json:"max_tokens"`
-	Temperature      float64                 `json:"temperature"`
-	StopSequences    []string                `json:"stop_sequences"`
-	System           string                  `json:"system,omitempty"` // system prompt
-	Messages         []ClaudeRequestMessage  `json:"messages"`
-	Tools            []ClaudeRequestTool     `json:"tools,omitempty"` // tools list
+	AnthropicVersion string                 `json:"anthropic_version"`
+	MaxTokens        int                    `json:"max_tokens"`
+	Temperature      float64                `json:"temperature"`
+	StopSequences    []string               `json:"stop_sequences"`
+	System           string                 `json:"system,omitempty"` // system prompt
+	Messages         []ClaudeRequestMessage `json:"messages"`
+	Tools            []ClaudeRequestTool    `json:"tools,omitempty"` // tools list
 }
 
 type ClaudeRequestTool struct {
@@ -40,7 +40,7 @@ type ClaudeRequestTool struct {
 }
 
 type ClaudeRequestMessage struct {
-	Role    string                         `json:"role"`
+	Role    string                        `json:"role"`
 	Content []ClaudeRequestMessageContent `json:"content"`
 }
 

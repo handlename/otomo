@@ -97,4 +97,3 @@ whitelist_patterns = ["^https://example\\.com/.*"]
 	assert.Equal(t, "tavily-key", cfg.Tool.WebSearch.TavilyAPIKey)
 	assert.Equal(t, []string{"^https://example\\.com/.*"}, cfg.Tool.WebFetch.WhitelistPatterns)
 }
-
