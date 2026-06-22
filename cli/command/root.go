@@ -9,5 +9,6 @@ type Root struct {
 	LogConsole bool             `help:"Write logs for console." default:"true" negatable:""`
 	Version    kong.VersionFlag `help:"Show version."`
 
-	Server Server `cmd:"" help:"Run as server"`
+	Server Server  `cmd:"" help:"Run as server"`
+	Chat   ChatCmd `cmd:"" help:"Run interactive terminal chat"`
 }
