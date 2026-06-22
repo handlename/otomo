@@ -10,7 +10,7 @@ import (
 	"github.com/morikuni/failure/v2"
 )
 
-func executeToolLoop(ctx context.Context, otomo *chat.Otomo, c *reasoning.Context, tools []reasoning.Tool) (*reasoning.Answer, error) {
+func ExecuteToolLoop(ctx context.Context, otomo *chat.Otomo, c *reasoning.Context, tools []reasoning.Tool) (*reasoning.Answer, error) {
 	turns := 0
 	for {
 		if err := ctx.Err(); err != nil {

@@ -10,6 +10,7 @@ import (
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/handlename/otomo/internal/app/usecase"
 	"github.com/handlename/otomo/internal/domain/chat"
 	"github.com/handlename/otomo/internal/domain/core"
 	"github.com/handlename/otomo/internal/domain/reasoning"
@@ -59,7 +60,7 @@ func StartChatTUI(ctx context.Context, otomo *chat.Otomo, tools []reasoning.Tool
 		spinner:      s,
 	}
 
-	p := tea.NewProgram(m, tea.WithAltScreen())
+	p := tea.NewProgram(&m, tea.WithAltScreen(), tea.WithContext(ctx))
 	_, err := p.Run()
 	return err
 }
@@ -68,7 +69,7 @@ func (m model) Init() tea.Cmd {
 	return textinput.Blink
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 	var cmd tea.Cmd
 
@@ -123,18 +124,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		} else {
 			m.appendToHistory(core.RoleAssistant, string(msg.ans.Body()))
 			// Add to structural history, verifying messages validation to avoid nil values.
-			uMsg, err := core.NewMessage(core.RoleUser, core.UserID{}, core.MessageBody(m.userInputVal))
-			if err != nil {
-				m.appendToHistory(core.RoleAssistant, fmt.Sprintf("System Error: failed to create user message: %v", err))
+			uMsg, err1 := core.NewMessage(core.RoleUser, core.UserID{}, core.MessageBody(m.userInputVal))
+			aiMsg, err2 := core.NewMessage(core.RoleAssistant, core.UserID{}, core.MessageBody(msg.ans.Body()))
+			if err1 != nil {
+				m.appendToHistory(core.RoleAssistant, fmt.Sprintf("System Error: failed to create user message: %v", err1))
+			} else if err2 != nil {
+				m.appendToHistory(core.RoleAssistant, fmt.Sprintf("System Error: failed to create assistant message: %v", err2))
 			} else {
-				m.history = append(m.history, uMsg)
-			}
-
-			aiMsg, err := core.NewMessage(core.RoleAssistant, core.UserID{}, core.MessageBody(msg.ans.Body()))
-			if err != nil {
-				m.appendToHistory(core.RoleAssistant, fmt.Sprintf("System Error: failed to create assistant message: %v", err))
-			} else {
-				m.history = append(m.history, aiMsg)
+				m.history = append(m.history, uMsg, aiMsg)
 			}
 		}
 	}
@@ -167,7 +164,7 @@ func (m *model) appendToHistory(role core.MessageRole, content string) {
 	m.viewport.GotoBottom()
 }
 
-func (m model) thinkCmd(prompt string) tea.Cmd {
+func (m *model) thinkCmd(prompt string) tea.Cmd {
 	return func() tea.Msg {
 		c := reasoning.NewContext()
 		if len(m.history) > 0 {
@@ -176,12 +173,12 @@ func (m model) thinkCmd(prompt string) tea.Cmd {
 		c.SetUserPrompt(core.PromptBody(prompt))
 		c.SetTools(m.tools)
 
-		ans, err := executeToolLoop(m.ctx, m.otomo, c, m.tools)
+		ans, err := usecase.ExecuteToolLoop(m.ctx, m.otomo, c, m.tools)
 		return thinkResultMsg{ans: ans, err: err}
 	}
 }
 
-func (m model) View() string {
+func (m *model) View() string {
 	var s strings.Builder
 	s.WriteString(m.viewport.View())
 	s.WriteString("\n")

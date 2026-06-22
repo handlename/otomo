@@ -1,4 +1,4 @@
-package terminal
+package usecase
 
 import (
 	"context"
@@ -13,62 +13,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type mockBrainThinker struct {
-	ThinkFunc func(ctx context.Context, c *reasoning.Context) (*reasoning.Answer, error)
-}
-
-func (m *mockBrainThinker) Think(ctx context.Context, c *reasoning.Context) (*reasoning.Answer, error) {
-	return m.ThinkFunc(ctx, c)
-}
-
-type mockTool struct {
-	name        string
-	executeFunc func(ctx context.Context, inputJSON string) (string, error)
-}
-
-func (m *mockTool) Name() reasoning.ToolName {
-	tn, _ := reasoning.NewToolName(m.name)
-	return tn
-}
-
-func (m *mockTool) Description() string {
-	return "mock tool"
-}
-
-func (m *mockTool) InputSchema() string {
-	return "{}"
-}
-
-func (m *mockTool) Execute(ctx context.Context, inputJSON string) (string, error) {
-	if m.executeFunc != nil {
-		return m.executeFunc(ctx, inputJSON)
-	}
-	return "", nil
-}
-
-func TestFindTool(t *testing.T) {
-	toolName1, _ := reasoning.NewToolName("tool1")
-	tool1 := &mockTool{name: "tool1"}
-	tool2 := &mockTool{name: "tool2"}
-	tools := []reasoning.Tool{tool1, tool2}
-
-	t.Run("found", func(t *testing.T) {
-		res, ok := findTool(tools, toolName1)
-		assert.True(t, ok)
-		assert.Equal(t, tool1, res)
-	})
-
-	t.Run("not found", func(t *testing.T) {
-		unknown, _ := reasoning.NewToolName("unknown")
-		res, ok := findTool(tools, unknown)
-		assert.False(t, ok)
-		assert.Nil(t, res)
-	})
-}
-
 func TestExecuteToolLoop(t *testing.T) {
 	t.Run("no tool calls", func(t *testing.T) {
-		thinker := &mockBrainThinker{
+		thinker := &mockBrain{
 			ThinkFunc: func(ctx context.Context, c *reasoning.Context) (*reasoning.Answer, error) {
 				return reasoning.NewAnswer("hello from otomo", nil)
 			},
@@ -79,14 +26,14 @@ func TestExecuteToolLoop(t *testing.T) {
 		require.NoError(t, err)
 
 		c := reasoning.NewContext()
-		ans, err := executeToolLoop(context.Background(), otomo, c, nil)
+		ans, err := ExecuteToolLoop(context.Background(), otomo, c, nil)
 		require.NoError(t, err)
 		assert.Equal(t, reasoning.AnswerBody("hello from otomo"), ans.Body())
 	})
 
 	t.Run("one tool call success", func(t *testing.T) {
 		callCount := 0
-		thinker := &mockBrainThinker{
+		thinker := &mockBrain{
 			ThinkFunc: func(ctx context.Context, c *reasoning.Context) (*reasoning.Answer, error) {
 				callCount++
 				if callCount == 1 {
@@ -106,8 +53,9 @@ func TestExecuteToolLoop(t *testing.T) {
 		otomo, err := chat.NewOtomo(brain)
 		require.NoError(t, err)
 
+		searchToolName, _ := reasoning.NewToolName("search")
 		searchTool := &mockTool{
-			name: "search",
+			name: searchToolName,
 			executeFunc: func(ctx context.Context, inputJSON string) (string, error) {
 				return "search result", nil
 			},
@@ -115,14 +63,14 @@ func TestExecuteToolLoop(t *testing.T) {
 
 		c := reasoning.NewContext()
 		c.SetUserPrompt("use tool")
-		ans, err := executeToolLoop(context.Background(), otomo, c, []reasoning.Tool{searchTool})
+		ans, err := ExecuteToolLoop(context.Background(), otomo, c, []reasoning.Tool{searchTool})
 		require.NoError(t, err)
 		assert.Equal(t, reasoning.AnswerBody("tool executed successfully"), ans.Body())
 	})
 
 	t.Run("one tool call execution error", func(t *testing.T) {
 		callCount := 0
-		thinker := &mockBrainThinker{
+		thinker := &mockBrain{
 			ThinkFunc: func(ctx context.Context, c *reasoning.Context) (*reasoning.Answer, error) {
 				callCount++
 				if callCount == 1 {
@@ -135,7 +83,7 @@ func TestExecuteToolLoop(t *testing.T) {
 				require.Len(t, messages, 3)
 				// The result should indicate error status
 				assert.Equal(t, reasoning.ToolResultError, messages[2].ToolResults()[0].Status())
-				assert.Equal(t, "some tool error", messages[2].ToolResults()[0].Output())
+				assert.Equal(t, "error executing tool: some tool error", messages[2].ToolResults()[0].Output())
 				return reasoning.NewAnswer("handled error", nil)
 			},
 		}
@@ -144,8 +92,9 @@ func TestExecuteToolLoop(t *testing.T) {
 		otomo, err := chat.NewOtomo(brain)
 		require.NoError(t, err)
 
+		searchToolName, _ := reasoning.NewToolName("search")
 		searchTool := &mockTool{
-			name: "search",
+			name: searchToolName,
 			executeFunc: func(ctx context.Context, inputJSON string) (string, error) {
 				return "", errors.New("some tool error")
 			},
@@ -153,14 +102,14 @@ func TestExecuteToolLoop(t *testing.T) {
 
 		c := reasoning.NewContext()
 		c.SetUserPrompt("use tool")
-		ans, err := executeToolLoop(context.Background(), otomo, c, []reasoning.Tool{searchTool})
+		ans, err := ExecuteToolLoop(context.Background(), otomo, c, []reasoning.Tool{searchTool})
 		require.NoError(t, err)
 		assert.Equal(t, reasoning.AnswerBody("handled error"), ans.Body())
 	})
 
 	t.Run("tool not found error", func(t *testing.T) {
 		callCount := 0
-		thinker := &mockBrainThinker{
+		thinker := &mockBrain{
 			ThinkFunc: func(ctx context.Context, c *reasoning.Context) (*reasoning.Answer, error) {
 				callCount++
 				if callCount == 1 {
@@ -172,7 +121,7 @@ func TestExecuteToolLoop(t *testing.T) {
 				messages := c.Messages()
 				require.Len(t, messages, 3)
 				assert.Equal(t, reasoning.ToolResultError, messages[2].ToolResults()[0].Status())
-				assert.Equal(t, "tool not found", messages[2].ToolResults()[0].Output())
+				assert.Equal(t, "error: tool 'missing' not found", messages[2].ToolResults()[0].Output())
 				return reasoning.NewAnswer("handled missing tool", nil)
 			},
 		}
@@ -183,13 +132,13 @@ func TestExecuteToolLoop(t *testing.T) {
 
 		c := reasoning.NewContext()
 		c.SetUserPrompt("use missing tool")
-		ans, err := executeToolLoop(context.Background(), otomo, c, nil)
+		ans, err := ExecuteToolLoop(context.Background(), otomo, c, nil)
 		require.NoError(t, err)
 		assert.Equal(t, reasoning.AnswerBody("handled missing tool"), ans.Body())
 	})
 
 	t.Run("too many tool execution turns error", func(t *testing.T) {
-		thinker := &mockBrainThinker{
+		thinker := &mockBrain{
 			ThinkFunc: func(ctx context.Context, c *reasoning.Context) (*reasoning.Answer, error) {
 				tcId, _ := reasoning.NewToolCallID("call-loop")
 				tcName, _ := reasoning.NewToolName("loop")
@@ -202,10 +151,11 @@ func TestExecuteToolLoop(t *testing.T) {
 		otomo, err := chat.NewOtomo(brain)
 		require.NoError(t, err)
 
-		loopTool := &mockTool{name: "loop"}
+		loopToolName, _ := reasoning.NewToolName("loop")
+		loopTool := &mockTool{name: loopToolName}
 
 		c := reasoning.NewContext()
-		_, err = executeToolLoop(context.Background(), otomo, c, []reasoning.Tool{loopTool})
+		_, err = ExecuteToolLoop(context.Background(), otomo, c, []reasoning.Tool{loopTool})
 		require.Error(t, err)
 		assert.True(t, failure.Is(err, errorcode.ErrInternal))
 		assert.Contains(t, err.Error(), "too many tool execution turns")

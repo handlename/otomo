@@ -7,10 +7,10 @@ import (
 
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/handlename/otomo/internal/app/usecase"
 	"github.com/handlename/otomo/internal/domain/chat"
 	"github.com/handlename/otomo/internal/domain/core"
 	"github.com/handlename/otomo/internal/domain/reasoning"
-	"github.com/handlename/otomo/internal/errorcode"
 	"github.com/morikuni/failure/v2"
 )
 
@@ -62,7 +62,7 @@ func StartChatLoop(ctx context.Context, otomo *chat.Otomo, tools []reasoning.Too
 		fmt.Print(infoStyle.Render("Otomo is thinking..."))
 
 		// Execute Bedrock Reasoning
-		ans, err := executeToolLoop(ctx, otomo, c, tools)
+		ans, err := usecase.ExecuteToolLoop(ctx, otomo, c, tools)
 		// Clear thinking text
 		fmt.Print("\r\033[K")
 
@@ -92,68 +92,3 @@ func StartChatLoop(ctx context.Context, otomo *chat.Otomo, tools []reasoning.Too
 	}
 }
 
-// Copy local tool runner execution from usecase
-func executeToolLoop(ctx context.Context, otomo *chat.Otomo, c *reasoning.Context, tools []reasoning.Tool) (*reasoning.Answer, error) {
-	turns := 0
-	for {
-		if err := ctx.Err(); err != nil {
-			return nil, failure.Wrap(err)
-		}
-		if !reasoning.ShouldContinueToUseTool(turns) {
-			return nil, failure.New(errorcode.ErrInternal, failure.Message("too many tool execution turns"))
-		}
-		turns++
-
-		ans, err := otomo.Think(ctx, c)
-		if err != nil {
-			return nil, failure.Wrap(err)
-		}
-
-		if !ans.HasToolCalls() {
-			return ans, nil
-		}
-
-		var results []reasoning.ToolResult
-		for _, tc := range ans.ToolCalls() {
-			tool, ok := findTool(tools, tc.Name())
-			if !ok {
-				tr, err := reasoning.NewToolResult(tc.ID(), "tool not found", reasoning.ToolResultError)
-				if err != nil {
-					return nil, failure.Wrap(err)
-				}
-				results = append(results, tr)
-				continue
-			}
-			out, err := tool.Execute(ctx, tc.InputJSON())
-			if err != nil {
-				tr, err := reasoning.NewToolResult(tc.ID(), err.Error(), reasoning.ToolResultError)
-				if err != nil {
-					return nil, failure.Wrap(err)
-				}
-				results = append(results, tr)
-			} else {
-				tr, err := reasoning.NewToolResult(tc.ID(), out, reasoning.ToolResultSuccess)
-				if err != nil {
-					return nil, failure.Wrap(err)
-				}
-				results = append(results, tr)
-			}
-		}
-
-		if err := c.AddToolUseResponse(string(ans.Body()), ans.ToolCalls()); err != nil {
-			return nil, failure.Wrap(err)
-		}
-		if err := c.AddToolResults(results); err != nil {
-			return nil, failure.Wrap(err)
-		}
-	}
-}
-
-func findTool(tools []reasoning.Tool, name reasoning.ToolName) (reasoning.Tool, bool) {
-	for _, t := range tools {
-		if t.Name().Equals(name) {
-			return t, true
-		}
-	}
-	return nil, false
-}
