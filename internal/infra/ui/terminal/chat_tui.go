@@ -14,6 +14,8 @@ import (
 	"github.com/handlename/otomo/internal/domain/chat"
 	"github.com/handlename/otomo/internal/domain/core"
 	"github.com/handlename/otomo/internal/domain/reasoning"
+	"github.com/handlename/otomo/internal/infra/ui/mcp"
+	"github.com/rs/zerolog/log"
 )
 
 type thinkResultMsg struct {
@@ -34,7 +36,12 @@ type model struct {
 	userInputVal string
 }
 
-func StartChatTUI(ctx context.Context, otomo *chat.Otomo, tools []reasoning.Tool) error {
+type ChatConfig struct {
+	EnableMCP bool
+	MCPPort   int
+}
+
+func StartChatTUI(ctx context.Context, otomo *chat.Otomo, tools []reasoning.Tool, cfg ChatConfig) error {
 	ti := textinput.New()
 	ti.Placeholder = "Ask Otomo..."
 	ti.Focus()
@@ -60,6 +67,14 @@ func StartChatTUI(ctx context.Context, otomo *chat.Otomo, tools []reasoning.Tool
 	}
 
 	p := tea.NewProgram(&m, tea.WithAltScreen(), tea.WithContext(ctx))
+
+	if cfg.EnableMCP {
+		srv := mcp.NewServer(cfg.MCPPort, p)
+		if err := srv.Start(ctx); err != nil {
+			log.Error().Err(err).Msg("failed to start MCP server")
+		}
+	}
+
 	_, err := p.Run()
 	return err
 }
@@ -114,6 +129,30 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.spinner, cmd = m.spinner.Update(msg)
 			cmds = append(cmds, cmd)
 		}
+	case mcp.McpRequestMsg:
+		m.userInputVal = msg.Prompt
+		m.thinking = true
+		m.textInput.Blur()
+		m.appendToHistory(core.RoleUser, msg.Prompt, "Agent: ")
+		return m, tea.Batch(
+			m.spinner.Tick,
+			func() tea.Msg {
+				c := reasoning.NewContext()
+				if len(m.history) > 0 {
+					_ = c.SetMessages(m.history)
+				}
+				c.SetUserPrompt(core.PromptBody(msg.Prompt))
+				c.SetTools(m.tools)
+
+				ans, err := usecase.ExecuteToolLoop(m.ctx, m.otomo, c, m.tools)
+				if err == nil {
+					msg.ReplyChan <- string(ans.Body())
+				} else {
+					msg.ReplyChan <- fmt.Sprintf("Error: %v", err)
+				}
+				return thinkResultMsg{ans: ans, err: err}
+			},
+		)
 
 	case thinkResultMsg:
 		m.thinking = false
@@ -146,19 +185,23 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, tea.Batch(cmds...)
 }
 
-func (m *model) appendToHistory(role core.MessageRole, content string) {
+func (m *model) appendToHistory(role core.MessageRole, content string, prefix ...string) {
 	style := lipgloss.NewStyle()
-	prefix := ""
+	pref := ""
 	if role == core.RoleUser {
 		style = style.Foreground(lipgloss.Color("2")).Bold(true)
-		prefix = "You: "
+		if len(prefix) > 0 {
+			pref = prefix[0]
+		} else {
+			pref = "You: "
+		}
 	} else {
 		style = style.Foreground(lipgloss.Color("4")).Bold(true)
-		prefix = "Otomo: "
+		pref = "Otomo: "
 	}
 
 	// Maintain full history in memory to avoid content loss when viewport scrolls.
-	m.historyLines = append(m.historyLines, style.Render(prefix)+content, "")
+	m.historyLines = append(m.historyLines, style.Render(pref)+content, "")
 	m.viewport.SetContent(strings.Join(m.historyLines, "\n"))
 	m.viewport.GotoBottom()
 }

@@ -13,6 +13,18 @@ type Root struct {
 	Slack Slack `toml:"slack" validate:"required"`
 	LLM   LLM   `toml:"llm" validate:"required"`
 	Tool  Tool  `toml:"tool"`
+	MCP   MCP   `toml:"mcp"`
+}
+
+type MCP struct {
+	Port int `toml:"port" default:"8000"`
+}
+
+func (m MCP) GetPort() int {
+	if m.Port == 0 {
+		return 8000
+	}
+	return m.Port
 }
 
 type Tool struct {
