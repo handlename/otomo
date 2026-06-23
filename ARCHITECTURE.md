@@ -180,3 +180,19 @@ func NewUserID(v string) (UserID, error) { ... }
 ```
 
 5. Run `go generate ./...` in the root of the project to generate the `<filename>_gen.go` file containing `Value()`, `Equals()`, and `String()` methods.
+
+---
+
+## 4. Platform Constraints & TUI Guidelines
+
+To maintain portability and compatibility with our primary production environment (AWS Lambda), developers MUST follow these guidelines:
+
+1. **Role of TUI (`ui/terminal`)**:
+   The terminal UI is strictly a secondary interface designed for local debugging and rapid prompt testing. All core business features and interactive integrations in `otomo` must be developed with the **Slack bot interface** as the primary presentation layer.
+
+2. **AWS Lambda Execution Constraint**:
+   All features implemented in this repository must be designed to run statelessly within AWS Lambda. Specifically, you **MUST NOT** adopt any local persistence mechanisms that do not work on Lambda (e.g., saving session contexts to local files, local SQLite files, or memory states that require server persistence across invocations).
+
+3. **Local Simulation**:
+   It is fully permissible and encouraged to simulate AWS Lambda environments and resources locally using emulation tools like `floci` (or other AWS simulators) to mock production behavior during TUI execution.
+

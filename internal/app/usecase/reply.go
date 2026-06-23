@@ -62,7 +62,7 @@ func (r *Reply) Run(ctx context.Context, input ReplyInput) (*ReplyOutput, error)
 		}
 	}
 
-	ans, err := executeToolLoop(ctx, r.otomo, c, r.tools)
+	ans, err := ExecuteToolLoop(ctx, r.otomo, c, r.tools)
 	if err != nil {
 		r.handleError(ctx, input.EventData, err)
 		return nil, err

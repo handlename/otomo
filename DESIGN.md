@@ -48,10 +48,11 @@ otomo/
 │   │   ├── repository/        # Repository implementations
 │   │   ├── service/           # External service integrations
 │   │   ├── tool/              # AI-powered tools (web_fetch.go, web_search.go)
-│   │   └── ui/                # User interface (HTTP handlers)
-│   │       └── http/
-│   │           ├── middleware/
-│   │           └── slack/
+│   │   └── ui/                # User interface (HTTP handlers, CLI terminal interface)
+│   │       ├── http/
+│   │       │   ├── middleware/
+│   │       │   └── slack/
+│   │       └── terminal/
 │   └── testutil/              # Testing utilities
 ├── lambda/                     # AWS Lambda deployment files
 │   ├── function.jsonnet       # Lambda function configuration

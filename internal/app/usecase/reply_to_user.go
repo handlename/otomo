@@ -28,7 +28,7 @@ func (u *ReplyToUser) Run(ctx context.Context, otomo *chat.Otomo, channelID core
 	c.SetUserPrompt(userPrompt)
 	c.SetTools(u.tools)
 
-	ans, err := executeToolLoop(ctx, otomo, c, u.tools)
+	ans, err := ExecuteToolLoop(ctx, otomo, c, u.tools)
 	if err != nil {
 		return err
 	}

@@ -28,7 +28,6 @@ type WebFetch struct {
 	WhitelistPatterns []string `toml:"whitelist_patterns"`
 }
 
-
 type Slack struct {
 	SigningSecret string        `toml:"signing_secret" validate:"required"`
 	BotUserID     string        `toml:"bot_user_id" validate:"required"`
