@@ -43,7 +43,7 @@ func (a *App) Run(ctx context.Context) error {
 	return nil
 }
 
-func (a *App) RunChat(ctx context.Context) error {
+func (a *App) RunChat(ctx context.Context, enableMCP bool, mcpPort int) error {
 	// Redirect console logs to otomo.log to avoid breaking the TUI display
 	logFile, err := os.OpenFile("otomo.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err == nil {
@@ -74,5 +74,10 @@ func (a *App) RunChat(ctx context.Context) error {
 		tool.NewWebFetchTool(config.Config.Tool.WebFetch),
 	}
 
-	return terminal.StartChatTUI(ctx, otomo, tools)
+	cfg := terminal.ChatConfig{
+		EnableMCP: enableMCP,
+		MCPPort:   mcpPort,
+	}
+
+	return terminal.StartChatTUI(ctx, otomo, tools, cfg)
 }

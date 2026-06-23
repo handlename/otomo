@@ -97,3 +97,69 @@ whitelist_patterns = ["^https://example\\.com/.*"]
 	assert.Equal(t, "tavily-key", cfg.Tool.WebSearch.TavilyAPIKey)
 	assert.Equal(t, []string{"^https://example\\.com/.*"}, cfg.Tool.WebFetch.WhitelistPatterns)
 }
+
+func TestConfig_MCP(t *testing.T) {
+	tests := []struct {
+		name     string
+		tomlData string
+		wantPort int
+	}{
+		{
+			name: "mcp block present with port",
+			tomlData: `
+port = 9000
+[slack]
+signing_secret = "secret"
+bot_user_id = "bot"
+bot_token = "token"
+app_token = "app"
+[llm]
+model_type = "claude"
+model_id = "model"
+[mcp]
+port = 8888
+`,
+			wantPort: 8888,
+		},
+		{
+			name: "mcp block completely omitted",
+			tomlData: `
+port = 9000
+[slack]
+signing_secret = "secret"
+bot_user_id = "bot"
+bot_token = "token"
+app_token = "app"
+[llm]
+model_type = "claude"
+model_id = "model"
+`,
+			wantPort: 8000,
+		},
+		{
+			name: "mcp block present but port omitted",
+			tomlData: `
+port = 9000
+[slack]
+signing_secret = "secret"
+bot_user_id = "bot"
+bot_token = "token"
+app_token = "app"
+[llm]
+model_type = "claude"
+model_id = "model"
+[mcp]
+`,
+			wantPort: 8000,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var cfg Root
+			err := toml.Unmarshal([]byte(tt.tomlData), &cfg)
+			require.NoError(t, err)
+			assert.Equal(t, tt.wantPort, cfg.MCP.GetPort())
+		})
+	}
+}

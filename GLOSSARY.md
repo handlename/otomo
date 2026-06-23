@@ -52,6 +52,10 @@ A [Tool](#tool) that allows the AI [Brain](#brain) to retrieve contents of a web
 
 A [Tool](#tool) that allows the AI [Brain](#brain) to search the web using the Tavily Search API.
 
+### post_message
+
+A [Tool](#tool) exposed by the local [MCP](#mcp-model-context-protocol) server that allows external clients to post messages directly to the active TUI chat session and receive the answer.
+
 ## Architecture & Technology
 
 ### Application Layer
@@ -81,3 +85,7 @@ The entry points of the application, responsible for routing HTTP requests (Slac
 ### Ridge
 
 A framework that adapts standard Go HTTP routers (such as chi) to work seamlessly in an AWS Lambda environment.
+
+### MCP (Model Context Protocol)
+
+An open protocol that enables seamless integration between LLMs and local tools, services, or servers. In this project, it is used to expose the active CLI chat session to external AI agents.

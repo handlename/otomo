@@ -48,10 +48,11 @@ otomo/
 │   │   ├── repository/        # Repository implementations
 │   │   ├── service/           # External service integrations
 │   │   ├── tool/              # AI-powered tools (web_fetch.go, web_search.go)
-│   │   └── ui/                # User interface (HTTP handlers, CLI terminal interface)
+│   │   └── ui/                # User interface (HTTP handlers, CLI terminal interface, MCP server)
 │   │       ├── http/
 │   │       │   ├── middleware/
 │   │       │   └── slack/
+│   │       ├── mcp/           # MCP server implementation
 │   │       └── terminal/
 │   └── testutil/              # Testing utilities
 ├── lambda/                     # AWS Lambda deployment files
@@ -107,6 +108,9 @@ tavily_api_key = "{{ env `TAVILY_API_KEY` }}"
 whitelist_patterns = [
   '^https://.*'
 ]
+
+[mcp]
+port = 8000
 ```
 
 ### Configuration Details
@@ -115,6 +119,8 @@ whitelist_patterns = [
   - `tavily_api_key`: API key for Tavily Search API.
 - **`[tool.web_fetch]`**:
   - `whitelist_patterns`: Regular expression patterns specifying allowed URLs to fetch.
+- **`[mcp]`**:
+  - `port`: Port for the local MCP server to listen on.
 
 ## Deployment Architecture
 
