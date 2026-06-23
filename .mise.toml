@@ -1,5 +1,26 @@
+experimental_monorepo_root = true
+
+[monorepo]
+config_roots = ["lambda", "terraform"]
+
 [tools]
 aws = "2"
 buf = "1"
 "aqua:hashicorp/terraform" = "1.11.3"
 "aqua:fujiwara/lambroll" = "1"
+
+[tasks.test]
+description = "Run tests"
+run = "go tool gotestsum --format testdox"
+
+[tasks.ci]
+description = "Run CI tests"
+run = "go tool gotestsum --format github-actions --junitfile test-report.xml"
+
+[tasks.generate]
+description = "Run go generate"
+run = "go generate ./..."
+
+[tasks.deploy]
+description = "Deploy lambda function (alias for //lambda:deploy)"
+depends = ["//lambda:deploy"]

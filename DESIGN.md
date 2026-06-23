@@ -67,7 +67,7 @@ otomo/
 ├── go.mod                    # Go module dependencies
 ├── logger.go                 # Logging configuration
 ├── version.go                # Version information
-├── Makefile                  # Build and deployment automation
+├── .mise.toml                # Tool, build, and deployment automation
 └── README.md                 # Project documentation
 ```
 
@@ -183,9 +183,8 @@ whitelist_patterns = [
 
 ## Build and Development
 
-- **Build Tool**: Make-based build system
+- **Build and Task Automation**: Task automation and tool management via `mise`
 - **Dependency Management**: Go modules
 - **Code Generation**: AST-based code generator for value objects (`go generate ./...`)
-- **Version Management**: mise for tool version management
 - **Release Management**: GoReleaser for automated releases
 - **Code Quality**: Static analysis and linting integration

@@ -1,0 +1,54 @@
+[tools]
+"aqua:fujiwara/lambroll" = "1"
+
+[env]
+SERVICE_NAME = "otomo"
+AWS_REGION = "us-east-1"
+ROLE_ARN = "{{ get_env(name='ROLE_ARN', default=exec(command='cat \"${TFSTATE_PATH:-../terraform/terraform.tfstate}\" 2>/dev/null | jq -r \".resources[] | select(.type == \\\"aws_iam_role\\\") | select(.name == \\\"lambda\\\") | .instances[0].attributes.arn\" 2>/dev/null || true')) }}"
+
+[tasks.clean]
+description = "Clean build artifacts"
+run = "rm -rf build tmp"
+
+[tasks.build]
+description = "Build lambda execution package"
+depends = ["clean"]
+env = { GOOS = "linux", GOARCH = "arm64" }
+run = """
+mkdir -p build tmp
+
+# Download ssmwrap
+SSMWRAP_VERSION="2.2.2"
+mkdir -p tmp/ssmwrap_${SSMWRAP_VERSION}
+curl -sL "https://github.com/handlename/ssmwrap/releases/download/v${SSMWRAP_VERSION}/ssmwrap_${SSMWRAP_VERSION}_linux_arm64.tar.gz" | tar -C tmp/ssmwrap_${SSMWRAP_VERSION} -xzf -
+cp tmp/ssmwrap_${SSMWRAP_VERSION}/ssmwrap build/
+
+# Go build
+go build -o build/app ../cmd/otomo/
+
+# Copy config and bootstrap
+cp ../config.toml build/
+cp bootstrap build/
+"""
+
+[tasks.deploy]
+description = "Deploy lambda function"
+depends = ["build"]
+run = "mise exec -- lambroll deploy --src build --function-url function_url.jsonnet"
+
+[tasks.dryrun]
+description = "Dry run deploy lambda function"
+depends = ["build"]
+run = "mise exec -- lambroll deploy --src build --function-url function_url.jsonnet --dry-run"
+
+[tasks.diff]
+description = "Diff lambda function configuration"
+run = "mise exec -- lambroll diff"
+
+[tasks.destroy]
+description = "Delete lambda function"
+run = "mise exec -- lambroll delete"
+
+[tasks.logs]
+description = "Tail lambda function logs"
+run = "mise exec -- lambroll logs --follow"
