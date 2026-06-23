@@ -61,6 +61,7 @@ Coordinates the flow of data and defines use cases. It depends only on the Domai
 #### Presentation Layer
 Handles input delivery from external sources and formats output.
 - **UI / HTTP**: Handles HTTP endpoints (chi router), Slack events, and CLI commands.
+- **MCP Server (SSE)**: Exposes a Model Context Protocol server over HTTP/SSE running in the background of CLI chat, allowing external AI clients to interact with the active TUI chat loop.
 
 #### Infrastructure Layer
 Implements interfaces defined in Domain and Application layers for external tools and services.
