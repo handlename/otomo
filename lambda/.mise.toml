@@ -17,12 +17,13 @@ run = "rm -rf build"
 
 [tasks.ssmwrap]
 description = "Download and extract ssmwrap"
+sources = ["{{ config_root }}/.mise.toml"]
+outputs = ["{{ config_root }}/tmp/ssmwrap_2.2.2/ssmwrap"]
 run = """
 SSMWRAP_VERSION="{{ vars.ssmwrap_version }}"
-if [ ! -f tmp/ssmwrap_${SSMWRAP_VERSION}/ssmwrap ]; then
-  mkdir -p tmp/ssmwrap_${SSMWRAP_VERSION}
-  curl -sSfL "https://github.com/handlename/ssmwrap/releases/download/v${SSMWRAP_VERSION}/ssmwrap_${SSMWRAP_VERSION}_linux_arm64.tar.gz" | tar -C tmp/ssmwrap_${SSMWRAP_VERSION} -xzf - || { rm -rf tmp/ssmwrap_${SSMWRAP_VERSION}; exit 1; }
-fi
+mkdir -p tmp/ssmwrap_${SSMWRAP_VERSION}
+curl -sSfL "https://github.com/handlename/ssmwrap/releases/download/v${SSMWRAP_VERSION}/ssmwrap_${SSMWRAP_VERSION}_linux_arm64.tar.gz" | tar -C tmp/ssmwrap_${SSMWRAP_VERSION} -xzf - || { rm -rf tmp/ssmwrap_${SSMWRAP_VERSION}; exit 1; }
+touch tmp/ssmwrap_${SSMWRAP_VERSION}/ssmwrap
 """
 
 [tasks.compile]
