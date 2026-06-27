@@ -54,6 +54,10 @@ func (s *Server) Start(ctx context.Context) error {
 		Name:        "post_message",
 		Description: "Post a message to the active otomo chat TUI session and retrieve the response.",
 	}, func(ctx context.Context, req *mcp.CallToolRequest, input PostMessageInput) (*mcp.CallToolResult, PostMessageOutput, error) {
+		if s.p == nil {
+			return nil, PostMessageOutput{}, fmt.Errorf("TUI program is not initialized")
+		}
+
 		replyChan := make(chan MCPResponse, 1)
 
 		s.p.Send(MCPRequestMsg{
