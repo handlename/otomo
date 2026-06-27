@@ -13,6 +13,7 @@ For the core architectural principles, layer structure, and patterns, please ref
 - **Language**: Go 1.24
 - **AI Provider**: AWS Bedrock (Claude models)
 - **Chat Platform**: Slack API
+- **Distributed Tracing**: OpenTelemetry Go SDK (Stdout and OTLP HTTP exporters)
 - **Deployment**: AWS Lambda + Function URLs
 - **Infrastructure**: Terraform
 - **HTTP Framework**: chi router with Ridge (AWS Lambda HTTP adapter)
@@ -111,6 +112,11 @@ whitelist_patterns = [
 
 [mcp]
 port = 8000
+
+[otel]
+enabled = false
+exporter = "otlp"
+service_name = "otomo"
 ```
 
 ### Configuration Details
@@ -121,6 +127,10 @@ port = 8000
   - `whitelist_patterns`: Regular expression patterns specifying allowed URLs to fetch.
 - **`[mcp]`**:
   - `port`: Port for the local MCP server to listen on.
+- **`[otel]`**:
+  - `enabled`: Set to `true` to enable distributed tracing.
+  - `exporter`: The trace exporter to use. Options are `"stdout"` (for pretty-printed JSON output to standard output) or `"otlp"` (for sending OTLP traces over HTTP).
+  - `service_name`: The service name registered in trace resource metadata. Default is `"otomo"`.
 
 ## Deployment Architecture
 
@@ -180,6 +190,12 @@ port = 8000
 6. **External Tool Integrations**
    - Web search capability via Tavily Search API
    - Secure web page fetching with URL whitelist validation patterns
+
+7. **Distributed Tracing**
+   - End-to-end execution flow tracing using OpenTelemetry (OTel)
+   - Parent spans started at Slack HTTP webhooks, Terminal TUI chat, and MCP server requests
+   - Sub-spans instrumented for use cases, Bedrock model invocations, and Slack API services
+   - Decoupled design keeping Domain layer entities entirely clean of OTel SDK/API dependencies
 
 ## Testing Strategy
 
