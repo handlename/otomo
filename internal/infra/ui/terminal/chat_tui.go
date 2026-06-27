@@ -16,6 +16,8 @@ import (
 	"github.com/handlename/otomo/internal/domain/reasoning"
 	"github.com/handlename/otomo/internal/infra/ui/mcp"
 	"github.com/rs/zerolog/log"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/codes"
 )
 
 type thinkResultMsg struct {
@@ -144,10 +146,19 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				c.SetUserPrompt(core.PromptBody(msg.Prompt))
 				c.SetTools(m.tools)
 
-				ans, err := usecase.ExecuteToolLoop(m.ctx, m.otomo, c, m.tools)
+				mctx := m.ctx
+				if mctx == nil {
+					mctx = context.Background()
+				}
+				ctx, span := otel.Tracer("otomo").Start(mctx, "MCP Request")
+				defer span.End()
+
+				ans, err := usecase.ExecuteToolLoop(ctx, m.otomo, c, m.tools)
 				if err == nil {
 					msg.ReplyChan <- string(ans.Body())
 				} else {
+					span.RecordError(err)
+					span.SetStatus(codes.Error, err.Error())
 					msg.ReplyChan <- fmt.Sprintf("Error: %v", err)
 				}
 				return thinkResultMsg{ans: ans, err: err}
@@ -215,7 +226,18 @@ func (m *model) thinkCmd(prompt string) tea.Cmd {
 		c.SetUserPrompt(core.PromptBody(prompt))
 		c.SetTools(m.tools)
 
-		ans, err := usecase.ExecuteToolLoop(m.ctx, m.otomo, c, m.tools)
+		mctx := m.ctx
+		if mctx == nil {
+			mctx = context.Background()
+		}
+		ctx, span := otel.Tracer("otomo").Start(mctx, "Terminal User Prompt")
+		defer span.End()
+
+		ans, err := usecase.ExecuteToolLoop(ctx, m.otomo, c, m.tools)
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
+		}
 		return thinkResultMsg{ans: ans, err: err}
 	}
 }

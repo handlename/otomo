@@ -163,3 +163,82 @@ model_id = "model"
 		})
 	}
 }
+
+func TestConfig_Otel(t *testing.T) {
+	tests := []struct {
+		name            string
+		tomlData        string
+		wantEnabled     bool
+		wantExporter    string
+		wantServiceName string
+	}{
+		{
+			name: "otel block completely omitted",
+			tomlData: `
+port = 9000
+[slack]
+signing_secret = "secret"
+bot_user_id = "bot"
+bot_token = "token"
+app_token = "app"
+[llm]
+model_type = "claude"
+model_id = "model"
+`,
+			wantEnabled:     false,
+			wantExporter:    "otlp",
+			wantServiceName: "otomo",
+		},
+		{
+			name: "otel block present but fields omitted",
+			tomlData: `
+port = 9000
+[slack]
+signing_secret = "secret"
+bot_user_id = "bot"
+bot_token = "token"
+app_token = "app"
+[llm]
+model_type = "claude"
+model_id = "model"
+[otel]
+`,
+			wantEnabled:     false,
+			wantExporter:    "otlp",
+			wantServiceName: "otomo",
+		},
+		{
+			name: "otel block present with values",
+			tomlData: `
+port = 9000
+[slack]
+signing_secret = "secret"
+bot_user_id = "bot"
+bot_token = "token"
+app_token = "app"
+[llm]
+model_type = "claude"
+model_id = "model"
+[otel]
+enabled = true
+exporter = "stdout"
+service_name = "test-otomo"
+`,
+			wantEnabled:     true,
+			wantExporter:    "stdout",
+			wantServiceName: "test-otomo",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var cfg Root
+			err := toml.Unmarshal([]byte(tt.tomlData), &cfg)
+			require.NoError(t, err)
+			assert.Equal(t, tt.wantEnabled, cfg.Otel.Enabled)
+			assert.Equal(t, tt.wantExporter, cfg.Otel.GetExporter())
+			assert.Equal(t, tt.wantServiceName, cfg.Otel.GetServiceName())
+		})
+	}
+}
+

@@ -8,26 +8,36 @@ import (
 	"github.com/handlename/otomo/internal/domain/reasoning"
 	"github.com/handlename/otomo/internal/errorcode"
 	"github.com/morikuni/failure/v2"
+	"github.com/handlename/otomo/internal/infra/trace"
+	"go.opentelemetry.io/otel"
 )
 
 func ExecuteToolLoop(ctx context.Context, otomo *chat.Otomo, c *reasoning.Context, tools []reasoning.Tool) (*reasoning.Answer, error) {
+	ctx, span := otel.Tracer("otomo").Start(ctx, "ExecuteToolLoop")
+	defer span.End()
+
 	turns := 0
 	for {
 		if err := ctx.Err(); err != nil {
+			trace.RecordError(span, err)
 			return nil, failure.Wrap(err)
 		}
 
 		if !reasoning.ShouldContinueToUseTool(turns) {
-			return nil, failure.New(errorcode.ErrInternal, failure.Message("too many tool execution turns"))
+			err := failure.New(errorcode.ErrInternal, failure.Message("too many tool execution turns"))
+			trace.RecordError(span, err)
+			return nil, err
 		}
 		turns++
 
 		ans, err := otomo.Think(ctx, c)
 		if err != nil {
-			return nil, failure.Wrap(err,
+			err = failure.Wrap(err,
 				failure.WithCode(errorcode.ErrInternal),
 				failure.Message("failed to think"),
 			)
+			trace.RecordError(span, err)
+			return nil, err
 		}
 
 		if !ans.HasToolCalls() {
@@ -44,21 +54,29 @@ func ExecuteToolLoop(ctx context.Context, otomo *chat.Otomo, c *reasoning.Contex
 					reasoning.ToolResultError,
 				)
 				if err != nil {
-					return nil, failure.Wrap(err, failure.WithCode(errorcode.ErrInternal), failure.Message("failed to create tool result"))
+					err = failure.Wrap(err, failure.WithCode(errorcode.ErrInternal), failure.Message("failed to create tool result"))
+					trace.RecordError(span, err)
+					return nil, err
 				}
 				results = append(results, tr)
 				continue
 			}
 
-			out, err := tool.Execute(ctx, tc.InputJSON())
-			if err != nil {
+			toolCtx, toolSpan := otel.Tracer("otomo").Start(ctx, "Tool Execute: "+tc.Name().Value())
+			out, executeErr := tool.Execute(toolCtx, tc.InputJSON())
+			trace.RecordError(toolSpan, executeErr)
+			toolSpan.End()
+
+			if executeErr != nil {
 				tr, err := reasoning.NewToolResult(
 					tc.ID(),
-					fmt.Sprintf("error executing tool: %v", err),
+					fmt.Sprintf("error executing tool: %v", executeErr),
 					reasoning.ToolResultError,
 				)
 				if err != nil {
-					return nil, failure.Wrap(err, failure.WithCode(errorcode.ErrInternal), failure.Message("failed to create tool result"))
+					err = failure.Wrap(err, failure.WithCode(errorcode.ErrInternal), failure.Message("failed to create tool result"))
+					trace.RecordError(span, err)
+					return nil, err
 				}
 				results = append(results, tr)
 			} else {
@@ -68,17 +86,23 @@ func ExecuteToolLoop(ctx context.Context, otomo *chat.Otomo, c *reasoning.Contex
 					reasoning.ToolResultSuccess,
 				)
 				if err != nil {
-					return nil, failure.Wrap(err, failure.WithCode(errorcode.ErrInternal), failure.Message("failed to create tool result"))
+					err = failure.Wrap(err, failure.WithCode(errorcode.ErrInternal), failure.Message("failed to create tool result"))
+					trace.RecordError(span, err)
+					return nil, err
 				}
 				results = append(results, tr)
 			}
 		}
 
 		if err := c.AddToolUseResponse(string(ans.Body()), ans.ToolCalls()); err != nil {
-			return nil, failure.Wrap(err, failure.WithCode(errorcode.ErrInternal), failure.Message("failed to update context with tool calls"))
+			err = failure.Wrap(err, failure.WithCode(errorcode.ErrInternal), failure.Message("failed to update context with tool calls"))
+			trace.RecordError(span, err)
+			return nil, err
 		}
 		if err := c.AddToolResults(results); err != nil {
-			return nil, failure.Wrap(err, failure.WithCode(errorcode.ErrInternal), failure.Message("failed to update context with tool results"))
+			err = failure.Wrap(err, failure.WithCode(errorcode.ErrInternal), failure.Message("failed to update context with tool results"))
+			trace.RecordError(span, err)
+			return nil, err
 		}
 	}
 }

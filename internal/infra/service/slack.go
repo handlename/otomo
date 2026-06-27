@@ -15,6 +15,8 @@ import (
 	"github.com/morikuni/failure/v2"
 	"github.com/rs/zerolog/log"
 	"github.com/slack-go/slack"
+	"github.com/handlename/otomo/internal/infra/trace"
+	"go.opentelemetry.io/otel"
 )
 
 var _ service.Messenger = (*Slack)(nil)
@@ -53,6 +55,9 @@ func (s *Slack) Verify(header http.Header, body []byte) error {
 }
 
 func (s *Slack) PostMessage(ctx context.Context, channelID core.ChannelID, messageID core.MessageID, msg chat.ReplyBody) error {
+	ctx, span := otel.Tracer("otomo").Start(ctx, "Slack PostMessage")
+	defer span.End()
+
 	block := slack.NewMarkdownBlock("", string(msg))
 	_, _, err := s.client.PostMessageContext(
 		ctx,
@@ -62,33 +67,50 @@ func (s *Slack) PostMessage(ctx context.Context, channelID core.ChannelID, messa
 		slack.MsgOptionBlocks(block),
 	)
 	if err != nil {
-		return failure.Wrap(err)
+		err = failure.Wrap(err)
+		trace.RecordError(span, err)
+		return err
 	}
 	return nil
 }
 
 func (s *Slack) AddReaction(ctx context.Context, channelID core.ChannelID, messageID core.MessageID, emoji string) error {
-	return s.client.AddReaction(emoji, slack.ItemRef{
+	ctx, span := otel.Tracer("otomo").Start(ctx, "Slack AddReaction")
+	defer span.End()
+
+	err := s.client.AddReactionContext(ctx, emoji, slack.ItemRef{
 		Channel:   channelID.Value(),
 		Timestamp: messageID.Value(),
 	})
+	if err != nil {
+		err = failure.Wrap(err)
+		trace.RecordError(span, err)
+		return err
+	}
+	return nil
 }
 
 // FetchThread implements service.Messenger.
 func (s *Slack) FetchThread(ctx context.Context, channelID core.ChannelID, threadID chat.ThreadID) (*chat.Thread, error) {
+	ctx, span := otel.Tracer("otomo").Start(ctx, "Slack FetchThread")
+	defer span.End()
+
 	t, err := chat.NewThread(threadID)
 	if err != nil {
-		return nil, failure.Wrap(err)
+		err = failure.Wrap(err)
+		trace.RecordError(span, err)
+		return nil, err
 	}
 	more := true
 	next := ""
 
 	for more {
 		var msgs []slack.Message
-		var err error
 		msgs, more, next, err = s.fetchThread(ctx, channelID.Value(), threadID.Value(), next)
 		if err != nil {
-			return nil, failure.Wrap(err)
+			err = failure.Wrap(err)
+			trace.RecordError(span, err)
+			return nil, err
 		}
 
 		threadMsgs := make([]*chat.ThreadMessage, 0, len(msgs))
@@ -154,6 +176,9 @@ func (s *Slack) fetchThread(ctx context.Context, channelID, threadID, cursor str
 
 // UploadFile implements service.Messenger.
 func (s *Slack) UploadFile(ctx context.Context, channelID core.ChannelID, threadID chat.ThreadID, filename, content string) error {
+	ctx, span := otel.Tracer("otomo").Start(ctx, "Slack UploadFile")
+	defer span.End()
+
 	_, err := s.client.UploadFileV2Context(ctx, slack.UploadFileV2Parameters{
 		Channel:         channelID.Value(),
 		ThreadTimestamp: threadID.Value(),
@@ -161,5 +186,10 @@ func (s *Slack) UploadFile(ctx context.Context, channelID core.ChannelID, thread
 		Content:         content,
 		FileSize:        len(content),
 	})
-	return err
+	if err != nil {
+		err = failure.Wrap(err)
+		trace.RecordError(span, err)
+		return err
+	}
+	return nil
 }

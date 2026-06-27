@@ -14,6 +14,27 @@ type Root struct {
 	LLM   LLM   `toml:"llm" validate:"required"`
 	Tool  Tool  `toml:"tool"`
 	MCP   MCP   `toml:"mcp"`
+	Otel  Otel  `toml:"otel"`
+}
+
+type Otel struct {
+	Enabled     bool   `toml:"enabled"`
+	Exporter    string `toml:"exporter" default:"otlp"`
+	ServiceName string `toml:"service_name" default:"otomo"`
+}
+
+func (o Otel) GetExporter() string {
+	if o.Exporter == "" {
+		return "otlp"
+	}
+	return o.Exporter
+}
+
+func (o Otel) GetServiceName() string {
+	if o.ServiceName == "" {
+		return "otomo"
+	}
+	return o.ServiceName
 }
 
 type MCP struct {
