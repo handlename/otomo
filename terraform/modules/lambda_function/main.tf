@@ -20,7 +20,7 @@ resource "terraform_data" "lambda_function" {
   }
 
   provisioner "local-exec" {
-    command     = "make deploy"
+    command     = "mise run deploy"
     working_dir = self.triggers_replace.function_dir
     when        = create
     environment = merge(
@@ -30,7 +30,7 @@ resource "terraform_data" "lambda_function" {
   }
 
   provisioner "local-exec" {
-    command     = "make destroy"
+    command     = "mise run destroy"
     working_dir = self.triggers_replace.function_dir
     when        = destroy
   }
