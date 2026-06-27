@@ -129,7 +129,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.spinner, cmd = m.spinner.Update(msg)
 			cmds = append(cmds, cmd)
 		}
-	case mcp.McpRequestMsg:
+	case mcp.MCPRequestMsg:
 		m.userInputVal = msg.Prompt
 		m.thinking = true
 		m.textInput.Blur()
@@ -146,9 +146,9 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 				ans, err := usecase.ExecuteToolLoop(m.ctx, m.otomo, c, m.tools)
 				if err == nil {
-					msg.ReplyChan <- string(ans.Body())
+					msg.ReplyChan <- mcp.MCPResponse{Response: string(ans.Body())}
 				} else {
-					msg.ReplyChan <- fmt.Sprintf("Error: %v", err)
+					msg.ReplyChan <- mcp.MCPResponse{Error: err}
 				}
 				return thinkResultMsg{ans: ans, err: err}
 			},
