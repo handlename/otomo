@@ -12,6 +12,7 @@ import (
 	"github.com/handlename/otomo/cli/command"
 	"github.com/handlename/otomo/config"
 	"github.com/handlename/otomo/internal/infra/app"
+	"github.com/handlename/otomo/internal/infra/trace"
 	"github.com/morikuni/failure/v2"
 	"github.com/rs/zerolog/log"
 )
@@ -36,6 +37,18 @@ func Run() ExitCode {
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
+
+	// Initialize Tracer Provider
+	shutdown, err := trace.InitTracer(ctx)
+	if err != nil {
+		handleError(err)
+		return ExitCodeError
+	}
+	defer func() {
+		if err := shutdown(context.Background()); err != nil {
+			log.Error().Err(err).Msg("failed to shutdown tracer")
+		}
+	}()
 
 	if err := ktx.Run(&command.Context{Ctx: ctx, App: &app.App{}}); err != nil {
 		if errors.Is(err, context.Canceled) {

@@ -25,3 +25,10 @@
 
 ## Documentation
 - Update or modify related documentation (e.g., [ARCHITECTURE.md](./ARCHITECTURE.md), [DESIGN.md](./DESIGN.md), [GLOSSARY.md](./GLOSSARY.md)) whenever features in `otomo` are added or changed.
+
+## Tracing
+- When adding or modifying operations in the Presentation, Application, or Infrastructure layers that involve network calls, latency-sensitive actions, or significant use case steps, instrument them using OpenTelemetry spans.
+- Use `otel.Tracer("otomo").Start(ctx, "Span Name")` to create and context-propagate a span, and defer its closure via `defer span.End()`.
+- Use the central helper `trace.RecordError(span, err)` from `github.com/handlename/otomo/internal/infra/trace` on error return paths to record errors. Do not use named return variables solely for deferred span logging.
+- **Strictly prohibit** any OpenTelemetry imports or tracing dependencies inside the Domain layer (`internal/domain/...`). The Domain layer must remain pure.
+
