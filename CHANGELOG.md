@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.3.0](https://github.com/handlename/otomo/compare/v0.2.0...v0.3.0) - 2026-06-28
+- feat(infra): use markdown block for slack messages by @handlename in https://github.com/handlename/otomo/pull/100
+- feat: implement interactive terminal chat TUI by @handlename in https://github.com/handlename/otomo/pull/102
+- feat: integrate local MCP server into CLI chat by @handlename in https://github.com/handlename/otomo/pull/104
+- chore: migrate task execution from make to mise by @handlename in https://github.com/handlename/otomo/pull/103
+- feat(mcp): return standard errors from post_message by @handlename in https://github.com/handlename/otomo/pull/105
+- feat: implement OpenTelemetry tracing integration by @handlename in https://github.com/handlename/otomo/pull/106
+- feat(trace): support local Jaeger tracing via Docker by @handlename in https://github.com/handlename/otomo/pull/107
+
 ## [v0.2.0](https://github.com/handlename/otomo/compare/v0.1.0...v0.2.0) - 2026-06-21
 - feat: error feedback for chat processing failures by @handlename in https://github.com/handlename/otomo/pull/86
 - chore(deps): bump github.com/go-playground/validator/v10 from 10.28.0 to 10.30.2 by @dependabot[bot] in https://github.com/handlename/otomo/pull/67
