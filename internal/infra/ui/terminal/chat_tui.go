@@ -16,8 +16,8 @@ import (
 	"github.com/handlename/otomo/internal/domain/reasoning"
 	"github.com/handlename/otomo/internal/infra/ui/mcp"
 	"github.com/rs/zerolog/log"
+	"github.com/handlename/otomo/internal/infra/trace"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/codes"
 )
 
 type thinkResultMsg struct {
@@ -131,7 +131,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.spinner, cmd = m.spinner.Update(msg)
 			cmds = append(cmds, cmd)
 		}
-	case mcp.McpRequestMsg:
+	case mcp.MCPRequestMsg:
 		m.userInputVal = msg.Prompt
 		m.thinking = true
 		m.textInput.Blur()
@@ -154,12 +154,11 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				defer span.End()
 
 				ans, err := usecase.ExecuteToolLoop(ctx, m.otomo, c, m.tools)
+				trace.RecordError(span, err)
 				if err == nil {
-					msg.ReplyChan <- string(ans.Body())
+					msg.ReplyChan <- mcp.MCPResponse{Response: string(ans.Body())}
 				} else {
-					span.RecordError(err)
-					span.SetStatus(codes.Error, err.Error())
-					msg.ReplyChan <- fmt.Sprintf("Error: %v", err)
+					msg.ReplyChan <- mcp.MCPResponse{Error: err}
 				}
 				return thinkResultMsg{ans: ans, err: err}
 			},
@@ -234,10 +233,7 @@ func (m *model) thinkCmd(prompt string) tea.Cmd {
 		defer span.End()
 
 		ans, err := usecase.ExecuteToolLoop(ctx, m.otomo, c, m.tools)
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, err.Error())
-		}
+		trace.RecordError(span, err)
 		return thinkResultMsg{ans: ans, err: err}
 	}
 }

@@ -25,9 +25,14 @@ type PostMessageOutput struct {
 	Response string `json:"response" jsonschema:"The response from otomo"`
 }
 
-type McpRequestMsg struct {
+type MCPResponse struct {
+	Response string
+	Error    error
+}
+
+type MCPRequestMsg struct {
 	Prompt    string
-	ReplyChan chan string
+	ReplyChan chan MCPResponse
 }
 
 func NewServer(port int, p *tea.Program) *Server {
@@ -49,16 +54,23 @@ func (s *Server) Start(ctx context.Context) error {
 		Name:        "post_message",
 		Description: "Post a message to the active otomo chat TUI session and retrieve the response.",
 	}, func(ctx context.Context, req *mcp.CallToolRequest, input PostMessageInput) (*mcp.CallToolResult, PostMessageOutput, error) {
-		replyChan := make(chan string, 1)
+		if s.p == nil {
+			return nil, PostMessageOutput{}, fmt.Errorf("TUI program is not initialized")
+		}
 
-		s.p.Send(McpRequestMsg{
+		replyChan := make(chan MCPResponse, 1)
+
+		s.p.Send(MCPRequestMsg{
 			Prompt:    input.Message,
 			ReplyChan: replyChan,
 		})
 
 		select {
 		case reply := <-replyChan:
-			return nil, PostMessageOutput{Response: reply}, nil
+			if reply.Error != nil {
+				return nil, PostMessageOutput{}, reply.Error
+			}
+			return nil, PostMessageOutput{Response: reply.Response}, nil
 		case <-ctx.Done():
 			return nil, PostMessageOutput{}, ctx.Err()
 		case <-time.After(2 * time.Minute):
